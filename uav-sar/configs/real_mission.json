@@ -1,0 +1,8 @@
+{
+  "area": {"name": "tay_nguyen_real", "grid_w": 40, "grid_h": 40,
+           "cell_size_m": 100.0},
+  "belief": {"initial_model": "gis", "forecast_enabled": true},
+  "planner": {"kind": "rolling", "lookahead_cells": 3},
+  "mission": {"horizon_min": 180.0, "dt_min": 1.0},
+  "sim": {"seed": 1234}
+}

@@ -1,0 +1,1433 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+
+\usepackage{enumitem}
+\usepackage{float}
+
+\usepackage[
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+]{hyperref}
+
+\usepackage[
+    left=2.5cm,
+    right=2.5cm,
+    top=2.5cm,
+    bottom=2.5cm
+]{geometry}
+
+\usepackage{setspace}
+\onehalfspacing
+
+\title{
+\textbf{Data-Driven Multi-UAV Dynamic Search and Routing\\
+for Missing Tourists in Wilderness Areas}
+}
+
+\author{Cao Nguyệt Ánh}
+\date{August 2026}
+
+\begin{document}
+
+\maketitle
+
+%========================================================
+\section*{Hướng nghiên cứu đề xuất}
+
+\textbf{Tìm kiếm và định tuyến động nhiều UAV dựa trên dữ liệu cho bài toán
+tìm kiếm khách du lịch mất tích trong môi trường tự nhiên}
+
+\textit{Data-Driven Belief-Adaptive Multi-UAV Search and Routing for
+Missing Tourists in Wilderness Areas}
+
+
+%========================================================
+\section*{Động cơ nghiên cứu}
+
+Hoạt động tìm kiếm và cứu hộ (Search and Rescue -- SAR) tại các khu vực
+trekking, rừng, vườn quốc gia và khu bảo tồn thường diễn ra trong điều kiện
+bất định lớn về vị trí của người mất tích. Khi bắt đầu một nhiệm vụ tìm kiếm,
+lực lượng cứu hộ thường chỉ biết một số thông tin như vị trí cuối cùng được
+ghi nhận (Initial Planning Point -- IPP), tuyến đường trekking dự kiến, thời
+gian kể từ lần liên lạc cuối cùng, đặc điểm của người mất tích, địa hình và
+điều kiện thời tiết.
+
+Do đó, khác với bài toán định tuyến truyền thống, trong đó các điểm cần phục
+vụ đã được biết trước, vị trí cần tìm kiếm trong SAR không được xác định chắc
+chắn. Thay vào đó, mỗi khu vực chỉ có một mức độ khả năng chứa người mất tích.
+Mức độ này còn có thể thay đổi theo thời gian nếu người mất tích tiếp tục di
+chuyển hoặc khi lực lượng tìm kiếm thu được thông tin mới.
+
+UAV là một công cụ phù hợp trong bối cảnh này nhờ khả năng nhanh chóng tiếp
+cận các khu vực rộng, địa hình hiểm trở hoặc khó tiếp cận bằng lực lượng mặt
+đất. Tuy nhiên, nếu UAV chỉ thực hiện một kế hoạch bao phủ đồng đều toàn bộ
+khu vực thì nguồn lực tìm kiếm có thể bị sử dụng không hiệu quả, đặc biệt khi
+thời gian và năng lượng đều có giới hạn.
+
+Nghiên cứu trước đã chỉ ra rằng hành vi của người mất tích có thể được mô
+hình hóa dựa trên địa hình và dữ liệu SAR thực tế. Hashimoto et al.
+\cite{hashimoto2022} xây dựng mô hình tác tử cho hành vi người mất tích và
+hiệu chỉnh mô hình bằng dữ liệu sự cố SAR. Các nghiên cứu gần đây hơn đã sử
+dụng probability map để hướng dẫn đường bay UAV hoặc đội UAV trong môi trường
+wilderness \cite{ge2024,ewers2025}.
+
+Vì vậy, câu hỏi của nghiên cứu này không đơn thuần là:
+
+\begin{quote}
+``Có thể dùng UAV và probability map để tìm người mất tích hay không?''
+\end{quote}
+
+mà hẹp hơn và có thể kiểm chứng hơn:
+
+\begin{quote}
+\textit{Khi thông tin về vị trí người mất tích được biểu diễn dưới dạng một
+trạng thái xác suất thay đổi theo thời gian, việc kết hợp chất lượng dự báo,
+khả năng phát hiện của từng UAV và tái định tuyến theo thông tin mới có tạo
+ra một nhiệm vụ tìm kiếm hiệu quả hơn đáng kể hay không?}
+\end{quote}
+
+
+%========================================================
+\section*{Điểm xuất phát của bài toán}
+
+Xét một khu vực tự nhiên $\mathcal{A}$ trong đó một khách du lịch được báo
+cáo mất tích.
+
+Một cách tiếp cận cơ sở là chia khu vực thành một tập các ô tìm kiếm:
+
+\[
+G=\{1,\ldots,n\}.
+\]
+
+Nếu không có thông tin nào khác, tất cả các ô có thể được xem là có mức ưu
+tiên tương đương và UAV thực hiện một chiến lược bao phủ khu vực.
+
+Tuy nhiên, trong thực tế có thể khai thác thêm thông tin về:
+
+\begin{itemize}
+    \item vị trí cuối cùng được ghi nhận;
+    \item khoảng cách tới đường mòn;
+    \item độ cao và độ dốc;
+    \item sông, suối hoặc các vật cản địa hình;
+    \item lớp phủ bề mặt và mật độ thực vật;
+    \item thời gian kể từ khi mất tích;
+    \item điều kiện thời tiết;
+    \item hành vi di chuyển thường gặp của người bị lạc.
+\end{itemize}
+
+Các thông tin này cho phép gán cho mỗi ô một xác suất khác nhau thay vì tìm
+kiếm đồng đều trên toàn bộ không gian.
+
+
+%========================================================
+\section*{Điều gì được giữ và điều gì được thay đổi?}
+
+Hướng nghiên cứu vẫn giữ các thành phần cơ bản của một bài toán định tuyến UAV:
+
+\begin{itemize}
+    \item một khu vực hoạt động;
+    \item một hoặc nhiều UAV;
+    \item vị trí xuất phát;
+    \item thời gian di chuyển;
+    \item giới hạn pin;
+    \item giới hạn thời gian nhiệm vụ;
+    \item quyết định phân công và thứ tự tìm kiếm.
+\end{itemize}
+
+Phần thay đổi cốt lõi là giá trị của các khu vực cần tìm kiếm.
+
+Trong bài toán định tuyến thông thường, một điểm có thể có reward hoặc nhu
+cầu đã biết trước. Trong nghiên cứu này, giá trị tìm kiếm của một khu vực là
+không chắc chắn và phụ thuộc vào thông tin hiện tại.
+
+Tại thời điểm $t$, đặt
+
+\[
+p_i^t=P(L_t=i\mid\mathcal{I}_t),
+\]
+
+trong đó $L_t$ là vị trí của người mất tích và $\mathcal{I}_t$ là toàn bộ
+thông tin mà hệ thống có tại thời điểm $t$.
+
+Ta có:
+
+\[
+p_i^t\geq 0,
+\qquad
+\sum_{i\in G}p_i^t=1.
+\]
+
+Do đó, vấn đề được chuyển từ:
+
+\[
+\text{Routing với các điểm có giá trị cố định}
+\]
+
+sang:
+
+\[
+\boxed{
+\text{Routing dưới trạng thái xác suất thay đổi theo thời gian}
+}
+\]
+
+
+%========================================================
+\section*{Bài toán nghiên cứu trung tâm}
+
+Giả sử có một đội UAV:
+
+\[
+K=\{1,\ldots,m\}.
+\]
+
+Tại mỗi thời điểm ra quyết định, hệ thống cần xác định đồng thời:
+
+\begin{enumerate}
+    \item khu vực nào nên được tìm kiếm tiếp theo;
+    \item UAV nào nên được phân công tới khu vực đó;
+    \item thứ tự các khu vực mà mỗi UAV sẽ tìm kiếm;
+    \item bao nhiêu thời gian nên dành cho hoạt động tìm kiếm;
+    \item khi nào UAV cần quay về vì giới hạn năng lượng;
+    \item khi nào kế hoạch hiện tại cần được điều chỉnh sau khi có thông tin mới.
+\end{enumerate}
+
+Một nghiệm tốt không chỉ cố gắng đi tới các khu vực có xác suất cao nhất mà
+cần cân bằng giữa ba yếu tố:
+
+\begin{enumerate}
+    \item khả năng thực sự tìm thấy người mất tích;
+    \item chi phí thời gian và năng lượng để tiếp cận khu vực;
+    \item giá trị của thông tin thu được từ hoạt động tìm kiếm.
+\end{enumerate}
+
+
+%========================================================
+\section*{Xác suất vị trí và xác suất phát hiện}
+
+Một điểm cần phân biệt rõ là:
+
+\[
+\text{xác suất mục tiêu ở một khu vực}
+\]
+
+khác với
+
+\[
+\text{xác suất UAV phát hiện được mục tiêu tại khu vực đó}.
+\]
+
+Ký hiệu
+
+\[
+p_i^t=P(L_t=i\mid\mathcal{I}_t)
+\]
+
+là xác suất người mất tích có mặt tại ô $i$.
+
+Tiếp theo, đặt
+
+\[
+q_{ikt}
+=
+P(D_{ikt}=1\mid L_t=i,\mathcal{E}_{it},\mathbf{u}_k),
+\]
+
+trong đó:
+
+\begin{itemize}
+    \item $D_{ikt}=1$ biểu thị UAV $k$ phát hiện mục tiêu tại ô $i$;
+    \item $\mathcal{E}_{it}$ là điều kiện môi trường tại ô $i$;
+    \item $\mathbf{u}_k$ mô tả đặc tính của UAV và cảm biến.
+\end{itemize}
+
+Xác suất $q_{ikt}$ có thể phụ thuộc vào:
+
+\[
+q_{ikt}
+=
+f(
+\text{sensor},
+\text{altitude},
+\text{vegetation},
+\text{visibility},
+\text{weather},
+\text{search time}
+).
+\]
+
+Ví dụ, một khu vực có $p_i^t$ cao nhưng được che phủ bởi rừng dày có thể có
+xác suất phát hiện bằng camera RGB thấp. Ngược lại, UAV sử dụng camera
+thermal có thể tạo ra xác suất phát hiện khác trong cùng khu vực.
+
+Một chỉ số đơn giản về giá trị tìm kiếm kỳ vọng là:
+
+\[
+V_{ikt}=p_i^tq_{ikt}.
+\]
+
+Do đó, bài toán không chỉ hỏi:
+
+\begin{quote}
+``Nên tìm ở đâu?''
+\end{quote}
+
+mà còn hỏi:
+
+\begin{quote}
+``UAV nào phù hợp nhất để tìm ở khu vực đó?''
+\end{quote}
+
+
+%========================================================
+\section*{Mô hình cơ sở}
+
+Đặt biến:
+
+\[
+z_{ikt}=
+\begin{cases}
+1, & \text{nếu UAV }k\text{ tìm kiếm ô }i\text{ tại thời điểm }t,\\
+0, & \text{ngược lại}.
+\end{cases}
+\]
+
+Một mô hình cơ sở có thể tối đa hóa tổng giá trị phát hiện kỳ vọng:
+
+\[
+\max
+\sum_{k\in K}
+\sum_{i\in G}
+p_i^tq_{ikt}z_{ikt}.
+\]
+
+Trong mô hình đầy đủ hơn, objective có thể cân bằng giữa hiệu quả tìm kiếm và
+chi phí vận hành:
+
+\[
+\max
+\left\{
+\text{Expected Detection Gain}
+-
+\lambda_1\text{Travel Cost}
+-
+\lambda_2\text{Energy Cost}
+-
+\lambda_3\text{Search Overlap}
+\right\}.
+\]
+
+Các ràng buộc cơ bản gồm:
+
+\begin{itemize}
+    \item giới hạn năng lượng của từng UAV;
+    \item giới hạn thời gian nhiệm vụ;
+    \item thời gian di chuyển giữa các khu vực;
+    \item thời gian tìm kiếm tại mỗi khu vực;
+    \item điều kiện xuất phát và quay về;
+    \item tránh phân công trùng lặp không cần thiết;
+    \item khả năng thực hiện nhiệm vụ của từng UAV.
+\end{itemize}
+
+Ở giai đoạn đầu, nên xây dựng và kiểm chứng mô hình tĩnh này trước khi đưa thêm
+các thành phần động.
+
+
+%========================================================
+\section*{Cập nhật trạng thái sau hoạt động tìm kiếm}
+
+Nếu UAV đã tìm kiếm một khu vực nhưng không phát hiện người mất tích, không
+thể kết luận rằng người đó chắc chắn không ở khu vực này.
+
+Nói cách khác:
+
+\[
+\boxed{
+\text{Không phát hiện}
+\neq
+\text{Mục tiêu không tồn tại}
+}
+\]
+
+Giả sử UAV $k$ tìm kiếm ô $i$ tại thời điểm $t$ và không phát hiện mục tiêu.
+Nếu trong một khoảng thời gian ngắn mục tiêu được xem là đứng yên, xác suất
+hậu nghiệm tại ô $i$ có thể được cập nhật theo Bayes:
+
+\[
+p_i^{t+}
+=
+\frac{
+p_i^t(1-q_{ikt})
+}{
+1-p_i^tq_{ikt}
+}.
+\]
+
+Đối với $j\neq i$:
+
+\[
+p_j^{t+}
+=
+\frac{
+p_j^t
+}{
+1-p_i^tq_{ikt}
+}.
+\]
+
+Sau khi bản đồ xác suất được cập nhật, hệ thống có thể giải lại bài toán định
+tuyến.
+
+Quy trình trở thành:
+
+\[
+\boxed{
+\begin{gathered}
+\text{Belief hiện tại}
+\rightarrow
+\text{Lập kế hoạch}
+\rightarrow
+\text{Tìm kiếm}
+\\[4pt]
+\downarrow
+\\[-2pt]
+\text{Quan sát}
+\rightarrow
+\text{Cập nhật Bayes}
+\rightarrow
+\text{Tái lập kế hoạch}
+\end{gathered}
+}
+\]
+
+
+%========================================================
+\section*{Mở rộng sang người mất tích có khả năng di chuyển}
+
+Một bước phát triển tiếp theo là không giả định mục tiêu đứng yên trong toàn
+bộ nhiệm vụ.
+
+Đặt
+
+\[
+P(L_{t+1}=j\mid L_t=i)
+\]
+
+là xác suất người mất tích di chuyển từ ô $i$ sang ô $j$.
+
+Xác suất này có thể phụ thuộc vào:
+
+\begin{itemize}
+    \item độ dốc;
+    \item khoảng cách tới trail;
+    \item loại địa hình;
+    \item mật độ thực vật;
+    \item khoảng cách di chuyển;
+    \item điều kiện thời tiết;
+    \item loại hành vi của người mất tích.
+\end{itemize}
+
+Một score chuyển động đơn giản có thể được xây dựng:
+
+\[
+M_{ij}
+=
+\beta_1 Trail_j
+-\beta_2 Slope_j
+-\beta_3 Vegetation_j
+-\beta_4 Distance_{ij}
++\beta_5 Weather_{jt}.
+\]
+
+Sau đó:
+
+\[
+P(L_{t+1}=j\mid L_t=i)
+=
+\frac{
+\exp(M_{ij})
+}{
+\sum_{h\in\mathcal{N}(i)}
+\exp(M_{ih})
+}.
+\]
+
+Bản đồ xác suất tại bước tiếp theo được dự báo:
+
+\[
+\bar p_j^{t+1}
+=
+\sum_{i\in G}
+P(L_{t+1}=j\mid L_t=i)p_i^t.
+\]
+
+Thành phần này làm cho probability map thay đổi bởi hai cơ chế khác nhau:
+
+\[
+\boxed{
+\text{thông tin từ UAV}
++
+\text{chuyển động của người mất tích}
+}
+\]
+
+Việc xem xét chuyển động là phù hợp với các nghiên cứu lost-person behavior
+cho thấy landscape và hành vi có ảnh hưởng tới quỹ đạo của người bị lạc
+\cite{hashimoto2022,lin2010}.
+
+
+%========================================================
+\section*{Dữ liệu cần thiết và nguồn dữ liệu khả thi}
+
+Nghiên cứu không cần một dataset duy nhất chứa toàn bộ biến. Cách khả thi hơn
+là xây dựng một spatial database bằng cách tích hợp nhiều lớp dữ liệu trên
+cùng một hệ tọa độ.
+
+\subsection*{Dữ liệu người mất tích}
+
+Dữ liệu lý tưởng gồm:
+
+\[
+(
+IPP,
+\text{find location},
+\text{elapsed time},
+\text{subject category},
+\text{scenario}
+).
+\]
+
+International Search and Rescue Incident Database (ISRID) đã được sử dụng
+trong nghiên cứu lost-person behavior và chứa thống kê từ một số lượng lớn
+các sự cố tìm kiếm \cite{hashimoto2022}.
+
+Trong trường hợp không thể truy cập toàn bộ dữ liệu ISRID, có thể sử dụng:
+
+\begin{itemize}
+    \item dữ liệu supplementary từ các nghiên cứu đã công bố;
+    \item các thống kê hành vi được công bố trong literature;
+    \item trajectory tổng hợp được hiệu chỉnh dựa trên các thống kê thực.
+\end{itemize}
+
+
+%--------------------------------------------------------
+\subsection*{Địa hình}
+
+Dữ liệu độ cao có thể lấy từ Shuttle Radar Topography Mission (SRTM)
+\cite{srtm}.
+
+Từ DEM có thể xây dựng:
+
+\begin{itemize}
+    \item elevation;
+    \item slope;
+    \item elevation difference;
+    \item terrain ruggedness.
+\end{itemize}
+
+SRTM Global 1 Arc-Second có độ phân giải xấp xỉ $30$ m, do đó có thể được
+dùng như một cơ sở tham khảo khi xác định kích thước ô tìm kiếm.
+
+
+%--------------------------------------------------------
+\subsection*{Đường mòn và mạng giao thông}
+
+OpenStreetMap có thể cung cấp các lớp:
+
+\begin{itemize}
+    \item hiking trails;
+    \item footpaths;
+    \item roads;
+    \item trailheads;
+    \item rivers;
+    \item các đối tượng địa lý có liên quan.
+\end{itemize}
+
+Từ đó có thể xây dựng các feature như:
+
+\[
+DistanceToTrail_i,
+\qquad
+TrailDensity_i,
+\qquad
+DistanceToRoad_i.
+\]
+
+
+%--------------------------------------------------------
+\subsection*{Lớp phủ bề mặt}
+
+ESA WorldCover có thể được sử dụng để mô tả lớp phủ bề mặt
+\cite{worldcover}.
+
+Các lớp quan trọng với bài toán SAR có thể bao gồm:
+
+\begin{itemize}
+    \item tree cover;
+    \item shrubland;
+    \item grassland;
+    \item bare land;
+    \item built-up area;
+    \item water.
+\end{itemize}
+
+Thông tin này có thể ảnh hưởng đồng thời tới khả năng di chuyển của người mất
+tích và khả năng quan sát của UAV.
+
+
+%--------------------------------------------------------
+\subsection*{Thời tiết}
+
+ERA5 hoặc ERA5-Land có thể cung cấp dữ liệu thời tiết theo thời gian
+\cite{era5land}.
+
+Các biến tiềm năng gồm:
+
+\begin{itemize}
+    \item nhiệt độ;
+    \item lượng mưa;
+    \item tốc độ gió;
+    \item độ ẩm;
+    \item độ che phủ mây.
+\end{itemize}
+
+Các biến thời tiết có thể được sử dụng vừa trong movement model vừa trong
+detection model.
+
+
+%--------------------------------------------------------
+\subsection*{Dữ liệu cảm biến UAV}
+
+WiSARD cung cấp dữ liệu hình ảnh RGB và thermal được thu từ UAV trong nhiều
+loại địa hình, mùa, thời tiết và điều kiện ánh sáng
+\cite{broyles2022}.
+
+Nguồn dữ liệu này có thể được sử dụng để:
+
+\begin{itemize}
+    \item xây dựng hoặc đánh giá detector;
+    \item hiệu chỉnh detection probability;
+    \item so sánh RGB và thermal sensing;
+    \item kiểm tra ảnh hưởng của môi trường tới khả năng phát hiện.
+\end{itemize}
+
+Ngoài WiSARD, các nghiên cứu thực nghiệm gần đây cũng đã kiểm chứng UAV search
+và probabilistic detection trong môi trường wilderness thực
+\cite{dumencic2025}.
+
+
+%========================================================
+\section*{Xây dựng bộ dữ liệu tích hợp}
+
+Các nguồn dữ liệu được đưa về cùng một hệ tọa độ và chia trên cùng một grid.
+
+Mỗi ô $i$ có thể chứa:
+
+\begin{verbatim}
+cell_id
+latitude
+longitude
+elevation
+slope
+terrain_ruggedness
+distance_to_trail
+distance_to_road
+trail_density
+land_cover
+vegetation
+temperature
+rainfall
+wind_speed
+initial_probability
+\end{verbatim}
+
+Các biến thay đổi theo thời gian có thể gồm:
+
+\begin{verbatim}
+time
+target_probability
+weather
+uav_id
+searched
+search_duration
+detection_probability
+observation
+posterior_probability
+\end{verbatim}
+
+Về mặt toán học, trạng thái không gian có thể được viết:
+
+\[
+X_{it}
+=
+(
+e_i,
+s_i,
+h_i,
+l_i,
+v_i,
+w_{it},
+p_i^t
+).
+\]
+
+Cách tổ chức này cho phép nghiên cứu sử dụng dữ liệu môi trường thực trong khi
+các hoạt động của UAV được kiểm soát thông qua simulation.
+
+
+%========================================================
+\section*{Mô phỏng người mất tích}
+
+Mỗi simulation run đại diện cho một nhiệm vụ SAR.
+
+Đầu tiên chọn IPP:
+
+\[
+L_0=L^{IPP}.
+\]
+
+Sau đó sinh một trajectory:
+
+\[
+L_0,L_1,\ldots,L_T.
+\]
+
+Trajectory này được xem là \textbf{ground truth} và không được cung cấp cho
+thuật toán lập kế hoạch.
+
+Planner chỉ biết:
+
+\[
+P^t=
+(p_1^t,\ldots,p_n^t).
+\]
+
+Do đó cần phân biệt:
+
+\[
+\boxed{
+\text{Vị trí thực}
+\neq
+\text{belief của planner}
+}
+\]
+
+Đây là yếu tố quan trọng để tránh tình trạng simulation vô tình cung cấp
+thông tin mà UAV không thể biết trong thực tế.
+
+
+%========================================================
+\section*{Mô phỏng hoạt động của UAV}
+
+Trạng thái UAV $k$ tại thời điểm $t$ có thể được biểu diễn:
+
+\[
+U_k^t=
+(
+l_k^t,
+E_k^t,
+v_k,
+s_k
+),
+\]
+
+trong đó:
+
+\begin{itemize}
+    \item $l_k^t$: vị trí hiện tại;
+    \item $E_k^t$: năng lượng còn lại;
+    \item $v_k$: tốc độ bay;
+    \item $s_k$: cảm biến.
+\end{itemize}
+
+Trong mỗi decision epoch, UAV có thể thực hiện:
+
+\[
+a_{kt}
+\in
+\{
+\text{move},
+\text{search},
+\text{wait},
+\text{return}
+\}.
+\]
+
+Nếu UAV di chuyển từ ô $i$ tới $j$:
+
+\[
+\tau_{ijk}^{fly}
+=
+\frac{d_{ij}}{v_k}.
+\]
+
+Một mô hình năng lượng cơ sở là:
+
+\[
+E_{ijk}^{fly}
+=
+\gamma_kd_{ij}.
+\]
+
+Nếu muốn xem xét địa hình:
+
+\[
+E_{ijk}^{fly}
+=
+\gamma_kd_{ij}
++
+\eta_k\max\{0,e_j-e_i\}.
+\]
+
+Khi UAV tìm kiếm tại ô $i$ trong thời gian
+$\tau_{ik}^{search}$:
+
+\[
+E_{ik}^{search}
+=
+\alpha_k\tau_{ik}^{search}.
+\]
+
+Nếu mục tiêu đang thực sự ở ô đó thì kết quả quan sát được sinh bởi:
+
+\[
+D_{ikt}
+\sim
+\operatorname{Bernoulli}(q_{ikt}).
+\]
+
+Vì vậy:
+
+\[
+L_t=i
+\not\Rightarrow
+D_{ikt}=1.
+\]
+
+
+%========================================================
+\section*{Quy trình mô phỏng tổng thể}
+
+Một simulation run có thể gồm các bước:
+
+\begin{enumerate}
+    \item chọn khu vực và xây dựng spatial grid;
+    \item lấy các lớp GIS và weather;
+    \item chọn IPP;
+    \item sinh hoặc lấy trajectory thực của người mất tích;
+    \item tạo initial probability map;
+    \item giải bài toán phân bổ và định tuyến UAV;
+    \item mô phỏng hoạt động bay và tìm kiếm;
+    \item sinh kết quả quan sát;
+    \item cập nhật probability map;
+    \item tái tối ưu nếu chiến lược động được sử dụng;
+    \item tiếp tục cho tới khi phát hiện mục tiêu hoặc kết thúc mission horizon.
+\end{enumerate}
+
+Chu trình cốt lõi là:
+
+\[
+\boxed{
+\begin{gathered}
+P^t
+\rightarrow
+\text{Phân công}
+\rightarrow
+\text{Định tuyến}
+\rightarrow
+\text{Tìm kiếm}
+\\[4pt]
+\downarrow
+\\[-2pt]
+\text{Quan sát}
+\rightarrow
+\text{Cập nhật}
+\rightarrow
+P^{t+1}
+\rightarrow
+\text{Tái tối ưu}
+\end{gathered}
+}
+\]
+
+
+%========================================================
+\section*{Câu hỏi nghiên cứu}
+
+Để tránh xây dựng một mô hình quá lớn nhưng khó xác định thành phần nào thực
+sự tạo ra lợi ích, nghiên cứu được tổ chức theo một chuỗi câu hỏi có thứ tự.
+
+
+%--------------------------------------------------------
+\subsection*{RQ1 -- Giá trị của dự báo vị trí dựa trên dữ liệu}
+
+\textbf{Vấn đề.}
+
+Một probability map chỉ dựa vào khoảng cách tới IPP hoặc một phân phối
+Gaussian có thể không phản ánh được tác động của địa hình, trail và điều kiện
+môi trường.
+
+\textbf{Câu hỏi nghiên cứu.}
+
+\begin{quote}
+Việc tích hợp dữ liệu địa hình, đường mòn, lớp phủ bề mặt, thời tiết và hành
+vi có tạo ra một probability map tốt hơn đáng kể so với các baseline đơn
+giản hay không?
+\end{quote}
+
+\textbf{Giả thuyết.}
+
+Một mô hình dựa trên dữ liệu sẽ phân bổ nhiều probability mass hơn vào các
+khu vực mà người mất tích thực sự có khả năng đi tới.
+
+\textbf{Kết quả cần chứng minh.}
+
+Không chỉ cải thiện các chỉ số prediction mà còn phải tạo ra lợi ích trong
+nhiệm vụ UAV, chẳng hạn tăng tỷ lệ phát hiện hoặc giảm thời gian phát hiện.
+
+
+%--------------------------------------------------------
+\subsection*{RQ2 -- Chất lượng dự báo có chuyển thành lợi ích vận hành hay không?}
+
+Đây là câu hỏi kết nối trực tiếp phần data-driven với phần Operations
+Research.
+
+\textbf{Câu hỏi nghiên cứu.}
+
+\begin{quote}
+Khi chất lượng của probability map tăng lên, mức cải thiện tương ứng về
+detection probability và detection time là bao nhiêu?
+\end{quote}
+
+Chuỗi cần kiểm định là:
+
+\[
+\boxed{
+\text{Prediction Quality}
+\rightarrow
+\text{Routing Decisions}
+\rightarrow
+\text{SAR Performance}
+}
+\]
+
+Một kết quả có giá trị cần cho thấy rằng sự cải thiện prediction tạo ra sự
+khác biệt vận hành có ý nghĩa, thay vì chỉ làm đẹp các chỉ số thống kê.
+
+
+%--------------------------------------------------------
+\subsection*{RQ3 -- Giá trị của định tuyến có xét khả năng phát hiện}
+
+\textbf{Vấn đề.}
+
+Chỉ sử dụng $p_i^t$ giả định rằng mọi UAV có khả năng tìm kiếm tương đương tại
+mọi khu vực.
+
+\textbf{Câu hỏi nghiên cứu.}
+
+\begin{quote}
+Phân công UAV theo $p_i^tq_{ikt}$ có cải thiện hiệu quả tìm kiếm so với chỉ
+sử dụng $p_i^t$ hay không?
+\end{quote}
+
+\textbf{Giả thuyết.}
+
+Lợi ích sẽ tăng khi sự khác biệt về cảm biến hoặc điều kiện môi trường trở
+nên lớn.
+
+\textbf{Kết quả cần chứng minh.}
+
+Phương pháp cần tăng detection success hoặc giảm detection time mà không gây
+ra mức tăng không hợp lý về quãng đường và năng lượng.
+
+
+%--------------------------------------------------------
+\subsection*{RQ4 -- Giá trị của tái định tuyến động}
+
+\textbf{Vấn đề.}
+
+Một kế hoạch tối ưu tại thời điểm ban đầu có thể trở nên không phù hợp sau khi
+một phần khu vực đã được kiểm tra.
+
+\textbf{Câu hỏi nghiên cứu.}
+
+\begin{quote}
+Bayesian updating và rolling-horizon replanning có tạo ra lợi ích đáng kể so
+với việc giữ nguyên route ban đầu hay không?
+\end{quote}
+
+\textbf{Giả thuyết.}
+
+Lợi ích của dynamic replanning sẽ lớn hơn khi:
+
+\begin{itemize}
+    \item initial belief có độ bất định cao;
+    \item $q_{ikt}<1$;
+    \item mission horizon đủ dài;
+    \item target có khả năng di chuyển.
+\end{itemize}
+
+\textbf{Kết quả cần chứng minh.}
+
+Lợi ích về detection probability hoặc detection time phải đủ lớn để biện minh
+cho thời gian tính toán bổ sung.
+
+
+%--------------------------------------------------------
+\subsection*{RQ5 -- Độ bền vững trước sai số mô hình}
+
+Trong thực tế:
+
+\[
+P_{\mathrm{estimated}}(L_t)
+\neq
+P_{\mathrm{true}}(L_t).
+\]
+
+Tương tự, $q_{ikt}$ cũng chỉ là một đại lượng ước lượng.
+
+\textbf{Câu hỏi nghiên cứu.}
+
+\begin{quote}
+Hiệu quả của phương pháp suy giảm như thế nào khi probability map hoặc
+detection model bị sai lệch?
+\end{quote}
+
+Đây là câu hỏi quan trọng để tránh đánh giá một thuật toán trong điều kiện
+planner biết mô hình ``quá chính xác'' so với thực tế.
+
+
+%========================================================
+\section*{Thiết kế thực nghiệm}
+
+Các thực nghiệm nên được xây dựng theo nguyên tắc mỗi lần thay đổi một cơ chế
+chính trong khi giữ các điều kiện khác cố định.
+
+
+%--------------------------------------------------------
+\subsection*{Thí nghiệm về probability model}
+
+So sánh:
+
+\[
+\text{Uniform}
+\rightarrow
+\text{Distance-based}
+\rightarrow
+\text{GIS-based}
+\rightarrow
+\text{Data-driven}.
+\]
+
+Các phương pháp phải được đánh giá trên cùng target scenarios.
+
+Các chỉ số prediction có thể gồm:
+
+\begin{itemize}
+    \item log-likelihood của vị trí thực;
+    \item probability mass quanh target;
+    \item rank của true cell;
+    \item Top-$k$ spatial recall.
+\end{itemize}
+
+
+%--------------------------------------------------------
+\subsection*{Thí nghiệm từ prediction tới routing}
+
+Giữ nguyên:
+
+\begin{itemize}
+    \item target trajectory;
+    \item đội UAV;
+    \item năng lượng;
+    \item detection model;
+    \item mission horizon.
+\end{itemize}
+
+Chỉ thay probability map.
+
+Mục tiêu là kiểm tra:
+
+\[
+\text{Prediction Error}
+\rightarrow
+\text{SAR Performance}.
+\]
+
+
+%--------------------------------------------------------
+\subsection*{Thí nghiệm về detection-aware assignment}
+
+So sánh hai tiêu chí:
+
+\[
+p_i^t
+\]
+
+và
+
+\[
+p_i^tq_{ikt}.
+\]
+
+Thí nghiệm nên thay đổi:
+
+\begin{itemize}
+    \item mật độ thực vật;
+    \item detection probability;
+    \item loại cảm biến;
+    \item mức độ khác biệt giữa UAV.
+\end{itemize}
+
+
+%--------------------------------------------------------
+\subsection*{Thí nghiệm static và dynamic}
+
+Một thiết kế đơn giản nhưng có khả năng giải thích tốt là:
+
+\[
+\begin{array}{c|cc}
+ & \text{Static Routing} & \text{Dynamic Routing}\\
+\hline
+\text{Baseline Probability} & A & B\\
+\text{Data-driven Probability} & C & D
+\end{array}
+\]
+
+Các so sánh:
+
+\[
+C-A
+\]
+
+đo giá trị của data-driven probability trong trường hợp static;
+
+\[
+B-A
+\]
+
+đo giá trị của dynamic update với baseline probability;
+
+và
+
+\[
+D-A
+\]
+
+cho thấy lợi ích tổng hợp của toàn bộ framework.
+
+
+%--------------------------------------------------------
+\subsection*{Thí nghiệm về sai số mô hình}
+
+Có thể tạo sai lệch có kiểm soát:
+
+\[
+P_{\mathrm{est}}
+=
+(1-\epsilon)P_{\mathrm{reference}}
++
+\epsilon P_{\mathrm{noise}},
+\]
+
+với các mức:
+
+\[
+\epsilon
+\in
+\{0,0.1,0.2,0.4,0.6\}.
+\]
+
+Tương tự có thể perturb $q_{ikt}$ để đánh giá sai số detection model.
+
+
+%========================================================
+\section*{Chỉ số đánh giá}
+
+Chỉ số chính nên gắn trực tiếp với mục tiêu SAR.
+
+\subsection*{Tỷ lệ phát hiện thành công}
+
+\[
+DSR
+=
+\frac{N_{\mathrm{detected}}}
+{N_{\mathrm{missions}}}.
+\]
+
+\subsection*{Xác suất phát hiện trong thời gian cho phép}
+
+\[
+P(T_{\mathrm{detect}}\leq T_{\max}).
+\]
+
+\subsection*{Thời gian phát hiện kỳ vọng}
+
+\[
+EDT
+=
+\mathbb{E}[T_{\mathrm{detect}}].
+\]
+
+Ngoài ra có thể đo:
+
+\begin{itemize}
+    \item tổng quãng đường bay;
+    \item tổng năng lượng tiêu thụ;
+    \item diện tích đã kiểm tra;
+    \item redundant coverage;
+    \item workload balance giữa UAV;
+    \item số lần replanning;
+    \item thời gian tính toán;
+    \item MIP gap nếu sử dụng MILP.
+\end{itemize}
+
+
+%========================================================
+\section*{Định vị đóng góp nghiên cứu}
+
+Các thành phần probability map, Bayesian update, UAV search và dynamic
+replanning không nên được tuyên bố riêng lẻ là điểm mới, bởi các thành phần
+này đã xuất hiện trong literature
+\cite{hashimoto2022,ge2024,ewers2025}.
+
+Đóng góp tiềm năng của nghiên cứu nên được định vị ở sự kết nối giữa:
+
+\[
+\boxed{
+\begin{gathered}
+\text{Data-driven lost-person belief}
+\\
++
+\\
+\text{Environment- and UAV-dependent detection}
+\\
++
+\\
+\text{Multi-UAV allocation and routing}
+\\
++
+\\
+\text{Belief update and dynamic replanning}
+\end{gathered}
+}
+\]
+
+Cụ thể, nghiên cứu kỳ vọng có ba đóng góp chính.
+
+\textbf{Thứ nhất}, xây dựng và đánh giá một probability representation dựa
+trên dữ liệu GIS, môi trường và hành vi thay vì chỉ giả định một phân phối
+không gian đơn giản.
+
+\textbf{Thứ hai}, kết nối trực tiếp prediction model với routing model để trả
+lời câu hỏi liệu prediction tốt hơn có thực sự tạo ra kết quả SAR tốt hơn hay
+không.
+
+\textbf{Thứ ba}, xem xét jointly location probability và UAV detection
+probability trong quá trình phân công, sau đó cho phép probability được cập
+nhật khi có observation mới.
+
+
+%========================================================
+\section*{Tiêu chí để hướng nghiên cứu đáng tiếp tục}
+
+Một thành phần mới chỉ nên được giữ lại nếu nó tạo ra lợi ích có thể đo được.
+
+Ví dụ:
+
+\begin{itemize}
+    \item GIS-based probability chỉ đáng sử dụng nếu tốt hơn rõ ràng so với
+    distance baseline;
+    \item detection-aware routing chỉ đáng giữ nếu cải thiện SAR outcomes;
+    \item dynamic replanning chỉ đáng sử dụng nếu mức cải thiện bù được chi
+    phí tính toán;
+    \item heterogeneous UAV chỉ cần thêm khi sensor heterogeneity thực sự tạo
+    khác biệt;
+    \item moving-target model chỉ nên được thêm khi static-target assumption
+    trở thành một hạn chế quan trọng.
+\end{itemize}
+
+Cách tiếp cận này giúp tránh việc tạo một mô hình lớn nhưng không xác định
+được thành phần nào thực sự có ích.
+
+
+%========================================================
+\section*{Phạm vi nghiên cứu ban đầu}
+
+Để giữ nghiên cứu đầu tiên khả thi, phạm vi chính nên giới hạn ở:
+
+\begin{itemize}
+    \item một người mất tích;
+    \item một hoặc một số khu vực wilderness cụ thể;
+    \item một đội UAV quy mô nhỏ;
+    \item dữ liệu GIS thực;
+    \item một probability model cơ sở và một data-driven model;
+    \item giới hạn năng lượng và mission horizon;
+    \item imperfect detection;
+    \item Bayesian update;
+    \item rolling-horizon replanning.
+\end{itemize}
+
+Các yếu tố sau nên được xem là hướng mở rộng có điều kiện:
+
+\begin{itemize}
+    \item nhiều người mất tích;
+    \item đội UAV lớn và không đồng nhất phức tạp;
+    \item phối hợp UAV với ground rescuers;
+    \item communication constraints;
+    \item obstacle-aware 3D routing;
+    \item station/recharging decisions;
+    \item POMDP đầy đủ;
+    \item Reinforcement Learning;
+    \item Multi-Agent Reinforcement Learning.
+\end{itemize}
+
+Đặc biệt, RL/MARL không nên được thêm chỉ để tăng độ phức tạp. Sau khi có
+rolling-horizon optimization làm baseline, một nghiên cứu tiếp theo mới nên
+kiểm tra:
+
+\[
+\text{Greedy}
+\rightarrow
+\text{Static Optimization}
+\rightarrow
+\text{Rolling Horizon}
+\rightarrow
+\text{RL/MARL}.
+\]
+
+
+%========================================================
+\section*{Kết quả kỳ vọng}
+
+Một kết quả nghiên cứu có giá trị không nhất thiết phải chứng minh rằng mọi
+thành phần đề xuất đều tốt hơn trong mọi trường hợp.
+
+Thay vào đó, nghiên cứu cần xác định được:
+
+\begin{itemize}
+    \item khi nào data-driven probability map có ích;
+    \item mức prediction improvement cần thiết để tạo ra operational gain;
+    \item khi nào detection-aware assignment có giá trị;
+    \item khi nào replanning đáng thực hiện;
+    \item phương pháp suy giảm ra sao khi probability model sai;
+    \item chi phí tính toán tăng bao nhiêu để đổi lấy mức cải thiện đó.
+\end{itemize}
+
+Nếu một phương pháp chỉ cải thiện rất ít hoặc chỉ hoạt động trong một khoảng
+tham số hẹp, mô hình đơn giản hơn nên được ưu tiên.
+
+Vì vậy, giá trị của nghiên cứu không nằm ở việc xây dựng mô hình phức tạp
+nhất, mà ở việc xác định rõ:
+
+\[
+\boxed{
+\text{Thông tin nào}
+\rightarrow
+\text{làm thay đổi quyết định UAV}
+\rightarrow
+\text{và tạo ra lợi ích SAR thực sự}
+}
+\]
+
+
+%========================================================
+\section*{Tài liệu tham khảo}
+
+\begin{thebibliography}{99}
+
+\bibitem{hashimoto2022}
+Hashimoto, A., Heintzman, L., Koester, R., Abaid, N.:
+An agent-based model reveals lost person behavior based on data from
+wilderness search and rescue.
+\emph{Scientific Reports} \textbf{12}, 5873 (2022).
+doi:10.1038/s41598-022-09502-4.
+
+\bibitem{lin2010}
+Lin, L., Goodrich, M.A.:
+A Bayesian approach to modeling lost person behaviors based on terrain
+features in wilderness search and rescue.
+\emph{Computational and Mathematical Organization Theory}
+\textbf{16}(3), 300--323 (2010).
+doi:10.1007/s10588-010-9066-2.
+
+\bibitem{seric2021}
+Šerić, L., Pinjušić, T., Topić, K., Blažević, T.:
+Lost Person Search Area Prediction Based on Regression and Transfer Learning Models.
+\emph{ISPRS International Journal of Geo-Information}
+\textbf{10}(2), 80 (2021).
+doi:10.3390/ijgi10020080.
+
+\bibitem{ge2024}
+Ge, Z., Jiang, J., Coombes, M.:
+Multi-UAV Search and Rescue in Wilderness Using Smart Agent-Based
+Probability Models.
+\emph{arXiv preprint} arXiv:2411.10148 (2024).
+doi:10.48550/arXiv.2411.10148.
+
+\bibitem{ewers2025}
+Ewers, J.-H., Anderson, D., Thomson, D.:
+Deep reinforcement learning for time-critical wilderness search and rescue
+using drones.
+\emph{Frontiers in Robotics and AI} \textbf{11}, 1527095 (2025).
+doi:10.3389/frobt.2024.1527095.
+
+\bibitem{broyles2022}
+Broyles, D., Hayner, C.R., Leung, K.:
+WiSARD: A Labeled Visual and Thermal Image Dataset for Wilderness Search
+and Rescue.
+In: \emph{2022 IEEE/RSJ International Conference on Intelligent Robots
+and Systems (IROS)}, pp. 9467--9474 (2022).
+doi:10.1109/IROS47612.2022.9981298.
+
+\bibitem{dumencic2025}
+Dumenčić, S., Lanča, L., Jakac, K., Ivić, S.:
+Experimental Validation of UAV Search and Detection System in Real
+Wilderness Environment.
+\emph{Drones} \textbf{9}(7), 473 (2025).
+doi:10.3390/drones9070473.
+
+\bibitem{srtm}
+NASA JPL:
+NASA Shuttle Radar Topography Mission Global 1 arc second
+[Data set].
+NASA EOSDIS Land Processes Distributed Active Archive Center (2013).
+doi:10.5067/MEASURES/SRTM/SRTMGL1.003.
+
+\bibitem{era5land}
+Copernicus Climate Change Service:
+ERA5-Land hourly data from 1950 to present.
+Climate Data Store, European Centre for Medium-Range Weather Forecasts.
+doi:10.24381/cds.e2161bac.
+
+\bibitem{worldcover}
+Zanaga, D., Van De Kerchove, R., Daems, D., De Keersmaecker, W.,
+Brockmann, C., Kirches, G., Wevers, J., Cartus, O., Santoro, M.,
+Fritz, S., Lesiv, M., Herold, M., Tsendbazar, N.E., Xu, P.,
+Ramoino, F., Arino, O.:
+ESA WorldCover 10 m 2021 v200 [Data set] (2022).
+doi:10.5281/zenodo.7254221.
+
+\bibitem{osm}
+OpenStreetMap contributors:
+OpenStreetMap geographic database.
+OpenStreetMap Foundation.
+
+\end{thebibliography}
+
+
+
+\end{document}

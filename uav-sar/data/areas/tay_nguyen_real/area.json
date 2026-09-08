@@ -1,0 +1,62 @@
+{
+  "name": "tay_nguyen_real",
+  "W": 40,
+  "H": 40,
+  "cell": 100.0,
+  "origin_lonlat": [
+    108.25,
+    12.6
+  ],
+  "meta": {
+    "source": "real-gis",
+    "crs": "EPSG:32649",
+    "bbox_size_m": 4000.0,
+    "sources": {
+      "dem": {
+        "dataset": "Copernicus DEM GLO-30",
+        "provider": "Copernicus",
+        "url": "https://copernicus-dem-30m.s3.amazonaws.com/",
+        "sha256": "810f6f6e535633b3486f31337cb07e8a92e6b8f07a87d8f68ad64e04f152b9f4"
+      },
+      "landcover": {
+        "dataset": "ESA WorldCover 2021 v200",
+        "provider": "ESA",
+        "doi": "10.5281/zenodo.7254221",
+        "sha256": "7b83de2f5819999d1c22329606abc0237101eeb6701fcf0e7e2d9e2aeb196edc"
+      },
+      "transport": {
+        "dataset": "OpenStreetMap",
+        "provider": "OSM contributors",
+        "license": "ODbL 1.0",
+        "sha256": "f0596028d0c9420e1f9b1cf314d1b840b2961d1ebfb7169df4f0592d56d0e03c"
+      },
+      "weather": {
+        "dataset": "NASA POWER Hourly 2025",
+        "provider": "NASA Langley",
+        "url": "https://power.larc.nasa.gov/",
+        "sha256": "b80cd7e773b90c77570fe9d0fa1623fd3faee2dc6a7f0130c7caff73cf7dc811"
+      }
+    },
+    "built_utc": "2026-08-27T02:36:58.521716+00:00",
+    "weather_processing": {
+      "start_local_standard_time": "2025011512",
+      "rain_normalisation_mm_h": 10.0,
+      "source_header": {
+        "title": "NASA/POWER Source Native Resolution Hourly Data",
+        "api": {
+          "version": "v2.9.9",
+          "name": "POWER Hourly API"
+        },
+        "sources": [
+          "SYN1DEG",
+          "MERRA2",
+          "POWER"
+        ],
+        "fill_value": -999.0,
+        "time_standard": "LST",
+        "start": "20250101",
+        "end": "20251231"
+      }
+    }
+  }
+}

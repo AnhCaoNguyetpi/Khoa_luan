@@ -1,0 +1,2 @@
+detected,detect_time_min,horizon_min,flight_distance_m,energy_wh,search_minutes,unique_cells_searched,total_search_ops,redundant_search_ops,n_swaps,n_replans,replan_ms_total,planner,initial_model,area_name,seed,replicate,arm,target_profile,elapsed_before_min,n_uavs,moving_target
+False,,180.0,79386.82448035758,806.1061920295815,150.0,17,50,33,16,17,397.9701000280329,rolling,gis,tay_nguyen_real,42,-1,rolling-gis,desoriented,60.0,2,True

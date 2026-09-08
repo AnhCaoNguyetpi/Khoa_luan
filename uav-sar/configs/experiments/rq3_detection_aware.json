@@ -1,0 +1,5 @@
+{
+  "_comment": "RQ3: p*q vs p assignment across fleets and vegetation levels",
+  "area": {"name": "demo_valley"},
+  "detection": {"dwell_ticks": 3, "footprint_side": 0.45}
+}

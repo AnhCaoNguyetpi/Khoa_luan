@@ -1,0 +1,12 @@
+numpy==2.5.2
+pandas==3.0.5
+matplotlib==3.11.1
+
+# Test
+pytest==9.1.1
+
+# Real GIS import
+rasterio==1.5.1
+geopandas==1.1.4
+shapely==2.1.2
+pyproj==3.7.2

@@ -1,0 +1,11 @@
+{
+  "name": "demo_valley",
+  "W": 40,
+  "H": 40,
+  "cell": 100.0,
+  "origin_lonlat": null,
+  "meta": {
+    "source": "synthetic",
+    "seed": 7
+  }
+}

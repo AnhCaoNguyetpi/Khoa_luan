@@ -1,0 +1,396 @@
+18:53:32 INFO generating 60 training incidents ...
+18:53:33 INFO saved C:\Users\ADMIN\Downloads\Khóa luận\uav-sar\data\models\demo_valley_pmr.npz
+18:53:33 INFO evaluating on 30 held-out incidents ...
+18:53:36 INFO arm uniform                    rep  1/8 det=False t=180
+18:53:37 INFO arm uniform                    rep  2/8 det=False t=180
+18:53:38 INFO arm uniform                    rep  3/8 det=False t=180
+18:53:38 INFO arm uniform                    rep  4/8 det=False t=180
+18:53:39 INFO arm uniform                    rep  5/8 det=False t=180
+18:53:40 INFO arm uniform                    rep  6/8 det=False t=180
+18:53:41 INFO arm uniform                    rep  7/8 det=False t=180
+18:53:42 INFO arm uniform                    rep  8/8 det=False t=180
+18:53:42 INFO arm distance                   rep  1/8 det=False t=180
+18:53:43 INFO arm distance                   rep  2/8 det=False t=180
+18:53:44 INFO arm distance                   rep  3/8 det=True t=124
+18:53:44 INFO arm distance                   rep  4/8 det=True t=6
+18:53:45 INFO arm distance                   rep  5/8 det=False t=180
+18:53:46 INFO arm distance                   rep  6/8 det=False t=180
+18:53:46 INFO arm distance                   rep  7/8 det=True t=56
+18:53:47 INFO arm distance                   rep  8/8 det=False t=180
+18:53:48 INFO arm gis                        rep  1/8 det=False t=180
+18:53:48 INFO arm gis                        rep  2/8 det=True t=4
+18:53:48 INFO arm gis                        rep  3/8 det=True t=62
+18:53:49 INFO arm gis                        rep  4/8 det=True t=10
+18:53:49 INFO arm gis                        rep  5/8 det=False t=180
+18:53:50 INFO arm gis                        rep  6/8 det=False t=180
+18:53:51 INFO arm gis                        rep  7/8 det=False t=180
+18:53:52 INFO arm gis                        rep  8/8 det=True t=130
+18:53:52 INFO arm datadriven                 rep  1/8 det=False t=180
+18:53:53 INFO arm datadriven                 rep  2/8 det=False t=180
+18:53:54 INFO arm datadriven                 rep  3/8 det=False t=180
+18:53:55 INFO arm datadriven                 rep  4/8 det=False t=180
+18:53:55 INFO arm datadriven                 rep  5/8 det=False t=180
+18:53:56 INFO arm datadriven                 rep  6/8 det=False t=180
+18:53:57 INFO arm datadriven                 rep  7/8 det=False t=180
+18:53:58 INFO arm datadriven                 rep  8/8 det=False t=180
+18:53:58 INFO compared 3 arm pairs over 2 metrics
+18:53:59 INFO arm eps=0.0                    rep  1/8 det=False t=180
+18:54:00 INFO arm eps=0.0                    rep  2/8 det=False t=180
+18:54:01 INFO arm eps=0.0                    rep  3/8 det=False t=180
+18:54:01 INFO arm eps=0.0                    rep  4/8 det=False t=180
+18:54:02 INFO arm eps=0.0                    rep  5/8 det=False t=180
+18:54:03 INFO arm eps=0.0                    rep  6/8 det=False t=180
+18:54:04 INFO arm eps=0.0                    rep  7/8 det=False t=180
+18:54:05 INFO arm eps=0.0                    rep  8/8 det=True t=137
+18:54:05 INFO arm eps=0.1                    rep  1/8 det=False t=180
+18:54:06 INFO arm eps=0.1                    rep  2/8 det=False t=180
+18:54:07 INFO arm eps=0.1                    rep  3/8 det=False t=180
+18:54:07 INFO arm eps=0.1                    rep  4/8 det=False t=180
+18:54:08 INFO arm eps=0.1                    rep  5/8 det=False t=180
+18:54:09 INFO arm eps=0.1                    rep  6/8 det=False t=180
+18:54:10 INFO arm eps=0.1                    rep  7/8 det=False t=180
+18:54:10 INFO arm eps=0.1                    rep  8/8 det=True t=50
+18:54:11 INFO arm eps=0.2                    rep  1/8 det=False t=180
+18:54:12 INFO arm eps=0.2                    rep  2/8 det=True t=157
+18:54:12 INFO arm eps=0.2                    rep  3/8 det=False t=180
+18:54:13 INFO arm eps=0.2                    rep  4/8 det=False t=180
+18:54:14 INFO arm eps=0.2                    rep  5/8 det=False t=180
+18:54:15 INFO arm eps=0.2                    rep  6/8 det=False t=180
+18:54:15 INFO arm eps=0.2                    rep  7/8 det=False t=180
+18:54:16 INFO arm eps=0.2                    rep  8/8 det=True t=50
+18:54:16 INFO arm eps=0.4                    rep  1/8 det=False t=180
+18:54:17 INFO arm eps=0.4                    rep  2/8 det=False t=180
+18:54:18 INFO arm eps=0.4                    rep  3/8 det=False t=180
+18:54:18 INFO arm eps=0.4                    rep  4/8 det=False t=180
+18:54:19 INFO arm eps=0.4                    rep  5/8 det=False t=180
+18:54:20 INFO arm eps=0.4                    rep  6/8 det=False t=180
+18:54:21 INFO arm eps=0.4                    rep  7/8 det=False t=180
+18:54:22 INFO arm eps=0.4                    rep  8/8 det=False t=180
+18:54:22 INFO arm eps=0.6                    rep  1/8 det=False t=180
+18:54:23 INFO arm eps=0.6                    rep  2/8 det=False t=180
+18:54:24 INFO arm eps=0.6                    rep  3/8 det=False t=180
+18:54:25 INFO arm eps=0.6                    rep  4/8 det=False t=180
+18:54:25 INFO arm eps=0.6                    rep  5/8 det=False t=180
+18:54:26 INFO arm eps=0.6                    rep  6/8 det=False t=180
+18:54:27 INFO arm eps=0.6                    rep  7/8 det=False t=180
+18:54:28 INFO arm eps=0.6                    rep  8/8 det=False t=180
+18:54:28 INFO arm eps=0.8                    rep  1/8 det=False t=180
+18:54:29 INFO arm eps=0.8                    rep  2/8 det=False t=180
+18:54:30 INFO arm eps=0.8                    rep  3/8 det=False t=180
+18:54:30 INFO arm eps=0.8                    rep  4/8 det=False t=180
+18:54:31 INFO arm eps=0.8                    rep  5/8 det=False t=180
+18:54:32 INFO arm eps=0.8                    rep  6/8 det=False t=180
+18:54:32 INFO arm eps=0.8                    rep  7/8 det=False t=180
+18:54:33 INFO arm eps=0.8                    rep  8/8 det=True t=84
+18:54:34 INFO arm eps=1.0                    rep  1/8 det=False t=180
+18:54:34 INFO arm eps=1.0                    rep  2/8 det=False t=180
+18:54:35 INFO arm eps=1.0                    rep  3/8 det=False t=180
+18:54:36 INFO arm eps=1.0                    rep  4/8 det=False t=180
+18:54:37 INFO arm eps=1.0                    rep  5/8 det=False t=180
+18:54:37 INFO arm eps=1.0                    rep  6/8 det=False t=180
+18:54:38 INFO arm eps=1.0                    rep  7/8 det=False t=180
+18:54:39 INFO arm eps=1.0                    rep  8/8 det=True t=89
+18:54:39 INFO compared 6 arm pairs over 2 metrics
+18:54:40 INFO arm pq|mixed|veg1.0            rep  1/8 det=True t=9
+18:54:40 INFO arm pq|mixed|veg1.0            rep  2/8 det=False t=180
+18:54:41 INFO arm pq|mixed|veg1.0            rep  3/8 det=False t=180
+18:54:42 INFO arm pq|mixed|veg1.0            rep  4/8 det=False t=180
+18:54:43 INFO arm pq|mixed|veg1.0            rep  5/8 det=False t=180
+18:54:43 INFO arm pq|mixed|veg1.0            rep  6/8 det=False t=180
+18:54:44 INFO arm pq|mixed|veg1.0            rep  7/8 det=False t=180
+18:54:45 INFO arm pq|mixed|veg1.0            rep  8/8 det=False t=180
+18:54:45 INFO arm p |mixed|veg1.0            rep  1/8 det=False t=180
+18:54:46 INFO arm p |mixed|veg1.0            rep  2/8 det=False t=180
+18:54:47 INFO arm p |mixed|veg1.0            rep  3/8 det=False t=180
+18:54:47 INFO arm p |mixed|veg1.0            rep  4/8 det=False t=180
+18:54:48 INFO arm p |mixed|veg1.0            rep  5/8 det=True t=78
+18:54:48 INFO arm p |mixed|veg1.0            rep  6/8 det=False t=180
+18:54:49 INFO arm p |mixed|veg1.0            rep  7/8 det=False t=180
+18:54:49 INFO arm p |mixed|veg1.0            rep  8/8 det=False t=180
+18:54:50 INFO arm pq|homRGB|veg1.0           rep  1/8 det=False t=180
+18:54:51 INFO arm pq|homRGB|veg1.0           rep  2/8 det=False t=180
+18:54:52 INFO arm pq|homRGB|veg1.0           rep  3/8 det=False t=180
+18:54:52 INFO arm pq|homRGB|veg1.0           rep  4/8 det=False t=180
+18:54:53 INFO arm pq|homRGB|veg1.0           rep  5/8 det=False t=180
+18:54:54 INFO arm pq|homRGB|veg1.0           rep  6/8 det=False t=180
+18:54:54 INFO arm pq|homRGB|veg1.0           rep  7/8 det=False t=180
+18:54:55 INFO arm pq|homRGB|veg1.0           rep  8/8 det=False t=180
+18:54:55 INFO arm p |homRGB|veg1.0           rep  1/8 det=False t=180
+18:54:56 INFO arm p |homRGB|veg1.0           rep  2/8 det=False t=180
+18:54:56 INFO arm p |homRGB|veg1.0           rep  3/8 det=True t=10
+18:54:57 INFO arm p |homRGB|veg1.0           rep  4/8 det=False t=180
+18:54:58 INFO arm p |homRGB|veg1.0           rep  5/8 det=False t=180
+18:54:58 INFO arm p |homRGB|veg1.0           rep  6/8 det=False t=180
+18:54:59 INFO arm p |homRGB|veg1.0           rep  7/8 det=False t=180
+18:55:00 INFO arm p |homRGB|veg1.0           rep  8/8 det=False t=180
+18:55:00 INFO compared 2 arm pairs over 2 metrics
+18:55:02 INFO arm A                          rep  1/8 det=False t=180
+18:55:03 INFO arm A                          rep  2/8 det=False t=180
+18:55:04 INFO arm A                          rep  3/8 det=True t=132
+18:55:04 INFO arm A                          rep  4/8 det=False t=180
+18:55:05 INFO arm A                          rep  5/8 det=False t=180
+18:55:06 INFO arm A                          rep  6/8 det=False t=180
+18:55:07 INFO arm A                          rep  7/8 det=False t=180
+18:55:08 INFO arm A                          rep  8/8 det=False t=180
+18:55:09 INFO arm B                          rep  1/8 det=True t=65
+18:55:10 INFO arm B                          rep  2/8 det=False t=180
+18:55:10 INFO arm B                          rep  3/8 det=False t=180
+18:55:11 INFO arm B                          rep  4/8 det=True t=176
+18:55:12 INFO arm B                          rep  5/8 det=False t=180
+18:55:13 INFO arm B                          rep  6/8 det=False t=180
+18:55:13 INFO arm B                          rep  7/8 det=False t=180
+18:55:14 INFO arm B                          rep  8/8 det=True t=70
+18:55:15 INFO arm C                          rep  1/8 det=True t=8
+18:55:15 INFO arm C                          rep  2/8 det=True t=3
+18:55:16 INFO arm C                          rep  3/8 det=False t=180
+18:55:17 INFO arm C                          rep  4/8 det=False t=180
+18:55:18 INFO arm C                          rep  5/8 det=False t=180
+18:55:19 INFO arm C                          rep  6/8 det=False t=180
+18:55:20 INFO arm C                          rep  7/8 det=False t=180
+18:55:21 INFO arm C                          rep  8/8 det=False t=180
+18:55:21 INFO arm D                          rep  1/8 det=True t=7
+18:55:21 INFO arm D                          rep  2/8 det=True t=17
+18:55:21 INFO arm D                          rep  3/8 det=True t=21
+18:55:22 INFO arm D                          rep  4/8 det=False t=180
+18:55:23 INFO arm D                          rep  5/8 det=True t=118
+18:55:23 INFO arm D                          rep  6/8 det=False t=180
+18:55:24 INFO arm D                          rep  7/8 det=False t=180
+18:55:25 INFO arm D                          rep  8/8 det=False t=180
+18:55:25 INFO arm E_static_target            rep  1/8 det=False t=180
+18:55:26 INFO arm E_static_target            rep  2/8 det=False t=180
+18:55:26 INFO arm E_static_target            rep  3/8 det=False t=180
+18:55:27 INFO arm E_static_target            rep  4/8 det=False t=180
+18:55:27 INFO arm E_static_target            rep  5/8 det=False t=180
+18:55:28 INFO arm E_static_target            rep  6/8 det=False t=180
+18:55:28 INFO arm E_static_target            rep  7/8 det=False t=180
+18:55:29 INFO arm E_static_target            rep  8/8 det=True t=76
+18:55:29 INFO compared 4 arm pairs over 2 metrics
+18:55:30 INFO arm map_eps=0.0                rep  1/8 det=True t=118
+18:55:31 INFO arm map_eps=0.0                rep  2/8 det=False t=180
+18:55:31 INFO arm map_eps=0.0                rep  3/8 det=False t=180
+18:55:32 INFO arm map_eps=0.0                rep  4/8 det=False t=180
+18:55:33 INFO arm map_eps=0.0                rep  5/8 det=False t=180
+18:55:33 INFO arm map_eps=0.0                rep  6/8 det=False t=180
+18:55:34 INFO arm map_eps=0.0                rep  7/8 det=True t=53
+18:55:34 INFO arm map_eps=0.0                rep  8/8 det=True t=69
+18:55:35 INFO arm map_eps=0.2                rep  1/8 det=True t=3
+18:55:35 INFO arm map_eps=0.2                rep  2/8 det=False t=180
+18:55:36 INFO arm map_eps=0.2                rep  3/8 det=True t=147
+18:55:37 INFO arm map_eps=0.2                rep  4/8 det=False t=180
+18:55:38 INFO arm map_eps=0.2                rep  5/8 det=False t=180
+18:55:38 INFO arm map_eps=0.2                rep  6/8 det=False t=180
+18:55:39 INFO arm map_eps=0.2                rep  7/8 det=True t=49
+18:55:40 INFO arm map_eps=0.2                rep  8/8 det=False t=180
+18:55:40 INFO arm map_eps=0.4                rep  1/8 det=False t=180
+18:55:41 INFO arm map_eps=0.4                rep  2/8 det=False t=180
+18:55:42 INFO arm map_eps=0.4                rep  3/8 det=True t=157
+18:55:43 INFO arm map_eps=0.4                rep  4/8 det=False t=180
+18:55:43 INFO arm map_eps=0.4                rep  5/8 det=False t=180
+18:55:44 INFO arm map_eps=0.4                rep  6/8 det=False t=180
+18:55:45 INFO arm map_eps=0.4                rep  7/8 det=True t=164
+18:55:46 INFO arm map_eps=0.4                rep  8/8 det=False t=180
+18:55:46 INFO arm map_eps=0.6                rep  1/8 det=True t=9
+18:55:47 INFO arm map_eps=0.6                rep  2/8 det=False t=180
+18:55:47 INFO arm map_eps=0.6                rep  3/8 det=False t=180
+18:55:48 INFO arm map_eps=0.6                rep  4/8 det=False t=180
+18:55:49 INFO arm map_eps=0.6                rep  5/8 det=True t=175
+18:55:49 INFO arm map_eps=0.6                rep  6/8 det=False t=180
+18:55:50 INFO arm map_eps=0.6                rep  7/8 det=True t=54
+18:55:50 INFO arm map_eps=0.6                rep  8/8 det=False t=180
+18:55:51 INFO arm q_bias=0.6                 rep  1/8 det=False t=180
+18:55:52 INFO arm q_bias=0.6                 rep  2/8 det=False t=180
+18:55:52 INFO arm q_bias=0.6                 rep  3/8 det=False t=180
+18:55:53 INFO arm q_bias=0.6                 rep  4/8 det=False t=180
+18:55:54 INFO arm q_bias=0.6                 rep  5/8 det=True t=146
+18:55:54 INFO arm q_bias=0.6                 rep  6/8 det=False t=180
+18:55:55 INFO arm q_bias=0.6                 rep  7/8 det=False t=180
+18:55:56 INFO arm q_bias=0.6                 rep  8/8 det=False t=180
+18:55:56 INFO arm q_bias=0.8                 rep  1/8 det=True t=7
+18:55:56 INFO arm q_bias=0.8                 rep  2/8 det=False t=180
+18:55:57 INFO arm q_bias=0.8                 rep  3/8 det=True t=75
+18:55:57 INFO arm q_bias=0.8                 rep  4/8 det=False t=180
+18:55:58 INFO arm q_bias=0.8                 rep  5/8 det=True t=146
+18:55:59 INFO arm q_bias=0.8                 rep  6/8 det=False t=180
+18:56:00 INFO arm q_bias=0.8                 rep  7/8 det=False t=180
+18:56:01 INFO arm q_bias=0.8                 rep  8/8 det=False t=180
+18:56:01 INFO arm q_bias=1.0                 rep  1/8 det=True t=7
+18:56:01 INFO arm q_bias=1.0                 rep  2/8 det=False t=180
+18:56:02 INFO arm q_bias=1.0                 rep  3/8 det=True t=160
+18:56:03 INFO arm q_bias=1.0                 rep  4/8 det=False t=180
+18:56:04 INFO arm q_bias=1.0                 rep  5/8 det=False t=180
+18:56:05 INFO arm q_bias=1.0                 rep  6/8 det=False t=180
+18:56:06 INFO arm q_bias=1.0                 rep  7/8 det=True t=53
+18:56:06 INFO arm q_bias=1.0                 rep  8/8 det=False t=180
+18:56:07 INFO arm q_bias=1.2                 rep  1/8 det=True t=108
+18:56:07 INFO arm q_bias=1.2                 rep  2/8 det=False t=180
+18:56:08 INFO arm q_bias=1.2                 rep  3/8 det=False t=180
+18:56:09 INFO arm q_bias=1.2                 rep  4/8 det=False t=180
+18:56:10 INFO arm q_bias=1.2                 rep  5/8 det=False t=180
+18:56:10 INFO arm q_bias=1.2                 rep  6/8 det=False t=180
+18:56:11 INFO arm q_bias=1.2                 rep  7/8 det=True t=50
+18:56:11 INFO arm q_bias=1.2                 rep  8/8 det=False t=180
+18:56:11 INFO arm q_bias=1.4                 rep  1/8 det=True t=3
+18:56:12 INFO arm q_bias=1.4                 rep  2/8 det=False t=180
+18:56:13 INFO arm q_bias=1.4                 rep  3/8 det=False t=180
+18:56:13 INFO arm q_bias=1.4                 rep  4/8 det=False t=180
+18:56:14 INFO arm q_bias=1.4                 rep  5/8 det=False t=180
+18:56:15 INFO arm q_bias=1.4                 rep  6/8 det=False t=180
+18:56:17 INFO arm q_bias=1.4                 rep  7/8 det=True t=54
+18:56:17 INFO arm q_bias=1.4                 rep  8/8 det=False t=180
+18:56:18 INFO arm beta_bias=-0.3             rep  1/8 det=True t=4
+18:56:18 INFO arm beta_bias=-0.3             rep  2/8 det=False t=180
+18:56:19 INFO arm beta_bias=-0.3             rep  3/8 det=True t=58
+18:56:20 INFO arm beta_bias=-0.3             rep  4/8 det=False t=180
+18:56:21 INFO arm beta_bias=-0.3             rep  5/8 det=False t=180
+18:56:21 INFO arm beta_bias=-0.3             rep  6/8 det=False t=180
+18:56:22 INFO arm beta_bias=-0.3             rep  7/8 det=False t=180
+18:56:23 INFO arm beta_bias=-0.3             rep  8/8 det=False t=180
+18:56:23 INFO arm beta_bias=-0.15            rep  1/8 det=False t=180
+18:56:24 INFO arm beta_bias=-0.15            rep  2/8 det=False t=180
+18:56:25 INFO arm beta_bias=-0.15            rep  3/8 det=True t=96
+18:56:26 INFO arm beta_bias=-0.15            rep  4/8 det=False t=180
+18:56:26 INFO arm beta_bias=-0.15            rep  5/8 det=False t=180
+18:56:27 INFO arm beta_bias=-0.15            rep  6/8 det=False t=180
+18:56:28 INFO arm beta_bias=-0.15            rep  7/8 det=False t=180
+18:56:29 INFO arm beta_bias=-0.15            rep  8/8 det=False t=180
+18:56:29 INFO arm beta_bias=0.0              rep  1/8 det=True t=8
+18:56:29 INFO arm beta_bias=0.0              rep  2/8 det=False t=180
+18:56:30 INFO arm beta_bias=0.0              rep  3/8 det=False t=180
+18:56:31 INFO arm beta_bias=0.0              rep  4/8 det=False t=180
+18:56:32 INFO arm beta_bias=0.0              rep  5/8 det=False t=180
+18:56:32 INFO arm beta_bias=0.0              rep  6/8 det=False t=180
+18:56:33 INFO arm beta_bias=0.0              rep  7/8 det=True t=53
+18:56:33 INFO arm beta_bias=0.0              rep  8/8 det=False t=180
+18:56:34 INFO arm beta_bias=0.15             rep  1/8 det=True t=4
+18:56:34 INFO arm beta_bias=0.15             rep  2/8 det=False t=180
+18:56:35 INFO arm beta_bias=0.15             rep  3/8 det=True t=95
+18:56:36 INFO arm beta_bias=0.15             rep  4/8 det=False t=180
+18:56:36 INFO arm beta_bias=0.15             rep  5/8 det=False t=180
+18:56:37 INFO arm beta_bias=0.15             rep  6/8 det=False t=180
+18:56:38 INFO arm beta_bias=0.15             rep  7/8 det=True t=49
+18:56:38 INFO arm beta_bias=0.15             rep  8/8 det=False t=180
+18:56:38 INFO arm beta_bias=0.3              rep  1/8 det=True t=3
+18:56:39 INFO arm beta_bias=0.3              rep  2/8 det=False t=180
+18:56:40 INFO arm beta_bias=0.3              rep  3/8 det=True t=74
+18:56:40 INFO arm beta_bias=0.3              rep  4/8 det=False t=180
+18:56:41 INFO arm beta_bias=0.3              rep  5/8 det=False t=180
+18:56:42 INFO arm beta_bias=0.3              rep  6/8 det=False t=180
+18:56:42 INFO arm beta_bias=0.3              rep  7/8 det=True t=49
+18:56:43 INFO arm beta_bias=0.3              rep  8/8 det=False t=180
+
+================ RQ1 ================
+
+== RQ1 prediction quality (held-out incidents) ==
+            loglik      rank  mass_r200m  mass_r400m  mass_r800m  recall_top5pct  recall_top10pct  recall_top20pct  recall_top5pct_ci_lo  recall_top5pct_ci_hi  recall_top10pct_ci_lo  recall_top10pct_ci_hi  recall_top20pct_ci_lo  recall_top20pct_ci_hi
+model                                                                                                                                                                                                                                                     
+gis        -6.3038  167.9667      0.0265      0.0841      0.2555          0.4000           0.5667           0.8667                0.2459                0.5768                 0.3920                 0.7262                 0.7032                 0.9469
+distance   -6.5235   94.5667      0.0195      0.0666      0.2234          0.5333           0.7667           0.9667                0.3614                0.6977                 0.5907                 0.8821                 0.8333                 0.9941
+datadriven -6.6617   93.0333      0.0161      0.0553      0.1957          0.5667           0.8000           0.9667                0.3920                0.7262                 0.6269                 0.9049                 0.8333                 0.9941
+uniform    -7.3225  757.5667      0.0082      0.0283      0.1015          0.1000           0.1333           0.2000                0.0346                0.2562                 0.0531                 0.2968                 0.0951                 0.3731
+
+== RQ1 operational preview (rolling planner, same envs) ==
+       arm   DSR  EDT_censored  mean_unique_cells_searched
+datadriven 0.000        180.00                      23.500
+  distance 0.375        135.75                      19.375
+       gis 0.500        115.75                      18.500
+   uniform 0.000        180.00                      24.500
+
+-- RQ1 operational stats: Wilson 95% CI per arm --
+       arm  k  n  detected_est  detected_ci_lo  detected_ci_hi
+datadriven  0  8         0.000           0.000           0.324
+  distance  3  8         0.375           0.137           0.694
+       gis  4  8         0.500           0.215           0.785
+   uniform  0  8         0.000           0.000           0.324
+
+-- RQ1 paired comparisons vs uniform (CRN-paired, bootstrap 95% CI) --
+control  treatment       metric  n_pairs  mean_ctrl  mean_trt    diff    ci_lo   ci_hi  p_boot  p_mcnemar
+uniform   distance     detected        8        0.0     0.375   0.375    0.125   0.750   0.040      0.250
+uniform   distance EDT_censored        8      180.0   135.750 -44.250  -90.750  -7.000   0.046        NaN
+uniform        gis     detected        8        0.0     0.500   0.500    0.125   0.875   0.005      0.125
+uniform        gis EDT_censored        8      180.0   115.750 -64.250 -116.750 -14.750   0.009        NaN
+uniform datadriven     detected        8        0.0     0.000   0.000    0.000   0.000   1.000      1.000
+uniform datadriven EDT_censored        8      180.0   180.000   0.000    0.000   0.000   1.000        NaN
+RQ1 done in 26s
+
+================ RQ2 ================
+
+== RQ2: SAR performance vs initial-map quality ==
+ eps   DSR  DSR_ci_lo  DSR_ci_hi  EDT_censored  P(T<=60)  P(T<=120)  mean_unique_cells_searched
+ 0.0 0.125      0.022      0.471       174.625     0.000      0.000                      21.000
+ 0.1 0.125      0.022      0.471       163.750     0.125      0.125                      20.375
+ 0.2 0.250      0.071      0.591       160.875     0.125      0.125                      20.875
+ 0.4 0.000      0.000      0.324       180.000     0.000      0.000                      24.125
+ 0.6 0.000      0.000      0.324       180.000     0.000      0.000                      24.500
+ 0.8 0.125      0.022      0.471       168.000     0.000      0.125                      24.375
+ 1.0 0.125      0.022      0.471       168.625     0.000      0.125                      24.250
+
+-- RQ2 paired stats vs eps=0 (CRN-paired) --
+treatment   diff  ci_lo  ci_hi  p_mcnemar
+  eps=0.1  0.000  0.000  0.000        1.0
+  eps=0.2  0.125  0.000  0.375        1.0
+  eps=0.4 -0.125 -0.375  0.000        1.0
+  eps=0.6 -0.125 -0.375  0.000        1.0
+  eps=0.8  0.000  0.000  0.000        1.0
+  eps=1.0  0.000  0.000  0.000        1.0
+RQ2 done in 41s
+
+================ RQ3 ================
+
+== RQ3: detection-aware (pq) vs detection-blind (p) assignment ==
+                    DSR  detected_ci_lo  detected_ci_hi  EDT_censored  mean_flight_distance_m  mean_energy_wh
+arm                                                                                                          
+p |homRGB|veg1.0  0.125           0.022           0.471       158.750               76956.398         784.730
+p |mixed|veg1.0   0.125           0.022           0.471       167.250               81652.913         853.055
+pq|homRGB|veg1.0  0.000           0.000           0.324       180.000               85161.435         887.135
+pq|mixed|veg1.0   0.125           0.022           0.471       158.625               80393.639         832.142
+
+-- RQ3 paired stats pq - p (positive diff favours pq) --
+         control        treatment   diff  ci_lo  ci_hi  p_mcnemar
+p |homRGB|veg1.0 pq|homRGB|veg1.0 -0.125 -0.375  0.000        1.0
+ p |mixed|veg1.0  pq|mixed|veg1.0  0.000 -0.375  0.375        1.0
+RQ3 done in 21s
+
+================ RQ4 ================
+
+== RQ4: static x dynamic factorial ==
+                       DSR  EDT_censored  P(T<=60)  P(T<=120)  mean_n_replans  mean_replan_ms_total  mean_flight_distance_m  mean_energy_wh
+arm                                                                                                                                        
+A                    0.125       174.000     0.000      0.000           1.000               640.719               69839.916         919.339
+B                    0.375       151.375     0.000      0.250          12.875               471.123               68367.573         769.358
+C                    0.250       136.375     0.250      0.250           1.000               618.037               59781.196         722.618
+D                    0.500       110.375     0.375      0.500           8.875               327.013               54825.073         573.472
+E|stationary-target  0.125       167.000     0.000      0.125          13.125               425.903               84049.050         863.864
+
+contrasts: C-A=+0.125 (data-driven belief, static) | B-A=+0.250 (dynamic, baseline belief) | D-A=+0.375 (full framework)
+
+-- RQ4 paired statistics (CRN-paired, bootstrap 95% CI) --
+control treatment       metric  n_pairs  mean_ctrl  mean_trt    diff    ci_lo   ci_hi  p_boot  p_mcnemar
+      A         B     detected        8      0.125     0.375   0.250   -0.250   0.625  0.4080      0.625
+      A         B EDT_censored        8    174.000   151.375 -22.625  -64.000  11.500  0.2096        NaN
+      A         C     detected        8      0.125     0.250   0.125   -0.250   0.500  0.7736      1.000
+      A         C EDT_censored        8    174.000   136.375 -37.625 -102.750  12.000  0.2104        NaN
+      A         D     detected        8      0.125     0.500   0.375    0.125   0.750  0.0440      0.250
+      A         D EDT_censored        8    174.000   110.375 -63.625 -112.125 -15.500  0.0064        NaN
+      B         D     detected        8      0.375     0.500   0.125   -0.375   0.625  0.8020      1.000
+      B         D EDT_censored        8    151.375   110.375 -41.000  -99.375  15.250  0.1800        NaN
+RQ4 done in 29s
+
+================ RQ5 ================
+
+== RQ5: robustness to model error ==
+sweep_group  sweep_value   DSR  EDT_censored  P(T<=120)  mean_flight_distance_m
+  beta_bias        -0.30 0.250       142.750      0.250               74631.374
+  beta_bias        -0.15 0.125       169.500      0.125               86086.515
+  beta_bias         0.00 0.250       142.625      0.250               72757.266
+  beta_bias         0.15 0.375       131.000      0.375               67529.014
+  beta_bias         0.30 0.375       128.250      0.375               67719.986
+    map_eps         0.00 0.375       142.500      0.375               73875.609
+    map_eps         0.20 0.375       137.375      0.250               74234.700
+    map_eps         0.40 0.250       175.125      0.000               96737.997
+    map_eps         0.60 0.375       142.250      0.250               82763.285
+     q_bias         0.60 0.125       175.750      0.000               88928.481
+     q_bias         0.80 0.375       141.000      0.250               72917.956
+     q_bias         1.00 0.375       140.000      0.250               71502.097
+     q_bias         1.20 0.250       154.750      0.250               78931.165
+     q_bias         1.40 0.250       142.125      0.250               73967.380
+RQ5 done in 75s

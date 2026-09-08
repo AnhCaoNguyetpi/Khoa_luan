@@ -1,0 +1,5 @@
+{
+  "_comment": "RQ1: compare Uniform / Distance / GIS-expert / Data-driven initial maps",
+  "area": {"name": "demo_valley"},
+  "belief": {"sigma_per_min": 25.0}
+}

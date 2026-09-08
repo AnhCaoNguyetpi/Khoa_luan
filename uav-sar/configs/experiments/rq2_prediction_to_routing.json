@@ -1,0 +1,5 @@
+{
+  "_comment": "RQ2: blend the data-driven map toward uniform with eps in [0,1]",
+  "area": {"name": "demo_valley"},
+  "planner": {"kind": "rolling"}
+}

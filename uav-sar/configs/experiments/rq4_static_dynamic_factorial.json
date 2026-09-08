@@ -1,0 +1,5 @@
+{
+  "_comment": "RQ4: {distance,data-driven} x {static,rolling} factorial A/B/C/D",
+  "area": {"name": "demo_valley"},
+  "target": {"moving": true, "burn_min_range": [30, 90]}
+}
