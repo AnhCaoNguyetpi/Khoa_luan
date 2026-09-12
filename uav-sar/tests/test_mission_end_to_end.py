@@ -1,78 +1,85 @@
-"""End-to-end mission smoke tests on a tiny area (fast)."""
-from _common import small_area, tiny_cfg
+"""End-to-end mission execution and simulation tests."""
+
 import numpy as np
+import pytest
 
-from sar_uav.sim.mission import MissionSetup, run_mission
-from sar_uav.sim.metrics import summarize
-
-
-def _setup():
-    cfg = tiny_cfg()
-    setup = MissionSetup.create(cfg, seed=99,
-                                area=small_area())
-    return cfg, setup
+from sar_uav.experiments.rng import IndexedRNGStream
+from sar_uav.planning.constraints import ConstraintChecker, JointSchedule, UAVSchedule, UAVSpec, Visit
+from sar_uav.sim.mission import ScheduleSimulator
 
 
-def test_mission_completes_and_metrics_consistent():
-    cfg, setup = _setup()
-    res = run_mission(setup, planner_cfg={"kind": "rolling"},
-                      initial_model="uniform", arm_name="t")
-    assert 0 <= res.detect_time_censored <= res.horizon_min
-    assert res.detected == bool(np.isfinite(res.detect_time_min))
-    if res.detected:
-        assert res.detect_time_min > 0
-        # detection must coincide with at least one searched cell footprint
-    assert 0 < res.unique_cells_searched <= max(res.total_search_ops, 1)
-    assert res.redundant_search_ops == (res.total_search_ops
-                                        - res.unique_cells_searched)
-    assert res.flight_distance_m >= 0 and res.energy_wh >= 0
-    assert res.n_uavs == len(cfg["fleet"])
+def test_simulation_execution_and_early_termination():
+    num_cells = 9
+    H = 10
+    delta_t = 60.0
+    depot_idx = 0
+
+    dist_m = np.zeros((9, 9))
+    coords = [(r, c) for r in range(3) for c in range(3)]
+    for i in range(9):
+        for j in range(9):
+            dist_m[i, j] = np.hypot(coords[i][0] - coords[j][0], coords[i][1] - coords[j][1]) * 250.0
+
+    uav_spec = UAVSpec(speed_ms=12.0, battery_joules=200000.0, reserve_joules=25000.0, delta_t=delta_t)
+    checker = ConstraintChecker(dist_m, depot_idx, [uav_spec], H, delta_t=delta_t)
+
+    # Schedule visits cell 4 from tick 2 to 4
+    sched = JointSchedule(
+        uav_schedules=[UAVSchedule(uav_idx=0, visits=[Visit(cell_idx=4, dwell_ticks=3)])],
+        num_cells=num_cells,
+        H=H,
+        delta_t=delta_t
+    )
+    feasible, msg = checker.check_joint_schedule(sched)
+    assert feasible, f"Infeasible: {msg}"
+
+    # Target path stays in cell 4
+    target_path = np.full(H, 4)
+
+    # High detection rate to guarantee detection
+    true_lambda = np.full(num_cells, 5.0)
+    sim = ScheduleSimulator(checker, true_lambda, delta_t=delta_t)
+
+    rng_stream = IndexedRNGStream(master_seed=123)
+    res = sim.run_simulation(sched, target_path, mission_idx=0, rng_stream=rng_stream, predicted_J=0.9)
+
+    assert res.detected is True
+    assert res.detection_tick is not None
+    assert 1 <= res.detection_tick <= 4
+    assert res.rmst_time == float(res.detection_tick)
+    assert res.actual_energy_joules > 0.0
+    assert abs(res.calibration_gap) <= 1.0
 
 
-def test_static_open_loop_runs():
-    _, setup = _setup()
-    res = run_mission(setup, planner_cfg={"kind": "static"},
-                      initial_model="distance", arm_name="s")
-    assert res.planner == "static"
-    assert np.isfinite(res.horizon_min)
+def test_simulation_non_detection():
+    num_cells = 9
+    H = 10
+    delta_t = 60.0
+    depot_idx = 0
 
+    dist_m = np.zeros((9, 9))
+    coords = [(r, c) for r in range(3) for c in range(3)]
+    for i in range(9):
+        for j in range(9):
+            dist_m[i, j] = np.hypot(coords[i][0] - coords[j][0], coords[i][1] - coords[j][1]) * 250.0
 
-def test_stationary_target_ablation():
-    cfg = tiny_cfg()
-    setup = MissionSetup.create(cfg, seed=7, area=small_area(),
-                                moving=False)
-    res = run_mission(setup, planner_cfg={"kind": "rolling"},
-                      initial_model="distance", arm_name="stat",
-                      moving_target=False)
-    assert res.moving_target is False
+    uav_spec = UAVSpec(speed_ms=12.0, battery_joules=200000.0, reserve_joules=25000.0, delta_t=delta_t)
+    checker = ConstraintChecker(dist_m, depot_idx, [uav_spec], H, delta_t=delta_t)
 
+    # Schedule visits cell 1
+    sched = JointSchedule(
+        uav_schedules=[UAVSchedule(uav_idx=0, visits=[Visit(cell_idx=1, dwell_ticks=2)])],
+        num_cells=num_cells,
+        H=H,
+        delta_t=delta_t
+    )
 
-def test_assign_criterion_p_only_changes_behaviour():
-    """p-only assignment must not crash; usually differs from pq."""
-    cfg = tiny_cfg()
-    setup = MissionSetup.create(cfg, seed=5, area=small_area())
-    r_pq = run_mission(setup, planner_cfg={"kind": "greedy"},
-                       initial_model="distance", assign_criterion="pq",
-                       arm_name="pq")
-    r_p = run_mission(setup, planner_cfg={"kind": "greedy"},
-                      initial_model="distance", assign_criterion="p",
-                      arm_name="p")
-    assert (r_pq.unique_cells_searched, r_pq.total_search_ops) != (0, 0)
-    assert (r_p.unique_cells_searched, r_p.total_search_ops) != (0, 0)
+    # Target is in cell 8 (disjoint from search)
+    target_path = np.full(H, 8)
+    true_lambda = np.full(num_cells, 0.2)
+    sim = ScheduleSimulator(checker, true_lambda, delta_t=delta_t)
 
-
-def test_summarize_dsr():
-    rows = [{"detected": True, "detect_time_min": 30.0,
-             "horizon_min": 60.0, "flight_distance_m": 100.0,
-             "energy_wh": 10.0, "search_minutes": 6.0,
-             "unique_cells_searched": 2, "redundant_search_ops": 0,
-             "n_replans": 1, "replan_ms_total": 5.0, "n_swaps": 0},
-            {"detected": False, "detect_time_min": np.nan,
-             "horizon_min": 60.0, "flight_distance_m": 200.0,
-             "energy_wh": 20.0, "search_minutes": 8.0,
-             "unique_cells_searched": 3, "redundant_search_ops": 1,
-             "n_replans": 2, "replan_ms_total": 9.0, "n_swaps": 1}]
-    s = summarize(rows)
-    assert abs(s["DSR"] - 0.5) < 1e-9
-    assert abs(s["EDT_censored"] - 45.0) < 1e-9
-    assert abs(s["P(T<=60)"] - 1.0) < 1e-9
+    res = sim.run_simulation(sched, target_path, mission_idx=1, predicted_J=0.3)
+    assert res.detected is False
+    assert res.detection_tick is None
+    assert res.rmst_time == float(H)

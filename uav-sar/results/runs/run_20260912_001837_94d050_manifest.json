@@ -1,0 +1,23 @@
+{
+  "run_id": "run_20260912_001837_94d050",
+  "tiers_completed": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "seed": 42,
+  "quick": false,
+  "timestamp": "2026-09-11T17:18:43Z",
+  "environment": {
+    "python_version": "3.12.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "git_hash": "b4d62fb94f",
+    "git_hash_full": "b4d62fb94ffc3e3099d6e93b527d2e7ce49788a3",
+    "git_branch": "main",
+    "git_is_dirty": true,
+    "source_sha256": "b412bef1fb09a6c9",
+    "project_tree_sha256": "b2b4c0854a9f3e87"
+  }
+}

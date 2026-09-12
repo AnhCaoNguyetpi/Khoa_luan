@@ -1,147 +1,106 @@
-# uav-sar — Data-Driven Belief-Adaptive Multi-UAV Search & Routing
+# uav-sar — Multi-UAV Routing and Search-Effort Allocation under Persistent Detection-Model Uncertainty
 
-Framework mô phỏng + tối ưu hóa cho đề tài:
+Framework mô phỏng và tối ưu hóa phối hợp nhiều UAV cho bài toán tìm kiếm cứu nạn (Search and Rescue - SAR) trong điều kiện sai số mô hình cảm biến kéo dài suốt nhiệm vụ.
 
-> **Tìm kiếm và định tuyến động nhiều UAV dựa trên dữ liệu cho bài toán tìm
-> kiếm khách du lịch mất tích trong môi trường tự nhiên**
-> *(Data-Driven Belief-Adaptive Multi-UAV Search and Routing for Missing
-> Tourists in Wilderness Areas)*
-
-Toàn bộ framework cài đặt đầy đủ chu trình trong đề cương (`docs/proposal/proposal.tex`):
-
-```
-P^t → Phân công → Định tuyến → Tìm kiếm → Quan sát → Cập nhật Bayes → P^{t+1} → Tái tối ưu
-```
-
-Mission mặc định dùng lưới GIS thật `tay_nguyen_real` quanh 108.25°E,
-12.60°N: Copernicus DEM GLO-30, ESA WorldCover 2021 v200,
-OpenStreetMap và NASA POWER hourly. Provenance và SHA-256 được lưu trong
-`data/areas/tay_nguyen_real/area.json`. `demo_valley` được giữ lại làm
-fixture tổng hợp cho thí nghiệm cũ và test.
+Framework được xây dựng bám sát các nguyên lý mô hình hóa và thuật toán trong đề tài nghiên cứu:
+> **Multi-UAV Routing and Search-Effort Allocation under Persistent Detection-Model Uncertainty**  
+> *(Tác giả: Cao Nguyệt Ánh — Đề tài luận văn & bài báo hội nghị)*
 
 ---
 
-## 1. Cấu trúc thư mục
+## 1. Điểm nổi bật và Đóng góp Thuật toán
+
+1. **Formulation Phối hợp 4 Thành phần:** Tối ưu hóa đồng thời phân công UAV, lộ trình ghé thăm (hỗ trợ revisit), thời lượng tìm kiếm (dwell time) và thời gian chờ (active wait) dưới tập giả thuyết sai số cố định $\mathcal{S} = \{q^s, w_s\}$.
+2. **Khối lượng Xác suất 2 Chiều (Forward Mass & Backward Continuation):**
+   - Tiền tố Forward Unnormalized Mass: $u_t^-(i, s), u_t^+(i, s)$.
+   - Hậu tố Backward Continuation: $V_t(i, s)$ với điều kiện biên $V_H(i, s) = 1.0$.
+   - Hàm mục tiêu xác suất tích lũy kỳ vọng: $J_{\mathcal{S}}(a) = 1 - \sum_{i, s} u_{H-1}^+(i, s)$.
+3. **Bộ Đánh giá Nghiệm 3 Cấp độ (3-Tier Evaluator):**
+   - `FullEvaluator`: Tính toán lại toàn bộ từ $t=0 \to H-1$.
+   - `PrefixOnlyEvaluator`: Tái sử dụng tiền tố $u_{t_a}^-$, lan truyền tiếp tới $H-1$.
+   - `ForwardBackwardFastEvaluator`: Tái sử dụng tiền tố $u_{t_a}^-$, chỉ lan truyền trong $[t_a, t_b]$ và ghép với $V_{t_b+1}$.
+4. **Không gian Láng giềng 8 Toán tử (Chống bẫy kẹt ngân sách):**
+   - `Replace Visit`: Thay thế vùng tìm kiếm bằng vùng khác trong một bước duy nhất (chống kẹt khi pin/thời gian đã bão hòa).
+   - `Dwell Rebalance`: Tái phân bổ thời lượng giữa các lần ghé, bảo toàn tổng dwell ticks.
+   - `Insert Visit` (hỗ trợ revisit), `Delete Visit`, `Swap / 2-opt`, `Relocate`, `Change Dwell`, `Adjust Wait`.
+5. **Ràng buộc Động học & An toàn Quay về:**
+   - Hệ thống đẳng thức nối tiếp hành động $s_{k1} = w_{k1} + \bar\tau_{o, v_{k1}}^k$ và $s_{k,\ell+1} = s_{k\ell} + d_{k\ell} + \bar\tau_{v_{k\ell}, v_{k,\ell+1}}^k + w_{k,\ell+1}$.
+   - Kiểm tra an toàn trước từng chặng bay dở dang: $B_k(t) \ge \bar e_{uv}^k + \bar e_{vo}^k + R_k$.
+   - Quy tắc quay về khi có phát hiện: UAV tại trạm về depot; UAV đang bay hoàn thành chặng tới $v$ rồi quay về depot theo đường bay khả thi ngắn nhất. Năng lượng sortie được đồng bộ tất định với ConstraintChecker.
+
+---
+
+## 2. Cấu trúc Thư mục Dự án
 
 ```
 uav-sar/
-├── configs/                  # cấu hình JSON (mission mặc định + từng RQ)
+├── configs/                     # Cấu hình nhiệm vụ (default_mission, real_mission)
 ├── data/
-│   ├── areas/demo_valley/    # grid + các lớp GIS (tự sinh / import)
-│   └── models/               # trọng số PMR đã huấn luyện (*.npz)
+│   └── areas/tay_nguyen_real/   # Dữ liệu GIS Tây Nguyên (DEM GLO-30, WorldCover, OSM)
 ├── docs/
-│   ├── proposal/proposal.tex # đề cương nghiên cứu (bản gốc)
-│   ├── architecture.md       # kiến trúc module & luồng dữ liệu
-│   └── experiments.md        # ánh xạ RQ1..RQ5 ↔ code ↔ output
-├── scripts/                  # entry-point chạy trực tiếp
+│   ├── proposal/proposal.tex    # Bản thảo đề cương bài báo hội nghị (LaTeX)
+│   ├── architecture.md          # Sơ đồ kiến trúc & luồng dữ liệu tối ưu hóa
+│   └── experiments.md           # Đặc tả chi tiết 5 Tiers thực nghiệm
+├── scripts/
+│   ├── run_mission.py           # Chạy một demo mission với Local Search + Simulation
+│   ├── run_experiments.py       # Entry-point thực thi 5 Tiers thực nghiệm
+│   ├── plot_paper_figures.py    # Vẽ 3 biểu đồ nghiên cứu từ dữ liệu thực nghiệm
+│   └── build_real_area.py       # Xây dựng lưới GIS Tây Nguyên từ dữ liệu nguồn
 ├── src/sar_uav/
-│   ├── config.py             # cấu hình mặc định + deep-merge loader
-│   ├── data/                 # AreaData, terrain tổng hợp, weather, GIS adapters
-│   ├── belief/               # 4 initial-belief models, Bayes update, motion model, PMR trainer
-│   ├── detection/            # q_ikt theo sensor × môi trường × thời gian dwell
-│   ├── uav/                  # UAVSpec (năng lượng), UAVState (state machine)
-│   ├── planning/             # greedy, static multi-sortie, rolling-horizon, MILP (tuỳ chọn)
-│   ├── sim/                  # target ẩn, MissionRunner, metrics DSR/EDT
-│   ├── experiments/          # dataset incidents, belief eval, runner CRN, rq1..rq5, stats
-│   └── viz/                  # matplotlib (Agg): heatmap belief, biểu đồ
-├── tests/                    # 44 unit/integration tests + run_tests.py
-└── results/                  # CSV + figure output (gitignored)
+│   ├── detection/
+│   │   └── hypothesis.py        # Tập giả thuyết S, mô hình exponential exposure
+│   ├── belief/
+│   │   ├── joint_mass.py        # Động cơ JointMassEngine (Forward Mass & Backward Continuation)
+│   │   └── motion.py            # Ma trận chuyển động Markov M(i,j)
+│   ├── planning/
+│   │   ├── constraints.py       # Ràng buộc đẳng thức, pin dự phòng & pre-leg check
+│   │   ├── evaluator.py         # 3 cấp độ: Full, Prefix-only, Forward-Backward Fast Evaluator
+│   │   ├── neighborhood.py      # 8 toán tử biến đổi láng giềng lazy generator
+│   │   ├── local_search.py      # Algorithm 1: Joint Route-Effort Local Search
+│   │   └── baselines.py         # Greedy Lookahead, SimpleEvolutionaryPlanner (Adaptive GA), Exact Brute Force
+│   ├── sim/
+│   │   └── mission.py           # ScheduleSimulator với return-to-depot protocol
+│   └── experiments/
+│       ├── rng.py               # IndexedRNGStream 4 phần tử cho CRN
+│       ├── stats.py             # Wilson confidence intervals, McNemar test, bootstrap
+│       ├── tier1_mechanism.py   # Tier 1: Phân tích cơ chế lưới 3x3
+│       ├── tier2_evaluator_accuracy.py  # Tier 2: Độ chính xác & speedup evaluator
+│       ├── tier3_main_benchmark.py      # Tier 3: Benchmark so sánh đối đầu các baselines
+│       ├── tier4_misspecification.py    # Tier 4: Kiểm tra sai đặc tả q* not in S
+│       └── tier5_scalability.py         # Tier 5: Khảo sát khả năng mở rộng Quality-vs-Runtime
+├── tests/                       # 62 unit tests kiểm chứng chặt chẽ
+└── results/                     # Kết quả JSON, CSV và biểu đồ thực nghiệm
 ```
 
-## 2. Cài đặt
+---
+
+## 3. Cài đặt & Kiểm thử
 
 ```bash
-cd uav-sar
-python -m venv .venv && .venv\Scripts\activate     # Windows
-pip install -r requirements.txt                    # numpy, pandas, matplotlib
+# Kích hoạt môi trường ảo
+.venv\Scripts\activate          # Trên Windows
+
+# Chạy toàn bộ 62 unit tests
+pytest
 ```
 
-Tuỳ chọn: `pip install pulp` (planner MILP), `pytest` (chạy test kiểu pytest),
-`rasterio geopandas shapely` (import dữ liệu thật).
+---
 
-## 3. Quickstart
+## 4. Hướng dẫn Sử dụng (Quickstart)
 
 ```bash
-# 0) dựng lại lưới GIS thật từ các file nguồn đã tải
-python scripts/build_real_area.py
+# 1. Chạy một mission thử nghiệm với Fast Evaluator
+python scripts/run_mission.py --evaluator fast --uavs 2 --horizon 15
 
-# 1) một mission demo (có snapshot PNG vào results/figures/demo)
-python scripts/run_mission.py --planner rolling --belief gis
+# 2. Chạy Tier 1 (Phân tích cơ chế trên lưới 3x3)
+python scripts/run_experiments.py --tier 1
 
-# 2) chạy thí nghiệm RQ4 (factorial static×dynamic) với 24 replicate
-python scripts/run_experiments.py --rq 4 --replicates 24
+# 3. Chạy Tier 2 (Đo lường độ chính xác và tốc độ Fast vs Full vs Prefix-only)
+python scripts/run_experiments.py --tier 2
 
-# 3) toàn bộ RQ1..RQ5 (chạy lâu; thêm --quick để smoke-test)
-python scripts/run_experiments.py --rq all
-python scripts/summarize_results.py
+# 4. Chạy toàn bộ 5 Tiers thực nghiệm
+python scripts/run_experiments.py --tier all
+
+# 5. Vẽ biểu đồ bài báo từ dữ liệu thực nghiệm thật (lưu vào results/figures/)
+python scripts/plot_paper_figures.py
 ```
-
-Kết quả nằm trong `results/data/*.csv` (bảng mission-level + summary) và
-`results/figures/*.png`.
-
-## 4. Ánh xạ đề cương ↔ code
-
-| Thành phần trong đề cương | Module |
-|---|---|
-| Grid `G`, spatial database ô `i` | `data/area.py` (`AreaData`) |
-| Thời tiết ERA5-Land stand-in | `data/weather.py` |
-| Initial belief: Uniform / Distance / GIS / **Data-driven** | `belief/models.py` |
-| PMR logistic huấn luyện trên "ISRID tổng hợp" | `belief/train.py`, `experiments/datasets.py` |
-| Motion model `M_ij` softmax + profile hành vi | `belief/motion.py` |
-| Bayes update sau quan sát âm | `belief/update.py` |
-| Detection `q_ikt` = f(sensor, veg, cloud, rain, wind, dwell) | `detection/sensors.py` |
-| Năng lượng `γ·d (+η·climb)`, `α·τ`, reserve RTB, swap pin | `uav/platform.py`, `uav/state.py` |
-| Objective `max Σ p·q·z − λ₁ travel − λ₂ energy − λ₃ overlap` | `planning/*` |
-| Greedy / Static (open-loop, multi-cycle) / Rolling-horizon / MILP | `planning/greedy.py`, `cycle_planners.py`, `milp_pulp.py` |
-| Ground truth ẩn ≠ belief của planner | `sim/target.py`, `sim/mission.py` |
-| Quy trình mô phỏng 11 bước | `sim/mission.py::run_mission` |
-| Metrics DSR, P(T≤T_max), EDT + chi phí vận hành | `sim/metrics.py` |
-| RQ1–RQ5 (thiết kế + chỉ số đúng như đề cương) | `experiments/rq1..rq5.py` |
-| Thống kê: Wilson CI, McNemar exact, paired bootstrap | `experiments/stats.py` |
-
-## 5. Dữ liệu thật (tuỳ chọn)
-
-Tải thủ công về máy rồi convert bằng một lệnh (không cần API key trong code):
-
-| Lớp | Nguồn tải |
-|---|---|
-| DEM 30 m | SRTM 1-arc-second (Earthdata / OpenTopography) |
-| Trails, roads | OpenStreetMap export (Geofabrik / overpass) → GeoJSON |
-| Land cover 10 m | ESA WorldCover 2021 v200 (Zenodo) |
-| Weather | ERA5-Land hourly (CDS) → CSV |
-
-```bash
-pip install rasterio geopandas shapely
-python scripts/import_gis_layers.py --name taynguyen --cell 100 \
-    --dem dem.tif --trails trails.geojson --roads roads.geojson \
-    --landcover worldcover.tif --origin-lonlat 108.25 12.60
-```
-
-Sau đó đặt `"area": {"name": "taynguyen"}` trong config là mọi pipeline dùng
-khu vực thật.
-
-## 6. Ghi chú thiết kế (giả định đã tài liệu hoá)
-
-* Planner **không bao giờ** thấy vị trí thật; mọi quyết định chỉ dùng `P^t`
-  và mô hình ước lượng.
-* Planner biết profile hành vi của mục tiêu (được perturb trong RQ5);
-  việc "không biết profile" là hướng mở rộng.
-* Footprint cảm biến > 1 ô: ô kề nhận `q × footprint_side` — phản ánh FOV
-  thực tế so với độ phân giải grid.
-* Quan sát âm dùng `q_dwell` tích luỹ trong thời gian dwell (xấp xỉ chuẩn
-  trong tài liệu SAR probabilistic).
-* RL/MARL cố tình **không** đưa vào — đúng phạm vi đề cương; planner ladder
-  hiện có: greedy → static → rolling-horizon (→ MILP allocation tuỳ chọn).
-
-## 7. Chạy test
-
-```bash
-python tests/run_tests.py      # không cần pytest
-# hoặc: pytest tests/
-```
-
-44 test bao phủ: công thức Bayes đúng như đề cương, ma trận chuyển vị stochastic,
-địa chất detection (monotonic, RGB vs thermal), năng lượng/state machine
-(forced RTB + swap pin), tính khả thi của planner, mission end-to-end, metrics;
-9 test thống kê xác minh Wilson CI khớp giá trị chuẩn, McNemar chính xác và
-paired bootstrap phát hiện đúng hiệu ứng/giữ null.

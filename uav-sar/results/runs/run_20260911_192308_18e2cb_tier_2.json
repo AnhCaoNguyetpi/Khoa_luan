@@ -1,0 +1,121 @@
+{
+  "metadata": {
+    "tier": 2,
+    "run_id": "run_20260911_192308_18e2cb",
+    "seed": 42,
+    "quick": false,
+    "timestamp": "2026-09-11T12:23:10Z",
+    "runtime_sec": 2.0987,
+    "environment": {
+      "python_version": "3.12.2",
+      "platform": "Windows-11-10.0.26200-SP0"
+    }
+  },
+  "results": {
+    "exact_J_star": 0.1838584886697685,
+    "fast_evaluator_J": 0.1737871732080457,
+    "prefix_only_J": 0.1737871732080457,
+    "full_evaluator_J": 0.1737871732080457,
+    "optimality_gap_absolute": 0.010071315461722796,
+    "optimality_gap_relative": 0.054777538609120546,
+    "micro_benchmark": {
+      "identical_candidate_count": 58,
+      "repeats": 10,
+      "latency_full_ms": 0.11222551723943164,
+      "latency_prefix_ms": 0.0683537930948158,
+      "latency_fast_ms": 0.06592396551021575,
+      "speedup_vs_full": 1.7023477937176106,
+      "speedup_vs_prefix": 1.0368580313061344,
+      "max_abs_err_fast": 4.440892098500626e-16,
+      "max_abs_err_prefix": 4.440892098500626e-16,
+      "breakdown_by_interval": {
+        "short_L_le_3": {
+          "count": 6,
+          "full_ms": 0.09916499996810064,
+          "prefix_ms": 0.06873999985449095,
+          "fast_ms": 0.019953333321609534,
+          "speedup_vs_full": 4.969846309373511,
+          "speedup_vs_prefix": 3.445038417718671
+        },
+        "medium_L_4_to_6": {
+          "count": 0,
+          "full_ms": 0.0,
+          "prefix_ms": 0.0,
+          "fast_ms": 0.0,
+          "speedup_vs_full": 1.0
+        },
+        "long_or_shifted_to_H": {
+          "count": 52,
+          "full_ms": 0.09977576922980147,
+          "prefix_ms": 0.06194980769578252,
+          "fast_ms": 0.06527846154103127,
+          "speedup_vs_full": 1.528463858896041,
+          "speedup_vs_prefix": 0.9490083901080221
+        }
+      }
+    },
+    "speedup_vs_full": 1.9897164255222441,
+    "speedup_vs_prefix": 1.092339510667364,
+    "total_time_speedup_vs_full": 1.5906491917219105,
+    "solver_runtime_fast_sec": 0.01699960000041756,
+    "solver_runtime_prefix_sec": 0.01765009999871836,
+    "solver_runtime_full_sec": 0.02704040000025998,
+    "cache_update_time_fast_sec": 0.0004124999977648258,
+    "operator_stats_fast": {
+      "Replace": {
+        "evaluated": 40,
+        "accepted": 0,
+        "improvement": 0.0
+      },
+      "ChangeDwell": {
+        "evaluated": 11,
+        "accepted": 0,
+        "improvement": 0.0
+      },
+      "Insert": {
+        "evaluated": 118,
+        "accepted": 2,
+        "improvement": 0.13938541578445085
+      },
+      "Delete": {
+        "evaluated": 6,
+        "accepted": 0,
+        "improvement": 0.0
+      },
+      "DwellRebalance": {
+        "evaluated": 3,
+        "accepted": 0,
+        "improvement": 0.0
+      },
+      "Swap": {
+        "evaluated": 5,
+        "accepted": 0,
+        "improvement": 0.0
+      }
+    },
+    "evaluator_stats_fast": {
+      "name": "ForwardBackwardFastEvaluator",
+      "eval_count": 183,
+      "total_time_sec": 0.010346599996410077,
+      "avg_time_ms": 0.05653879779459059,
+      "mean_l_affected": 7.043715846994536,
+      "median_l_affected": 8.0
+    },
+    "evaluator_stats_prefix": {
+      "name": "PrefixOnlyEvaluator",
+      "eval_count": 183,
+      "total_time_sec": 0.011301999977149535,
+      "avg_time_ms": 0.06175956271666412,
+      "mean_l_affected": 8.251366120218579,
+      "median_l_affected": 8.0
+    },
+    "evaluator_stats_full": {
+      "name": "FullEvaluator",
+      "eval_count": 183,
+      "total_time_sec": 0.020586799961165525,
+      "avg_time_ms": 0.11249617465117773,
+      "mean_l_affected": 7.043715846994536,
+      "median_l_affected": 8.0
+    }
+  }
+}

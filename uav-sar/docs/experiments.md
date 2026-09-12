@@ -1,97 +1,74 @@
-# Ánh xạ RQ1–RQ5 ↔ code ↔ output
+# Thiết kế Thực nghiệm và Ánh xạ 5 Tiers
 
-Mọi thí nghiệm chạy qua một entry-point duy nhất:
+Hệ thống thực nghiệm được chuẩn hóa thành 5 lớp (Tiers 1–5) tương ứng với Bảng "Năm lớp thực nghiệm phục vụ kiểm chứng đa chiều" trong đề cương bài báo hội nghị.
+
+Toàn bộ các thí nghiệm được khởi chạy thống nhất qua entry-point:
 
 ```bash
-python scripts/run_experiments.py --rq all --replicates 24   # hoặc --quick để smoke-test
-python scripts/summarize_results.py
+# Chạy toàn bộ 5 tiers:
+python scripts/run_experiments.py --tier all
+
+# Chạy kiểm thử nhanh (smoke-test):
+python scripts/run_experiments.py --tier all --quick
+
+# Chạy một tier cụ thể (ví dụ Tier 2 kiểm chứng evaluator):
+python scripts/run_experiments.py --tier 2
 ```
 
-Toàn bộ CSV nằm ở `results/`, log ở `results/logs/`. Mỗi arm trong mỗi RQ
-chạy trên **cùng bộ môi trường theo replicate** (common random numbers,
-xem `experiments/runner.py::make_setups`), nên mọi so sánh giữa các arm là
-so sánh **có ghép cặp** (paired).
+Kết quả được ghi tự động vào `results/tier_{1..5}_results.json` và bảng tổng hợp `results/all_tiers_summary.json`.
 
-## Thống kê đi kèm (`src/sar_uav/experiments/stats.py`)
+---
 
-| Công cụ | Ý nghĩa |
-|---|---|
-| `wilson_interval(k, n)` | Khoảng tin Wilson 95% cho tỷ lệ (DSR, P(T≤deadline), top-k recall) |
-| `mcnemar_exact_p(b, c)` | Kiểm định McNemar chính xác hai phía trên các cặp phân biệt (detected A vs B) |
-| `compare_arms(rows, pairs)` | So sánh cặp theo replicate: diff = treatment − control, bootstrap CI 95% + p_boot; metric nhị phân có thêm p_McNemar |
-| `arm_proportion_table` / `grouped_proportion_ci` | Bảng k/n + CI cho từng arm / từng điểm sweep |
+## Chi tiết 5 Tiers Thực nghiệm
 
-Quy ước: pair = (control, treatment), diff dương = treatment cao hơn trên
-metric đó (với `EDT_censored` thấp hơn mới tốt — đọc dấu diff tương ứng).
+### Tier 1 — Phân tích Cơ chế trên Lưới $3 \times 3$
+* **File mã nguồn:** `src/sar_uav/experiments/tier1_mechanism.py`
+* **Mục tiêu:** Minh họa trực quan sự thay đổi quyết định lộ trình và dwell khi thay đổi bất định trong 3 tình huống:
+  1. *Scenario 1:* Tập giả thuyết ensemble đem lại lợi ích rõ rệt so với nominal.
+  2. *Scenario 2:* Mô hình danh định nominal chuẩn xác ($S=1$), ensemble và nominal trùng khớp.
+  3. *Scenario 3:* Bất định lớn nhưng phân bố vị trí ban đầu quá tập trung nên quyết định tối ưu không đổi.
 
-## RQ1 — Giá trị của dự báo vị trí dựa trên dữ liệu
+### Tier 2 — Độ chính xác Thuật toán và Đo lường Tăng tốc Evaluator
+* **File mã nguồn:** `src/sar_uav/experiments/tier2_evaluator_accuracy.py`
+* **Mục tiêu:**
+  - Kiểm chứng tính tương đương số học giữa `ForwardBackwardFastEvaluator` và `FullEvaluator` (sai số tuyệt đối $< 10^{-12}$).
+  - Đo đạc thời gian tính toán trung bình (ms/eval) và mức tăng tốc so với `FullEvaluator` và `PrefixOnlyEvaluator`.
+  - Đo lường độ lệch nghiệm tối ưu $\Delta_{\mathrm{opt}} = J^\star - J_{\mathrm{alg}}$ so với nghiệm chuẩn của `ExactBruteForcePlanner`.
 
-* Câu hỏi: Uniform → Distance → GIS → Data-driven, bản đồ xác suất ban đầu
-  nào tốt và giá trị chuyển thành vận hành thế nào?
-* Code: `experiments/rq1.py`; huấn luyện PMR logistic bằng `belief/train.py`
-  trên incidents tổng hợp (`experiments/datasets.py`).
-* Config: `configs/experiments/rq1_probability_models.json`.
-* Output:
-  * `rq1_prediction_summary.csv` — loglik, rank, mass r∈{200,400,800} m,
-    top-k recall (+ `_ci_lo/_hi` Wilson) trên tập test giữ riêng.
-  * `rq1_prediction_rows.csv`, `rq1_initial_maps_example.png`,
-    `rq1_mass_vs_radius.png`, `rq1_topk_recall.png`.
-  * `rq1_operational_rows.csv` + `rq1_operational_summary.csv` — preview
-    vận hành rolling-planner theo từng initial-belief model.
-  * `rq1_operational_stats.csv`, `rq1_operational_comparisons.csv` —
-    CI từng arm + so sánh cặp vs uniform.
+### Tier 3 — Benchmark So sánh Đa phương pháp (Main Benchmark)
+* **File mã nguồn:** `src/sar_uav/experiments/tier3_main_benchmark.py`
+* **Mục tiêu:** So sánh đối đầu giữa các chiến lược đối chứng theo Bảng 2 của đề cương:
+  - **Nhóm 1 (Đóng góp thuật toán - Multi-start & Evaluators):**
+    - `Proposed_Fast`: Multi-start (2 starts: greedy ensemble + greedy nominal) + Forward-Backward Fast Evaluator (300+300 evals).
+    - `SingleStart_Fast_FixedLS`: Single-start từ greedy ensemble với ngân sách Local Search cố định (600 evals).
+    - `SingleStart_Fast_MatchedTotal`: Single-start bù trừ ngân sách evaluation:
+      - Ngân sách Local Search: $B_{\mathrm{LS}}^{\mathrm{matched}} = B_{\mathrm{LS}}^{\mathrm{total}} + N_{\mathrm{eval}}^{\mathrm{greedy\_nom}} = 600 + 228 = 828$ evals.
+      - Tổng evaluation toàn phương pháp: $N_{\mathrm{total}} = N_{\mathrm{eval}}^{\mathrm{greedy\_ens}} + B_{\mathrm{LS}}^{\mathrm{matched}} = 190 + 828 = 1018$ evals.
+      > *Lưu ý về protocol:* Đối chứng này đảm bảo tổng số lần truy vấn hàm mục tiêu $N_{\mathrm{total}}$ của Single-start bằng đúng $N_{\mathrm{total}}$ của Multi-start ($N_{\mathrm{eval}}^{\mathrm{greedy\_ens}} + N_{\mathrm{eval}}^{\mathrm{greedy\_nom}} + B_{\mathrm{LS}}^{\mathrm{start1}} + B_{\mathrm{LS}}^{\mathrm{start2}} = 190 + 228 + 300 + 300 = 1018$). Đây là đối chứng kiểm soát **trần số lượt đánh giá hàm mục tiêu** (matched evaluation budget ceiling), không phải cùng tổng thời gian thực (wall-clock time), do chi phí tính toán mỗi bước đánh giá khác nhau giữa pha greedy và các toán tử lân cận.
+    - `Proposed_PrefixOnly`: Multi-start + Prefix-only Evaluator (300+300 evals, bóc tách giá trị của backward continuation).
+    - `Ablation_NoReplaceRebalance`: Multi-start bỏ 2 toán tử Replace và Dwell Rebalance (khảo sát tác động của kích thước không gian lân cận).
+    - `Greedy_Lookahead`: Chiến lược tham lam phân bổ tức thời (Search SAR benchmark).
+    - `GA_Baseline` (alias `Adaptive_GA` trong mã nguồn): Thuật toán di truyền chuẩn (Standard Genetic Algorithm baseline) triển khai qua `SimpleEvolutionaryPlanner` với chọn lọc giải đấu (tournament size 2), lai ghép 1 điểm (1-point crossover), đột biến ô và dwell với xác suất cố định ($p_{\mathrm{mut}} = 0.3$), và cơ chế repair cắt đuôi bảo đảm ràng buộc an toàn/pin. Không sử dụng cơ chế tự thích nghi tham số.
+  - **Nhóm 2 (Đóng góp mô hình):**
+    - `Nominal_Planning`: Lập kế hoạch dưới mô hình điểm ($S=1$) rồi đánh giá trên môi trường thực.
+* **Chỉ số đánh giá:** Tỷ lệ tìm thấy $DSR$, thời gian tìm trung bình giới hạn $RMST$, năng lượng tiêu thụ thực tế ($kJ$), và Calibration Gap ($J_{\mathcal{S}} - D_r$).
+* **Nguyên tắc phân tích thực nghiệm:**
+  - Báo cáo trung thực cả trường hợp phương pháp đề xuất vượt trội và trường hợp các biến thể ablation/nominal đạt kết quả tốt hơn.
+  - Phân tích nguyên nhân thuật toán: chi phí ngân sách của từng toán tử, tính trơn của search landscape dưới mô hình đơn vs mô hình ensemble.
+  - Mọi khác biệt về DSR trên tập mẫu nhỏ (ví dụ 15 mission, mỗi lần phát hiện ứng với 6.67%) phải đi kèm khoảng tin cậy và không suy diễn vượt quá dữ liệu.
 
-## RQ2 — Chất lượng dự báo chuyển thành lợi ích vận hành?
+### Tier 4 — Kiểm tra Khả năng Chống chịu Sai đặc tả (Model Misspecification)
+* **File mã nguồn:** `src/sar_uav/experiments/tier4_misspecification.py`
+* **Mục tiêu:** Đánh giá độ bền vững khi mô hình vật lý thực $q^\star \notin \mathcal{S}$ (ngoài tập giả thuyết của planner) dưới các mức độ suy giảm cảm biến và che phủ thực địa $\alpha \in [0.3, 2.0]$. Xác định ranh giới mà tại đó ensemble bắt đầu suy giảm lợi ích.
 
-* Câu hỏi: pha loãng bản đồ tham chiếu về uniform `P=(1−ε)P_ref+ε·noise`,
-  DSR/EDT suy giảm ra sao?
-* Code: `experiments/rq2.py`. Config: `rq2_prediction_to_routing.json`.
-* Output: `rq2_rows.csv`, `rq2_summary.csv` (kèm `DSR_ci_lo/_hi`),
-  `rq2_performance_vs_eps.png`,
-  `rq2_comparisons.csv` (paired stats vs ε=0).
+### Tier 5 — Khảo sát Khả năng Mở rộng (Scalability & Quality-vs-Runtime)
+* **File mã nguồn:** `src/sar_uav/experiments/tier5_scalability.py`
+* **Mục tiêu:** Đo đạc chất lượng nghiệm và thời gian hội tụ khi mở rộng quy mô không gian lưới ($|G| \in \{16, 36, 64, 100\}$) và số lượng phi đội UAV ($m \in \{1, 2, 4\}$).
 
-## RQ3 — Định tuyến có xét khả năng phát hiện?
+---
 
-* Câu hỏi: tiêu chí gán `p·q` (detection-aware) vs `p` (detection-blind),
-  fleet hỗn hợp RGB+thermal vs thuần RGB.
-* Code: `experiments/rq3.py` (fleet thuần RGB khai báo tại
-  `HOMOGENEOUS_RGB_FLEET`). Config: `rq3_detection_aware.json`.
-* Output: `rq3_rows.csv`, `rq3_summary.csv` (kèm CI),
-  `rq3_dsr_by_veg.png`, `rq3_energy_by_veg.png`,
-  `rq3_stats.csv` (pq vs p, paired trên cùng môi trường).
-
-## RQ4 — Giá trị của tái định tuyến động (thiết kế 2×2)
-
-```
-                 Static   Dynamic
-Baseline belief     A        B
-Data-driven         C        D      (+ E: mục tiêu đứng yên)
-```
-
-* Contrasts: C−A (giá trị data-driven khi tĩnh), B−A (giá trị tái định
-  tuyến với belief cơ sở), D−A (lợi ích framework đầy đủ), D−B (thêm
-  data-driven khi đã động).
-* E chỉ dùng cho ablation, **không** đưa vào kiểm định paired vì quy trình
-  mục tiêu khác (đứng yên).
-* Code: `experiments/rq4.py`. Config: `rq4_static_dynamic_factorial.json`.
-* Output: `rq4_rows.csv`, `rq4_summary.csv`, `rq4_factorial_dsr.png`,
-  `rq4_survival.png`, `rq4_stats.csv` + `rq4_arm_stats.csv`.
-
-## RQ5 — Độ bền trước sai số mô hình
-
-* Câu hỏi: planner cố tình dùng sai mô hình — `map_eps` (bản đồ sai),
-  `q_bias` (detection bị over/under-estimate), `beta_bias` (motion model
-  lệch) — trong khi môi trường và quá trình mục tiêu thật không đổi.
-* Code: `experiments/rq5.py`. Config: `rq5_model_error.json`.
-* Output: `rq5_rows.csv`, `rq5_summary.csv` (kèm `DSR_ci_lo/_hi`),
-  `rq5_robustness_dsr.png`.
-
-## Ghi chú diễn giải
-
-* n=24 replicate/cell cho chênh lệch DSR nhỏ (~0.1) vẫn có CI rộng — hãy
-  trích dẫn kèm CI và p-value trong bảng, tăng `--replicates` nếu cần bền
-  hơn nữa (chi phí tuyến tính theo thời gian chạy).
-* p_boot có sàn resolution 2/n_boot (5000 lần lấy mẫu mặc định); khi bảng
-  ghi 0.0004 nghĩa là "< 2/n_boot".
-* Các so sánh giữa arm cùng seed-set hợp lệ nhờ CRN; tuyệt đối không paired
-  giữa các setup khác quy trình mục tiêu (ví dụ E vs A–D).
+## Kỹ thuật Ghép cặp Ngẫu nhiên (Common Random Numbers)
+* **File mã nguồn:** `src/sar_uav/experiments/rng.py`
+* Tuân thủ nghiêm ngặt protocol ghép cặp thông qua lớp `IndexedRNGStream` lập chỉ mục 4 phần tử:
+  $$(\text{mission\_idx}, \text{tick\_t}, \text{uav\_k}, \text{event\_type})$$
+  bảo đảm hai UAV khác nhau quan sát cùng thời điểm không dùng chung số ngẫu nhiên, giữ vững tính độc lập có điều kiện theo không gian (A1).

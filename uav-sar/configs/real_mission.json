@@ -1,8 +1,33 @@
 {
-  "area": {"name": "tay_nguyen_real", "grid_w": 40, "grid_h": 40,
-           "cell_size_m": 100.0},
-  "belief": {"initial_model": "gis", "forecast_enabled": true},
-  "planner": {"kind": "rolling", "lookahead_cells": 3},
-  "mission": {"horizon_min": 180.0, "dt_min": 1.0},
-  "sim": {"seed": 1234}
+  "area": {
+    "name": "tay_nguyen_real",
+    "grid_w": 30,
+    "grid_h": 30,
+    "cell_size_m": 250.0
+  },
+  "hypothesis": {
+    "uncertainty_scale": 0.6,
+    "num_hypotheses": 5,
+    "delta_t_sec": 60.0
+  },
+  "planner": {
+    "algorithm": "local_search",
+    "evaluator": "fast",
+    "max_evals": 3000,
+    "time_limit_sec": 60.0,
+    "allowed_dwells": [1, 2, 3, 4, 5]
+  },
+  "fleet": {
+    "num_uavs": 3,
+    "speed_ms": 15.0,
+    "battery_joules": 500000.0,
+    "reserve_joules": 60000.0
+  },
+  "mission": {
+    "horizon_ticks": 30,
+    "delta_t_sec": 60.0
+  },
+  "sim": {
+    "seed": 2026
+  }
 }

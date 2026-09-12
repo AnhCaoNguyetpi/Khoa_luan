@@ -1,0 +1,70 @@
+{
+  "metadata": {
+    "tier": 5,
+    "run_id": "run_20260912_000726_a4a12a",
+    "seed": 42,
+    "quick": true,
+    "timestamp": "2026-09-11T17:07:31Z",
+    "runtime_sec": 0.3732,
+    "environment": {
+      "python_version": "3.12.2",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "git_hash": "b4d62fb94f",
+      "git_hash_full": "b4d62fb94ffc3e3099d6e93b527d2e7ce49788a3",
+      "git_branch": "main",
+      "git_is_dirty": true,
+      "source_sha256": "53ade0da2bebaa38"
+    },
+    "experiment_config": {
+      "seed": 42,
+      "quick": true,
+      "grid_sizes": [
+        16
+      ]
+    }
+  },
+  "results": {
+    "grid_16_uav_1": {
+      "grid_size": 16,
+      "num_uavs": 1,
+      "horizon_H": 18,
+      "candidate_pool_size": 15,
+      "fast_J": 0.10596034639031915,
+      "prefix_J": 0.10596034639031915,
+      "full_J": 0.10596034639031915,
+      "fast_evals": 400,
+      "prefix_evals": 400,
+      "full_evals": 400,
+      "fast_avg_ms": 0.09217493734673157,
+      "prefix_avg_ms": 0.09703784461803902,
+      "full_avg_ms": 0.15038822054844686,
+      "speedup_vs_prefix": 1.0527573699672266,
+      "speedup_vs_full": 1.6315521862817894,
+      "fast_runtime_sec": 0.051463799999964976,
+      "prefix_runtime_sec": 0.05244900000002417,
+      "full_runtime_sec": 0.07326669999997648,
+      "total_speedup_vs_full": 1.423655074052564
+    },
+    "grid_16_uav_2": {
+      "grid_size": 16,
+      "num_uavs": 2,
+      "horizon_H": 18,
+      "candidate_pool_size": 15,
+      "fast_J": 0.09371126408763863,
+      "prefix_J": 0.09371126408763863,
+      "full_J": 0.09371126408763863,
+      "fast_evals": 400,
+      "prefix_evals": 400,
+      "full_evals": 400,
+      "fast_avg_ms": 0.09588195488798472,
+      "prefix_avg_ms": 0.10329824560966856,
+      "full_avg_ms": 0.1667591478721384,
+      "speedup_vs_prefix": 1.0773481384515784,
+      "speedup_vs_full": 1.7392130570028204,
+      "fast_runtime_sec": 0.053274899999905756,
+      "prefix_runtime_sec": 0.056567699999959586,
+      "full_runtime_sec": 0.08385449999991579,
+      "total_speedup_vs_full": 1.5739963847902882
+    }
+  }
+}

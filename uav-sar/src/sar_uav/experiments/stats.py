@@ -79,6 +79,52 @@ def bootstrap_mean_ci(x: Sequence[float], alpha: float = 0.05,
     return float(lo), float(hi)
 
 
+def student_t_ci(
+    values: Sequence[float],
+    alpha: float = 0.05,
+    bounds: Optional[Tuple[Optional[float], Optional[float]]] = None
+) -> Tuple[float, float, Tuple[float, float]]:
+    """Computes sample mean, standard error, and Student's t CI.
+
+    Appropriate for small sample sizes (e.g. n=15 missions, df=14, t_crit ≈ 2.145).
+    Applies uniformly to both per-arm metrics (e.g. RMST) and paired difference
+    metrics between arms (e.g. delta_RMST, delta_energy).
+
+    Parameters:
+      values: 1D sequence of observed values or paired differences.
+      alpha: Significance level (default 0.05 for 95% CI).
+      bounds: Optional (min_bound, max_bound) to clip CI to physical domains
+              (e.g. [0, H] for RMST, [-H, H] for delta RMST).
+
+    Returns:
+      (mean, se, (ci_lower, ci_upper))
+    """
+    arr = np.asarray(values, dtype=np.float64)
+    n = len(arr)
+    if n == 0:
+        return float("nan"), float("nan"), (float("nan"), float("nan"))
+    mean_val = float(np.mean(arr))
+    if n < 2:
+        return mean_val, float("nan"), (float("nan"), float("nan"))
+    se = float(np.std(arr, ddof=1) / np.sqrt(n))
+    try:
+        import scipy.stats as st
+        t_crit = float(st.t.ppf(1.0 - alpha / 2.0, df=n - 1))
+    except ImportError:
+        t_crit = 2.1448 if n == 15 else 1.96
+    lower = mean_val - t_crit * se
+    upper = mean_val + t_crit * se
+    if bounds is not None:
+        b_min, b_max = bounds
+        if b_min is not None:
+            lower = max(lower, b_min)
+            upper = max(upper, b_min)
+        if b_max is not None:
+            lower = min(lower, b_max)
+            upper = min(upper, b_max)
+    return mean_val, se, (float(lower), float(upper))
+
+
 # ----------------------------------------------------------------- p-values
 
 def mcnemar_exact_p(b: int, c: int) -> float:

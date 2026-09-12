@@ -1,0 +1,1643 @@
+{
+  "metadata": {
+    "tier": 3,
+    "run_id": "run_20260911_192308_18e2cb",
+    "seed": 42,
+    "quick": false,
+    "timestamp": "2026-09-11T12:23:11Z",
+    "runtime_sec": 0.9918,
+    "environment": {
+      "python_version": "3.12.2",
+      "platform": "Windows-11-10.0.26200-SP0"
+    }
+  },
+  "results": {
+    "summary": {
+      "Proposed_Fast": {
+        "J_self": 0.24834171786776782,
+        "J_ensemble": 0.24834171786776782,
+        "J_true_gt": 0.25349585362725424,
+        "DSR": 0.2,
+        "DSR_ci95_wilson": [
+          0.07047549341334775,
+          0.45185448736519324
+        ],
+        "mean_RMST_ticks": 13.333333333333334,
+        "RMST_ci95": [
+          11.276185361558387,
+          15.390481305108281
+        ],
+        "mean_energy_kJ": 288.10890535077334,
+        "calib_gap_self_vs_dsr": 0.04834171786776781,
+        "calib_gap_gt_vs_dsr": 0.05349585362725423
+      },
+      "Proposed_PrefixOnly": {
+        "J_self": 0.24834171786776782,
+        "J_ensemble": 0.24834171786776782,
+        "J_true_gt": 0.25349585362725424,
+        "DSR": 0.2,
+        "DSR_ci95_wilson": [
+          0.07047549341334775,
+          0.45185448736519324
+        ],
+        "mean_RMST_ticks": 13.333333333333334,
+        "RMST_ci95": [
+          11.276185361558387,
+          15.390481305108281
+        ],
+        "mean_energy_kJ": 288.10890535077334,
+        "calib_gap_self_vs_dsr": 0.04834171786776781,
+        "calib_gap_gt_vs_dsr": 0.05349585362725423
+      },
+      "Ablation_NoReplaceRebalance": {
+        "J_self": 0.24791488239269333,
+        "J_ensemble": 0.24791488239269333,
+        "J_true_gt": 0.25280484624600086,
+        "DSR": 0.26666666666666666,
+        "DSR_ci95_wilson": [
+          0.1089745331791685,
+          0.5195043407596966
+        ],
+        "mean_RMST_ticks": 12.6,
+        "RMST_ci95": [
+          10.387468418304497,
+          14.812531581695502
+        ],
+        "mean_energy_kJ": 280.75685483157605,
+        "calib_gap_self_vs_dsr": -0.018751784273973338,
+        "calib_gap_gt_vs_dsr": -0.013861820420665805
+      },
+      "Greedy_Lookahead": {
+        "J_self": 0.22019128513350705,
+        "J_ensemble": 0.22019128513350705,
+        "J_true_gt": 0.22670564358084067,
+        "DSR": 0.26666666666666666,
+        "DSR_ci95_wilson": [
+          0.1089745331791685,
+          0.5195043407596966
+        ],
+        "mean_RMST_ticks": 12.466666666666667,
+        "RMST_ci95": [
+          10.180400034991544,
+          14.75293329834179
+        ],
+        "mean_energy_kJ": 260.62564605597646,
+        "calib_gap_self_vs_dsr": -0.04647538153315961,
+        "calib_gap_gt_vs_dsr": -0.039961023085826
+      },
+      "Adaptive_GA": {
+        "J_self": 0.2450486436087358,
+        "J_ensemble": 0.2450486436087358,
+        "J_true_gt": 0.24556461535129204,
+        "DSR": 0.13333333333333333,
+        "DSR_ci95_wilson": [
+          0.03736125906843905,
+          0.3788198285497776
+        ],
+        "mean_RMST_ticks": 13.733333333333333,
+        "RMST_ci95": [
+          11.975393124515701,
+          15.491273542150964
+        ],
+        "mean_energy_kJ": 260.8957223263008,
+        "calib_gap_self_vs_dsr": 0.11171531027540246,
+        "calib_gap_gt_vs_dsr": 0.1122312820179587
+      },
+      "Nominal_Planning": {
+        "J_self": 0.24823226688735112,
+        "J_ensemble": 0.27899122809957555,
+        "J_true_gt": 0.2918567341178382,
+        "DSR": 0.26666666666666666,
+        "DSR_ci95_wilson": [
+          0.1089745331791685,
+          0.5195043407596966
+        ],
+        "mean_RMST_ticks": 12.866666666666667,
+        "RMST_ci95": [
+          10.712222783794699,
+          15.021110549538635
+        ],
+        "mean_energy_kJ": 293.17565756838894,
+        "calib_gap_self_vs_dsr": -0.018434399779315547,
+        "calib_gap_gt_vs_dsr": 0.025190067451171527
+      }
+    },
+    "paired_comparisons": {
+      "Proposed_vs_Proposed_PrefixOnly": {
+        "mean_delta_DSR": 0.0,
+        "discordant_pairs": {
+          "proposed_wins": 0,
+          "baseline_wins": 0
+        },
+        "mcnemar_p_value": 1.0,
+        "mean_delta_RMST_ticks": 0.0,
+        "ci95_delta_RMST": [
+          0.0,
+          0.0
+        ],
+        "mean_delta_energy_kJ": 0.0,
+        "ci95_delta_energy_kJ": [
+          0.0,
+          0.0
+        ]
+      },
+      "Proposed_vs_Ablation_NoReplaceRebalance": {
+        "mean_delta_DSR": -0.06666666666666667,
+        "discordant_pairs": {
+          "proposed_wins": 1,
+          "baseline_wins": 2
+        },
+        "mcnemar_p_value": 1.0,
+        "mean_delta_RMST_ticks": 0.7333333333333333,
+        "ci95_delta_RMST": [
+          -1.4177114773988326,
+          2.8843781440654994
+        ],
+        "mean_delta_energy_kJ": 7.352050519197405,
+        "ci95_delta_energy_kJ": [
+          -26.227939661579754,
+          40.932040699974564
+        ]
+      },
+      "Proposed_vs_Greedy_Lookahead": {
+        "mean_delta_DSR": -0.06666666666666667,
+        "discordant_pairs": {
+          "proposed_wins": 1,
+          "baseline_wins": 2
+        },
+        "mcnemar_p_value": 1.0,
+        "mean_delta_RMST_ticks": 0.8666666666666667,
+        "ci95_delta_RMST": [
+          -1.3873671495047866,
+          3.12070048283812
+        ],
+        "mean_delta_energy_kJ": 27.4832592947968,
+        "ci95_delta_energy_kJ": [
+          -3.9278220256835255,
+          58.89434061527712
+        ]
+      },
+      "Proposed_vs_Adaptive_GA": {
+        "mean_delta_DSR": 0.06666666666666667,
+        "discordant_pairs": {
+          "proposed_wins": 3,
+          "baseline_wins": 2
+        },
+        "mcnemar_p_value": 1.0,
+        "mean_delta_RMST_ticks": -0.4,
+        "ci95_delta_RMST": [
+          -3.3121794816482955,
+          2.5121794816482956
+        ],
+        "mean_delta_energy_kJ": 27.213183024472603,
+        "ci95_delta_energy_kJ": [
+          -15.289600959686904,
+          69.7159670086321
+        ]
+      },
+      "Proposed_vs_Nominal_Planning": {
+        "mean_delta_DSR": -0.06666666666666667,
+        "discordant_pairs": {
+          "proposed_wins": 1,
+          "baseline_wins": 2
+        },
+        "mcnemar_p_value": 1.0,
+        "mean_delta_RMST_ticks": 0.4666666666666667,
+        "ci95_delta_RMST": [
+          -1.6535412895908737,
+          2.5868746229242072
+        ],
+        "mean_delta_energy_kJ": -5.066752217615639,
+        "ci95_delta_energy_kJ": [
+          -38.23294043615967,
+          28.099436000928396
+        ]
+      }
+    },
+    "solver_stats": {
+      "Proposed_Fast": {
+        "total_runtime_sec": 0.1347836000022653,
+        "greedy_runtime_sec": 0.029150900001695845,
+        "local_search_runtime_sec": 0.10563270000056946,
+        "n_evals": 600,
+        "accepted_moves": 5,
+        "operator_stats": {
+          "Replace": {
+            "evaluated": 270,
+            "accepted": 2,
+            "improvement": 0.0013588329825089396
+          },
+          "DwellRebalance": {
+            "evaluated": 122,
+            "accepted": 1,
+            "improvement": 0.0022466253123918367
+          },
+          "Swap": {
+            "evaluated": 83,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "ChangeDwell": {
+            "evaluated": 38,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "AdjustWait": {
+            "evaluated": 10,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "Insert": {
+            "evaluated": 39,
+            "accepted": 2,
+            "improvement": 0.024544974439360212
+          },
+          "Delete": {
+            "evaluated": 33,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "Relocate": {
+            "evaluated": 4,
+            "accepted": 0,
+            "improvement": 0.0
+          }
+        }
+      },
+      "Proposed_PrefixOnly": {
+        "total_runtime_sec": 0.14379299999927753,
+        "greedy_runtime_sec": 0.029150900001695845,
+        "local_search_runtime_sec": 0.11464209999758168,
+        "n_evals": 600,
+        "accepted_moves": 5
+      },
+      "Ablation_NoReplaceRebalance": {
+        "total_runtime_sec": 0.10260340000240831,
+        "greedy_runtime_sec": 0.029150900001695845,
+        "local_search_runtime_sec": 0.07345250000071246,
+        "n_evals": 249,
+        "accepted_moves": 4,
+        "operator_stats": {
+          "Swap": {
+            "evaluated": 108,
+            "accepted": 2,
+            "improvement": 0.00317862281982606
+          },
+          "ChangeDwell": {
+            "evaluated": 45,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "AdjustWait": {
+            "evaluated": 10,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "Insert": {
+            "evaluated": 39,
+            "accepted": 2,
+            "improvement": 0.024544974439360212
+          },
+          "Delete": {
+            "evaluated": 42,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "Relocate": {
+            "evaluated": 4,
+            "accepted": 0,
+            "improvement": 0.0
+          }
+        }
+      },
+      "Greedy_Lookahead": {
+        "total_runtime_sec": 0.029150900001695845,
+        "n_evals": 190
+      },
+      "Adaptive_GA": {
+        "total_runtime_sec": 0.120423699998355,
+        "n_evals": 520
+      },
+      "Nominal_Planning": {
+        "total_runtime_sec": 0.13804259999960777,
+        "greedy_runtime_sec": 0.029707699999562465,
+        "local_search_runtime_sec": 0.10833490000004531,
+        "n_evals": 600,
+        "accepted_moves": 5,
+        "operator_stats": {
+          "Replace": {
+            "evaluated": 173,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "DwellRebalance": {
+            "evaluated": 188,
+            "accepted": 3,
+            "improvement": 0.00041056040243181435
+          },
+          "Swap": {
+            "evaluated": 108,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "ChangeDwell": {
+            "evaluated": 55,
+            "accepted": 2,
+            "improvement": 0.017687204584931115
+          },
+          "AdjustWait": {
+            "evaluated": 14,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "Insert": {
+            "evaluated": 25,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "Delete": {
+            "evaluated": 36,
+            "accepted": 0,
+            "improvement": 0.0
+          }
+        }
+      }
+    },
+    "final_schedules": {
+      "Proposed_Fast": {
+        "num_cells": 16,
+        "H": 15,
+        "delta_t": 60.0,
+        "uav_schedules": [
+          {
+            "uav_idx": 0,
+            "r_k": 5,
+            "visits": [
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 3,
+                "wait_ticks": 0,
+                "start_tick": 1
+              },
+              {
+                "cell_idx": 6,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 5
+              },
+              {
+                "cell_idx": 11,
+                "dwell_ticks": 1,
+                "wait_ticks": 0,
+                "start_tick": 8
+              },
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 10
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 1,
+                "wait_ticks": 0,
+                "start_tick": 13
+              }
+            ]
+          },
+          {
+            "uav_idx": 1,
+            "r_k": 4,
+            "visits": [
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 2
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 5
+              },
+              {
+                "cell_idx": 14,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 9
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 1,
+                "wait_ticks": 0,
+                "start_tick": 13
+              }
+            ]
+          }
+        ]
+      },
+      "Proposed_PrefixOnly": {
+        "num_cells": 16,
+        "H": 15,
+        "delta_t": 60.0,
+        "uav_schedules": [
+          {
+            "uav_idx": 0,
+            "r_k": 5,
+            "visits": [
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 3,
+                "wait_ticks": 0,
+                "start_tick": 1
+              },
+              {
+                "cell_idx": 6,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 5
+              },
+              {
+                "cell_idx": 11,
+                "dwell_ticks": 1,
+                "wait_ticks": 0,
+                "start_tick": 8
+              },
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 10
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 1,
+                "wait_ticks": 0,
+                "start_tick": 13
+              }
+            ]
+          },
+          {
+            "uav_idx": 1,
+            "r_k": 4,
+            "visits": [
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 2
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 5
+              },
+              {
+                "cell_idx": 14,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 9
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 1,
+                "wait_ticks": 0,
+                "start_tick": 13
+              }
+            ]
+          }
+        ]
+      },
+      "Ablation_NoReplaceRebalance": {
+        "num_cells": 16,
+        "H": 15,
+        "delta_t": 60.0,
+        "uav_schedules": [
+          {
+            "uav_idx": 0,
+            "r_k": 5,
+            "visits": [
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 1
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 1,
+                "wait_ticks": 0,
+                "start_tick": 3
+              },
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 5
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 8
+              },
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 11
+              }
+            ]
+          },
+          {
+            "uav_idx": 1,
+            "r_k": 4,
+            "visits": [
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 2
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 1,
+                "wait_ticks": 0,
+                "start_tick": 5
+              },
+              {
+                "cell_idx": 14,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 8
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 12
+              }
+            ]
+          }
+        ]
+      },
+      "Greedy_Lookahead": {
+        "num_cells": 16,
+        "H": 15,
+        "delta_t": 60.0,
+        "uav_schedules": [
+          {
+            "uav_idx": 0,
+            "r_k": 4,
+            "visits": [
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 1
+              },
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 4
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 7
+              },
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 10
+              }
+            ]
+          },
+          {
+            "uav_idx": 1,
+            "r_k": 3,
+            "visits": [
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 2
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 5
+              },
+              {
+                "cell_idx": 14,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 9
+              }
+            ]
+          }
+        ]
+      },
+      "Adaptive_GA": {
+        "num_cells": 16,
+        "H": 15,
+        "delta_t": 60.0,
+        "uav_schedules": [
+          {
+            "uav_idx": 0,
+            "r_k": 3,
+            "visits": [
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 4,
+                "wait_ticks": 0,
+                "start_tick": 2
+              },
+              {
+                "cell_idx": 11,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 7
+              },
+              {
+                "cell_idx": 11,
+                "dwell_ticks": 3,
+                "wait_ticks": 0,
+                "start_tick": 9
+              }
+            ]
+          },
+          {
+            "uav_idx": 1,
+            "r_k": 2,
+            "visits": [
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 4,
+                "wait_ticks": 0,
+                "start_tick": 1
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 4,
+                "wait_ticks": 0,
+                "start_tick": 5
+              }
+            ]
+          }
+        ]
+      },
+      "Nominal_Planning": {
+        "num_cells": 16,
+        "H": 15,
+        "delta_t": 60.0,
+        "uav_schedules": [
+          {
+            "uav_idx": 0,
+            "r_k": 5,
+            "visits": [
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 3,
+                "wait_ticks": 0,
+                "start_tick": 1
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 3,
+                "wait_ticks": 0,
+                "start_tick": 4
+              },
+              {
+                "cell_idx": 9,
+                "dwell_ticks": 3,
+                "wait_ticks": 0,
+                "start_tick": 8
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 1,
+                "wait_ticks": 0,
+                "start_tick": 12
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 1,
+                "wait_ticks": 0,
+                "start_tick": 13
+              }
+            ]
+          },
+          {
+            "uav_idx": 1,
+            "r_k": 4,
+            "visits": [
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 2
+              },
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 4
+              },
+              {
+                "cell_idx": 6,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 7
+              },
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 3,
+                "wait_ticks": 0,
+                "start_tick": 10
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "mission_records": [
+      {
+        "mission_idx": 0,
+        "target_path": [
+          2,
+          2,
+          2,
+          2,
+          1,
+          1,
+          1,
+          1,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          9
+        ],
+        "arms": {
+          "Proposed_Fast": {
+            "detected": 1,
+            "rmst": 13.0,
+            "energy": 313543.37781593733,
+            "calib_gap": -0.7516582821322322
+          },
+          "Proposed_PrefixOnly": {
+            "detected": 1,
+            "rmst": 13.0,
+            "energy": 313543.37781593733,
+            "calib_gap": -0.7516582821322322
+          },
+          "Ablation_NoReplaceRebalance": {
+            "detected": 1,
+            "rmst": 8.0,
+            "energy": 226164.45675830176,
+            "calib_gap": -0.7520851176073067
+          },
+          "Greedy_Lookahead": {
+            "detected": 1,
+            "rmst": 8.0,
+            "energy": 226164.45675830176,
+            "calib_gap": -0.779808714866493
+          },
+          "Adaptive_GA": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 273849.62209982553,
+            "calib_gap": 0.2450486436087358
+          },
+          "Nominal_Planning": {
+            "detected": 1,
+            "rmst": 13.0,
+            "energy": 325941.12549695425,
+            "calib_gap": -0.7517677331126489
+          }
+        }
+      },
+      {
+        "mission_idx": 1,
+        "target_path": [
+          5,
+          5,
+          5,
+          6,
+          6,
+          6,
+          6,
+          2,
+          2,
+          3,
+          3,
+          3,
+          7,
+          6,
+          2
+        ],
+        "arms": {
+          "Proposed_Fast": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 313543.37781593733,
+            "calib_gap": 0.24834171786776782
+          },
+          "Proposed_PrefixOnly": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 313543.37781593733,
+            "calib_gap": 0.24834171786776782
+          },
+          "Ablation_NoReplaceRebalance": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 316857.0863149221,
+            "calib_gap": 0.24791488239269333
+          },
+          "Greedy_Lookahead": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 292678.1652572865,
+            "calib_gap": 0.22019128513350705
+          },
+          "Adaptive_GA": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 273849.62209982553,
+            "calib_gap": 0.2450486436087358
+          },
+          "Nominal_Planning": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 325941.12549695425,
+            "calib_gap": 0.24823226688735112
+          }
+        }
+      },
+      {
+        "mission_idx": 2,
+        "target_path": [
+          5,
+          5,
+          5,
+          5,
+          5,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          0,
+          0
+        ],
+        "arms": {
+          "Proposed_Fast": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 313543.37781593733,
+            "calib_gap": 0.24834171786776782
+          },
+          "Proposed_PrefixOnly": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 313543.37781593733,
+            "calib_gap": 0.24834171786776782
+          },
+          "Ablation_NoReplaceRebalance": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 316857.0863149221,
+            "calib_gap": 0.24791488239269333
+          },
+          "Greedy_Lookahead": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 292678.1652572865,
+            "calib_gap": 0.22019128513350705
+          },
+          "Adaptive_GA": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 273849.62209982553,
+            "calib_gap": 0.2450486436087358
+          },
+          "Nominal_Planning": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 325941.12549695425,
+            "calib_gap": 0.24823226688735112
+          }
+        }
+      },
+      {
+        "mission_idx": 3,
+        "target_path": [
+          0,
+          1,
+          1,
+          1,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          9,
+          9,
+          8,
+          8,
+          8
+        ],
+        "arms": {
+          "Proposed_Fast": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 313543.37781593733,
+            "calib_gap": 0.24834171786776782
+          },
+          "Proposed_PrefixOnly": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 313543.37781593733,
+            "calib_gap": 0.24834171786776782
+          },
+          "Ablation_NoReplaceRebalance": {
+            "detected": 1,
+            "rmst": 9.0,
+            "energy": 250164.45675830176,
+            "calib_gap": -0.7520851176073067
+          },
+          "Greedy_Lookahead": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 292678.1652572865,
+            "calib_gap": 0.22019128513350705
+          },
+          "Adaptive_GA": {
+            "detected": 1,
+            "rmst": 8.0,
+            "energy": 237849.62209982547,
+            "calib_gap": -0.7549513563912642
+          },
+          "Nominal_Planning": {
+            "detected": 1,
+            "rmst": 5.0,
+            "energy": 163541.12549695425,
+            "calib_gap": -0.7517677331126489
+          }
+        }
+      },
+      {
+        "mission_idx": 4,
+        "target_path": [
+          6,
+          10,
+          10,
+          10,
+          10,
+          10,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          10,
+          10
+        ],
+        "arms": {
+          "Proposed_Fast": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 313543.37781593733,
+            "calib_gap": 0.24834171786776782
+          },
+          "Proposed_PrefixOnly": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 313543.37781593733,
+            "calib_gap": 0.24834171786776782
+          },
+          "Ablation_NoReplaceRebalance": {
+            "detected": 1,
+            "rmst": 5.0,
+            "energy": 158054.833995939,
+            "calib_gap": -0.7520851176073067
+          },
+          "Greedy_Lookahead": {
+            "detected": 1,
+            "rmst": 5.0,
+            "energy": 158054.833995939,
+            "calib_gap": -0.779808714866493
+          },
+          "Adaptive_GA": {
+            "detected": 1,
+            "rmst": 3.0,
+            "energy": 115541.12549695426,
+            "calib_gap": -0.7549513563912642
+          },
+          "Nominal_Planning": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 325941.12549695425,
+            "calib_gap": 0.24823226688735112
+          }
+        }
+      },
+      {
+        "mission_idx": 5,
+        "target_path": [
+          13,
+          13,
+          9,
+          9,
+          5,
+          6,
+          6,
+          6,
+          6,
+          7,
+          7,
+          7,
+          11,
+          7,
+          6
+        ],
+        "arms": {
+          "Proposed_Fast": {
+            "detected": 1,
+            "rmst": 5.0,
+            "energy": 154028.54315746104,
+            "calib_gap": -0.7516582821322322
+          },
+          "Proposed_PrefixOnly": {
+            "detected": 1,
+            "rmst": 5.0,
+            "energy": 154028.54315746104,
+            "calib_gap": -0.7516582821322322
+          },
+          "Ablation_NoReplaceRebalance": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 316857.0863149221,
+            "calib_gap": 0.24791488239269333
+          },
+          "Greedy_Lookahead": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 292678.1652572865,
+            "calib_gap": 0.22019128513350705
+          },
+          "Adaptive_GA": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 273849.62209982553,
+            "calib_gap": 0.2450486436087358
+          },
+          "Nominal_Planning": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 325941.12549695425,
+            "calib_gap": 0.24823226688735112
+          }
+        }
+      },
+      {
+        "mission_idx": 6,
+        "target_path": [
+          12,
+          8,
+          8,
+          12,
+          12,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          12,
+          12,
+          12,
+          12
+        ],
+        "arms": {
+          "Proposed_Fast": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 313543.37781593733,
+            "calib_gap": 0.24834171786776782
+          },
+          "Proposed_PrefixOnly": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 313543.37781593733,
+            "calib_gap": 0.24834171786776782
+          },
+          "Ablation_NoReplaceRebalance": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 316857.0863149221,
+            "calib_gap": 0.24791488239269333
+          },
+          "Greedy_Lookahead": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 292678.1652572865,
+            "calib_gap": 0.22019128513350705
+          },
+          "Adaptive_GA": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 273849.62209982553,
+            "calib_gap": 0.2450486436087358
+          },
+          "Nominal_Planning": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 325941.12549695425,
+            "calib_gap": 0.24823226688735112
+          }
+        }
+      },
+      {
+        "mission_idx": 7,
+        "target_path": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          4,
+          4,
+          4,
+          4,
+          8,
+          8,
+          8,
+          8
+        ],
+        "arms": {
+          "Proposed_Fast": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 313543.37781593733,
+            "calib_gap": 0.24834171786776782
+          },
+          "Proposed_PrefixOnly": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 313543.37781593733,
+            "calib_gap": 0.24834171786776782
+          },
+          "Ablation_NoReplaceRebalance": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 316857.0863149221,
+            "calib_gap": 0.24791488239269333
+          },
+          "Greedy_Lookahead": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 292678.1652572865,
+            "calib_gap": 0.22019128513350705
+          },
+          "Adaptive_GA": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 273849.62209982553,
+            "calib_gap": 0.2450486436087358
+          },
+          "Nominal_Planning": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 325941.12549695425,
+            "calib_gap": 0.24823226688735112
+          }
+        }
+      },
+      {
+        "mission_idx": 8,
+        "target_path": [
+          7,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          2,
+          6,
+          6,
+          6,
+          2,
+          2,
+          2
+        ],
+        "arms": {
+          "Proposed_Fast": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 313543.37781593733,
+            "calib_gap": 0.24834171786776782
+          },
+          "Proposed_PrefixOnly": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 313543.37781593733,
+            "calib_gap": 0.24834171786776782
+          },
+          "Ablation_NoReplaceRebalance": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 316857.0863149221,
+            "calib_gap": 0.24791488239269333
+          },
+          "Greedy_Lookahead": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 292678.1652572865,
+            "calib_gap": 0.22019128513350705
+          },
+          "Adaptive_GA": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 273849.62209982553,
+            "calib_gap": 0.2450486436087358
+          },
+          "Nominal_Planning": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 325941.12549695425,
+            "calib_gap": 0.24823226688735112
+          }
+        }
+      },
+      {
+        "mission_idx": 9,
+        "target_path": [
+          4,
+          4,
+          8,
+          4,
+          4,
+          4,
+          5,
+          5,
+          4,
+          4,
+          0,
+          0,
+          0,
+          1,
+          1
+        ],
+        "arms": {
+          "Proposed_Fast": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 313543.37781593733,
+            "calib_gap": 0.24834171786776782
+          },
+          "Proposed_PrefixOnly": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 313543.37781593733,
+            "calib_gap": 0.24834171786776782
+          },
+          "Ablation_NoReplaceRebalance": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 316857.0863149221,
+            "calib_gap": 0.24791488239269333
+          },
+          "Greedy_Lookahead": {
+            "detected": 1,
+            "rmst": 7.0,
+            "energy": 214164.45675830176,
+            "calib_gap": -0.779808714866493
+          },
+          "Adaptive_GA": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 273849.62209982553,
+            "calib_gap": 0.2450486436087358
+          },
+          "Nominal_Planning": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 325941.12549695425,
+            "calib_gap": 0.24823226688735112
+          }
+        }
+      },
+      {
+        "mission_idx": 10,
+        "target_path": [
+          3,
+          3,
+          3,
+          7,
+          7,
+          3,
+          3,
+          3,
+          2,
+          3,
+          3,
+          3,
+          2,
+          2,
+          2
+        ],
+        "arms": {
+          "Proposed_Fast": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 313543.37781593733,
+            "calib_gap": 0.24834171786776782
+          },
+          "Proposed_PrefixOnly": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 313543.37781593733,
+            "calib_gap": 0.24834171786776782
+          },
+          "Ablation_NoReplaceRebalance": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 316857.0863149221,
+            "calib_gap": 0.24791488239269333
+          },
+          "Greedy_Lookahead": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 292678.1652572865,
+            "calib_gap": 0.22019128513350705
+          },
+          "Adaptive_GA": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 273849.62209982553,
+            "calib_gap": 0.2450486436087358
+          },
+          "Nominal_Planning": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 325941.12549695425,
+            "calib_gap": 0.24823226688735112
+          }
+        }
+      },
+      {
+        "mission_idx": 11,
+        "target_path": [
+          7,
+          6,
+          5,
+          6,
+          6,
+          10,
+          10,
+          10,
+          11,
+          10,
+          11,
+          11,
+          11,
+          7,
+          7
+        ],
+        "arms": {
+          "Proposed_Fast": {
+            "detected": 1,
+            "rmst": 2.0,
+            "energy": 91541.12549695425,
+            "calib_gap": -0.7516582821322322
+          },
+          "Proposed_PrefixOnly": {
+            "detected": 1,
+            "rmst": 2.0,
+            "energy": 91541.12549695425,
+            "calib_gap": -0.7516582821322322
+          },
+          "Ablation_NoReplaceRebalance": {
+            "detected": 1,
+            "rmst": 2.0,
+            "energy": 91541.12549695425,
+            "calib_gap": -0.7520851176073067
+          },
+          "Greedy_Lookahead": {
+            "detected": 1,
+            "rmst": 2.0,
+            "energy": 91541.12549695425,
+            "calib_gap": -0.779808714866493
+          },
+          "Adaptive_GA": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 273849.62209982553,
+            "calib_gap": 0.2450486436087358
+          },
+          "Nominal_Planning": {
+            "detected": 1,
+            "rmst": 2.0,
+            "energy": 91541.12549695425,
+            "calib_gap": -0.7517677331126489
+          }
+        }
+      },
+      {
+        "mission_idx": 12,
+        "target_path": [
+          10,
+          10,
+          10,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          10,
+          10,
+          10
+        ],
+        "arms": {
+          "Proposed_Fast": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 313543.37781593733,
+            "calib_gap": 0.24834171786776782
+          },
+          "Proposed_PrefixOnly": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 313543.37781593733,
+            "calib_gap": 0.24834171786776782
+          },
+          "Ablation_NoReplaceRebalance": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 316857.0863149221,
+            "calib_gap": 0.24791488239269333
+          },
+          "Greedy_Lookahead": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 292678.1652572865,
+            "calib_gap": 0.22019128513350705
+          },
+          "Adaptive_GA": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 273849.62209982553,
+            "calib_gap": 0.2450486436087358
+          },
+          "Nominal_Planning": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 325941.12549695425,
+            "calib_gap": 0.24823226688735112
+          }
+        }
+      },
+      {
+        "mission_idx": 13,
+        "target_path": [
+          10,
+          6,
+          6,
+          6,
+          6,
+          2,
+          6,
+          6,
+          6,
+          5,
+          5,
+          5,
+          4,
+          4,
+          4
+        ],
+        "arms": {
+          "Proposed_Fast": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 313543.37781593733,
+            "calib_gap": 0.24834171786776782
+          },
+          "Proposed_PrefixOnly": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 313543.37781593733,
+            "calib_gap": 0.24834171786776782
+          },
+          "Ablation_NoReplaceRebalance": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 316857.0863149221,
+            "calib_gap": 0.24791488239269333
+          },
+          "Greedy_Lookahead": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 292678.1652572865,
+            "calib_gap": 0.22019128513350705
+          },
+          "Adaptive_GA": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 273849.62209982553,
+            "calib_gap": 0.2450486436087358
+          },
+          "Nominal_Planning": {
+            "detected": 1,
+            "rmst": 8.0,
+            "energy": 231259.10656847546,
+            "calib_gap": -0.7517677331126489
+          }
+        }
+      },
+      {
+        "mission_idx": 14,
+        "target_path": [
+          5,
+          9,
+          9,
+          13,
+          13,
+          14,
+          14,
+          14,
+          14,
+          10,
+          9,
+          9,
+          13,
+          13,
+          13
+        ],
+        "arms": {
+          "Proposed_Fast": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 313543.37781593733,
+            "calib_gap": 0.24834171786776782
+          },
+          "Proposed_PrefixOnly": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 313543.37781593733,
+            "calib_gap": 0.24834171786776782
+          },
+          "Ablation_NoReplaceRebalance": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 316857.0863149221,
+            "calib_gap": 0.24791488239269333
+          },
+          "Greedy_Lookahead": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 292678.1652572865,
+            "calib_gap": 0.22019128513350705
+          },
+          "Adaptive_GA": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 273849.62209982553,
+            "calib_gap": 0.2450486436087358
+          },
+          "Nominal_Planning": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 325941.12549695425,
+            "calib_gap": 0.24823226688735112
+          }
+        }
+      }
+    ]
+  }
+}

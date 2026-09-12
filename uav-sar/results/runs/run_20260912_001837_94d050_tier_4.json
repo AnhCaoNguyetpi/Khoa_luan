@@ -1,0 +1,60 @@
+{
+  "metadata": {
+    "tier": 4,
+    "run_id": "run_20260912_001837_94d050",
+    "seed": 42,
+    "quick": false,
+    "timestamp": "2026-09-11T17:18:41Z",
+    "runtime_sec": 0.2087,
+    "environment": {
+      "python_version": "3.12.2",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "git_hash": "b4d62fb94f",
+      "git_hash_full": "b4d62fb94ffc3e3099d6e93b527d2e7ce49788a3",
+      "git_branch": "main",
+      "git_is_dirty": true,
+      "source_sha256": "b412bef1fb09a6c9",
+      "project_tree_sha256": "b2b4c0854a9f3e87"
+    },
+    "experiment_config": {
+      "seed": 42,
+      "quick": false,
+      "num_missions": 10
+    }
+  },
+  "results": {
+    "protocol_1_calibration": {
+      "J_predicted_ensemble": 0.0832418981007852,
+      "empirical_DSR_ensemble": 0.1,
+      "empirical_DSR_nominal": 0.1,
+      "ensemble_calibration_gap": -0.01675810189921481
+    },
+    "protocol_2_robustness_boundary": {
+      "0.3": {
+        "DSR_Ensemble": 0.1,
+        "DSR_Nominal": 0.0,
+        "DSR_Delta": 0.1
+      },
+      "0.6": {
+        "DSR_Ensemble": 0.2,
+        "DSR_Nominal": 0.0,
+        "DSR_Delta": 0.2
+      },
+      "1.0": {
+        "DSR_Ensemble": 0.1,
+        "DSR_Nominal": 0.1,
+        "DSR_Delta": 0.0
+      },
+      "1.5": {
+        "DSR_Ensemble": 0.1,
+        "DSR_Nominal": 0.2,
+        "DSR_Delta": -0.1
+      },
+      "2.0": {
+        "DSR_Ensemble": 0.0,
+        "DSR_Nominal": 0.0,
+        "DSR_Delta": 0.0
+      }
+    }
+  }
+}

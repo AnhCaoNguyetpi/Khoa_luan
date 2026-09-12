@@ -1,13 +1,32 @@
-"""Planning package -- importing registers all planners in the registry."""
+"""Planning package for multi-UAV routing and search-effort allocation."""
 
-from .base import (BasePlanner, make_planner, cycle_feasibility, leg_metrics,
-                   cell_xy, Cycle)
-from .problem import PlanningProblem
+from .constraints import ConstraintChecker, JointSchedule, UAVSchedule, UAVSpec, Visit
+from .evaluator import BaseEvaluator, ForwardBackwardFastEvaluator, FullEvaluator, PrefixOnlyEvaluator
+from .neighborhood import NeighborhoodExplorer
+from .local_search import JointRouteEffortLocalSearch
+from .baselines import (
+    AdaptiveGAPlanner,
+    ExactBruteForcePlanner,
+    GABaselinePlanner,
+    GreedyLookaheadPlanner,
+    SimpleEvolutionaryPlanner,
+)
 
-# importing these modules registers their planner classes
-from . import greedy            # noqa: F401  (greedy, greedy_ratio)
-from . import cycle_planners    # noqa: F401  (static, rolling)
-from . import milp_pulp         # noqa: F401  (milp, optional)
-
-__all__ = ["BasePlanner", "make_planner", "PlanningProblem",
-           "cycle_feasibility", "leg_metrics", "cell_xy", "Cycle"]
+__all__ = [
+    "ConstraintChecker",
+    "JointSchedule",
+    "UAVSchedule",
+    "UAVSpec",
+    "Visit",
+    "BaseEvaluator",
+    "FullEvaluator",
+    "PrefixOnlyEvaluator",
+    "ForwardBackwardFastEvaluator",
+    "NeighborhoodExplorer",
+    "JointRouteEffortLocalSearch",
+    "GreedyLookaheadPlanner",
+    "SimpleEvolutionaryPlanner",
+    "GABaselinePlanner",
+    "AdaptiveGAPlanner",
+    "ExactBruteForcePlanner",
+]

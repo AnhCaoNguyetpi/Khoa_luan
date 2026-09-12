@@ -1,0 +1,1595 @@
+{
+  "metadata": {
+    "tier": 3,
+    "run_id": "run_20260912_000726_a4a12a",
+    "seed": 42,
+    "quick": true,
+    "timestamp": "2026-09-11T17:07:30Z",
+    "runtime_sec": 1.2222,
+    "environment": {
+      "python_version": "3.12.2",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "git_hash": "b4d62fb94f",
+      "git_hash_full": "b4d62fb94ffc3e3099d6e93b527d2e7ce49788a3",
+      "git_branch": "main",
+      "git_is_dirty": true,
+      "source_sha256": "53ade0da2bebaa38"
+    },
+    "experiment_config": {
+      "seed": 42,
+      "quick": true,
+      "num_missions": 3,
+      "H": 15,
+      "num_uavs": 2,
+      "max_evals": 600,
+      "num_cells": 16,
+      "max_evals_total": 600,
+      "max_evals_per_start": 300,
+      "time_limit_sec": 15.0
+    }
+  },
+  "results": {
+    "experiment_config": {
+      "H": 15,
+      "num_uavs": 2,
+      "num_missions": 3,
+      "num_cells": 16,
+      "max_evals_total": 600,
+      "max_evals_per_start": 300,
+      "time_limit_sec": 15.0,
+      "seed": 42
+    },
+    "summary": {
+      "Proposed_Fast": {
+        "J_self": 0.2754262384913462,
+        "J_ensemble": 0.2754262384913462,
+        "J_true_gt": 0.2853049058809457,
+        "DSR": 0.3333333333333333,
+        "DSR_ci95_wilson": [
+          0.06149194464890475,
+          0.7923403994017792
+        ],
+        "mean_RMST_ticks": 14.333333333333334,
+        "RMST_ci95": [
+          13.026666666666667,
+          15.64
+        ],
+        "mean_energy_kJ": 317.254833995939,
+        "calib_gap_self_vs_dsr": -0.05790709484198714,
+        "calib_gap_gt_vs_dsr": -0.04802842745238761
+      },
+      "SingleStart_Fast": {
+        "J_self": 0.24834171786776782,
+        "J_ensemble": 0.24834171786776782,
+        "J_true_gt": 0.25349585362725424,
+        "DSR": 0.3333333333333333,
+        "DSR_ci95_wilson": [
+          0.06149194464890475,
+          0.7923403994017792
+        ],
+        "mean_RMST_ticks": 14.333333333333334,
+        "RMST_ci95": [
+          13.026666666666667,
+          15.64
+        ],
+        "mean_energy_kJ": 313.54337781593733,
+        "calib_gap_self_vs_dsr": -0.0849916154655655,
+        "calib_gap_gt_vs_dsr": -0.07983747970607907
+      },
+      "Proposed_PrefixOnly": {
+        "J_self": 0.2754262384913462,
+        "J_ensemble": 0.2754262384913462,
+        "J_true_gt": 0.2853049058809457,
+        "DSR": 0.3333333333333333,
+        "DSR_ci95_wilson": [
+          0.06149194464890475,
+          0.7923403994017792
+        ],
+        "mean_RMST_ticks": 14.333333333333334,
+        "RMST_ci95": [
+          13.026666666666667,
+          15.64
+        ],
+        "mean_energy_kJ": 317.254833995939,
+        "calib_gap_self_vs_dsr": -0.05790709484198714,
+        "calib_gap_gt_vs_dsr": -0.04802842745238761
+      },
+      "Ablation_NoReplaceRebalance": {
+        "J_self": 0.2808165453889744,
+        "J_ensemble": 0.2808165453889744,
+        "J_true_gt": 0.29319949377785004,
+        "DSR": 0.3333333333333333,
+        "DSR_ci95_wilson": [
+          0.06149194464890475,
+          0.7923403994017792
+        ],
+        "mean_RMST_ticks": 14.333333333333334,
+        "RMST_ci95": [
+          13.026666666666667,
+          15.64
+        ],
+        "mean_energy_kJ": 325.94112549695427,
+        "calib_gap_self_vs_dsr": -0.052516787944358934,
+        "calib_gap_gt_vs_dsr": -0.040133839555483275
+      },
+      "Greedy_Lookahead": {
+        "J_self": 0.22019128513350705,
+        "J_ensemble": 0.22019128513350705,
+        "J_true_gt": 0.22670564358084067,
+        "DSR": 0.3333333333333333,
+        "DSR_ci95_wilson": [
+          0.06149194464890475,
+          0.7923403994017792
+        ],
+        "mean_RMST_ticks": 12.666666666666666,
+        "RMST_ci95": [
+          8.093333333333334,
+          17.24
+        ],
+        "mean_energy_kJ": 270.50692909095824,
+        "calib_gap_self_vs_dsr": -0.11314204819982626,
+        "calib_gap_gt_vs_dsr": -0.10662768975249265
+      },
+      "Adaptive_GA": {
+        "J_self": 0.2450486436087358,
+        "J_ensemble": 0.2450486436087358,
+        "J_true_gt": 0.24556461535129204,
+        "DSR": 0.0,
+        "DSR_ci95_wilson": [
+          0.0,
+          0.561497032152052
+        ],
+        "mean_RMST_ticks": 15.0,
+        "RMST_ci95": [
+          15.0,
+          15.0
+        ],
+        "mean_energy_kJ": 273.8496220998255,
+        "calib_gap_self_vs_dsr": 0.2450486436087358,
+        "calib_gap_gt_vs_dsr": 0.24556461535129204
+      },
+      "Nominal_Planning": {
+        "J_self": 0.24823226688735112,
+        "J_ensemble": 0.27899122809957555,
+        "J_true_gt": 0.2918567341178382,
+        "DSR": 0.3333333333333333,
+        "DSR_ci95_wilson": [
+          0.06149194464890475,
+          0.7923403994017792
+        ],
+        "mean_RMST_ticks": 14.333333333333334,
+        "RMST_ci95": [
+          13.026666666666667,
+          15.64
+        ],
+        "mean_energy_kJ": 325.94112549695427,
+        "calib_gap_self_vs_dsr": -0.0851010664459822,
+        "calib_gap_gt_vs_dsr": -0.041476599215495125
+      }
+    },
+    "paired_comparisons": {
+      "Proposed_vs_SingleStart_Fast": {
+        "mean_delta_DSR": 0.0,
+        "discordant_pairs": {
+          "proposed_wins": 0,
+          "baseline_wins": 0
+        },
+        "mcnemar_p_value": 1.0,
+        "mean_delta_RMST_ticks": 0.0,
+        "ci95_delta_RMST": [
+          0.0,
+          0.0
+        ],
+        "mean_delta_energy_kJ": 3.711456180001676,
+        "ci95_delta_energy_kJ": [
+          3.711456180001676,
+          3.711456180001676
+        ]
+      },
+      "Proposed_vs_Proposed_PrefixOnly": {
+        "mean_delta_DSR": 0.0,
+        "discordant_pairs": {
+          "proposed_wins": 0,
+          "baseline_wins": 0
+        },
+        "mcnemar_p_value": 1.0,
+        "mean_delta_RMST_ticks": 0.0,
+        "ci95_delta_RMST": [
+          0.0,
+          0.0
+        ],
+        "mean_delta_energy_kJ": 0.0,
+        "ci95_delta_energy_kJ": [
+          0.0,
+          0.0
+        ]
+      },
+      "Proposed_vs_Ablation_NoReplaceRebalance": {
+        "mean_delta_DSR": 0.0,
+        "discordant_pairs": {
+          "proposed_wins": 0,
+          "baseline_wins": 0
+        },
+        "mcnemar_p_value": 1.0,
+        "mean_delta_RMST_ticks": 0.0,
+        "ci95_delta_RMST": [
+          0.0,
+          0.0
+        ],
+        "mean_delta_energy_kJ": -8.686291501015262,
+        "ci95_delta_energy_kJ": [
+          -8.686291501015262,
+          -8.686291501015262
+        ]
+      },
+      "Proposed_vs_Greedy_Lookahead": {
+        "mean_delta_DSR": 0.0,
+        "discordant_pairs": {
+          "proposed_wins": 0,
+          "baseline_wins": 0
+        },
+        "mcnemar_p_value": 1.0,
+        "mean_delta_RMST_ticks": 1.6666666666666667,
+        "ci95_delta_RMST": [
+          -1.5999999999999999,
+          4.933333333333334
+        ],
+        "mean_delta_energy_kJ": 46.747904904980736,
+        "ci95_delta_energy_kJ": [
+          3.292282018977339,
+          90.20352779098414
+        ]
+      },
+      "Proposed_vs_Adaptive_GA": {
+        "mean_delta_DSR": 0.3333333333333333,
+        "discordant_pairs": {
+          "proposed_wins": 1,
+          "baseline_wins": 0
+        },
+        "mcnemar_p_value": 1.0,
+        "mean_delta_RMST_ticks": -0.6666666666666666,
+        "ci95_delta_RMST": [
+          -1.9733333333333336,
+          0.6400000000000002
+        ],
+        "mean_delta_energy_kJ": 43.405211896113485,
+        "ci95_delta_energy_kJ": [
+          43.405211896113485,
+          43.405211896113485
+        ]
+      },
+      "Proposed_vs_Nominal_Planning": {
+        "mean_delta_DSR": 0.0,
+        "discordant_pairs": {
+          "proposed_wins": 0,
+          "baseline_wins": 0
+        },
+        "mcnemar_p_value": 1.0,
+        "mean_delta_RMST_ticks": 0.0,
+        "ci95_delta_RMST": [
+          0.0,
+          0.0
+        ],
+        "mean_delta_energy_kJ": -8.686291501015262,
+        "ci95_delta_energy_kJ": [
+          -8.686291501015262,
+          -8.686291501015262
+        ]
+      }
+    },
+    "solver_stats": {
+      "Proposed_Fast": {
+        "total_runtime_sec": 0.16397940000001654,
+        "greedy_runtime_sec": 0.06093009999995047,
+        "local_search_runtime_sec": 0.10304930000006607,
+        "total_evals": 1018,
+        "greedy_evals": 418,
+        "local_search_evals": 600,
+        "n_evals": 600,
+        "accepted_moves": 4,
+        "stopped_reason": "max_evals_exceeded",
+        "selected_start": "nominal_greedy",
+        "J_after_greedy_ens": 0.22019128513350705,
+        "J_after_greedy_nom_under_ensemble": 0.2616400427933594,
+        "starts": [
+          {
+            "start_idx": 1,
+            "initial_name": "greedy_ensemble",
+            "J_init": 0.22019128513350705,
+            "J_final": 0.23683598843409515,
+            "n_evals": 300,
+            "runtime_sec": 0.05448449999994409,
+            "accepted_moves": 2,
+            "stopped_reason": "max_evals_exceeded",
+            "operator_stats": {
+              "Replace": {
+                "evaluated": 135,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "DwellRebalance": {
+                "evaluated": 76,
+                "accepted": 1,
+                "improvement": 0.002660233533309353
+              },
+              "Swap": {
+                "evaluated": 33,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "ChangeDwell": {
+                "evaluated": 17,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "AdjustWait": {
+                "evaluated": 7,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "Insert": {
+                "evaluated": 24,
+                "accepted": 1,
+                "improvement": 0.01398446976727874
+              },
+              "Delete": {
+                "evaluated": 7,
+                "accepted": 0,
+                "improvement": 0.0
+              }
+            }
+          },
+          {
+            "start_idx": 2,
+            "initial_name": "nominal_greedy",
+            "J_init": 0.2616400427933594,
+            "J_final": 0.2754262384913462,
+            "n_evals": 300,
+            "runtime_sec": 0.04856480000012198,
+            "accepted_moves": 2,
+            "stopped_reason": "max_evals_exceeded",
+            "operator_stats": {
+              "Replace": {
+                "evaluated": 94,
+                "accepted": 1,
+                "improvement": 0.0038143187289403357
+              },
+              "DwellRebalance": {
+                "evaluated": 120,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "Swap": {
+                "evaluated": 32,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "ChangeDwell": {
+                "evaluated": 18,
+                "accepted": 1,
+                "improvement": 0.009971876969046445
+              },
+              "AdjustWait": {
+                "evaluated": 9,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "Insert": {
+                "evaluated": 17,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "Delete": {
+                "evaluated": 9,
+                "accepted": 0,
+                "improvement": 0.0
+              }
+            }
+          }
+        ],
+        "operator_stats": {
+          "Replace": {
+            "evaluated": 94,
+            "accepted": 1,
+            "improvement": 0.0038143187289403357
+          },
+          "DwellRebalance": {
+            "evaluated": 120,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "Swap": {
+            "evaluated": 32,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "ChangeDwell": {
+            "evaluated": 18,
+            "accepted": 1,
+            "improvement": 0.009971876969046445
+          },
+          "AdjustWait": {
+            "evaluated": 9,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "Insert": {
+            "evaluated": 17,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "Delete": {
+            "evaluated": 9,
+            "accepted": 0,
+            "improvement": 0.0
+          }
+        }
+      },
+      "SingleStart_Fast": {
+        "total_runtime_sec": 0.13564879999989898,
+        "greedy_runtime_sec": 0.02767760000006092,
+        "local_search_runtime_sec": 0.10797119999983806,
+        "total_evals": 790,
+        "greedy_evals": 190,
+        "local_search_evals": 600,
+        "n_evals": 600,
+        "accepted_moves": 5,
+        "stopped_reason": "max_evals_exceeded",
+        "selected_start": "greedy_ensemble",
+        "J_after_greedy_ens": 0.22019128513350705,
+        "starts": [
+          {
+            "start_idx": 1,
+            "initial_name": "greedy_ensemble",
+            "J_init": 0.22019128513350705,
+            "J_final": 0.24834171786776782,
+            "n_evals": 600,
+            "runtime_sec": 0.10797119999983806,
+            "accepted_moves": 5,
+            "stopped_reason": "max_evals_exceeded",
+            "operator_stats": {
+              "Replace": {
+                "evaluated": 270,
+                "accepted": 2,
+                "improvement": 0.0013588329825089396
+              },
+              "DwellRebalance": {
+                "evaluated": 122,
+                "accepted": 1,
+                "improvement": 0.0022466253123918367
+              },
+              "Swap": {
+                "evaluated": 83,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "ChangeDwell": {
+                "evaluated": 38,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "AdjustWait": {
+                "evaluated": 10,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "Insert": {
+                "evaluated": 39,
+                "accepted": 2,
+                "improvement": 0.024544974439360212
+              },
+              "Delete": {
+                "evaluated": 33,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "Relocate": {
+                "evaluated": 4,
+                "accepted": 0,
+                "improvement": 0.0
+              }
+            }
+          }
+        ],
+        "operator_stats": {
+          "Replace": {
+            "evaluated": 270,
+            "accepted": 2,
+            "improvement": 0.0013588329825089396
+          },
+          "DwellRebalance": {
+            "evaluated": 122,
+            "accepted": 1,
+            "improvement": 0.0022466253123918367
+          },
+          "Swap": {
+            "evaluated": 83,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "ChangeDwell": {
+            "evaluated": 38,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "AdjustWait": {
+            "evaluated": 10,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "Insert": {
+            "evaluated": 39,
+            "accepted": 2,
+            "improvement": 0.024544974439360212
+          },
+          "Delete": {
+            "evaluated": 33,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "Relocate": {
+            "evaluated": 4,
+            "accepted": 0,
+            "improvement": 0.0
+          }
+        }
+      },
+      "Proposed_PrefixOnly": {
+        "total_runtime_sec": 0.16081119999989824,
+        "greedy_runtime_sec": 0.06093009999995047,
+        "local_search_runtime_sec": 0.09988109999994776,
+        "total_evals": 1018,
+        "greedy_evals": 418,
+        "local_search_evals": 600,
+        "n_evals": 600,
+        "accepted_moves": 4,
+        "stopped_reason": "max_evals_exceeded",
+        "selected_start": "nominal_greedy",
+        "J_after_greedy_ens": 0.22019128513350705,
+        "J_after_greedy_nom_under_ensemble": 0.2616400427933594,
+        "starts": [
+          {
+            "start_idx": 1,
+            "initial_name": "greedy_ensemble",
+            "J_init": 0.22019128513350705,
+            "J_final": 0.23683598843409515,
+            "n_evals": 300,
+            "runtime_sec": 0.05100019999986216,
+            "accepted_moves": 2,
+            "stopped_reason": "max_evals_exceeded",
+            "operator_stats": {
+              "Replace": {
+                "evaluated": 135,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "DwellRebalance": {
+                "evaluated": 76,
+                "accepted": 1,
+                "improvement": 0.002660233533309353
+              },
+              "Swap": {
+                "evaluated": 33,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "ChangeDwell": {
+                "evaluated": 17,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "AdjustWait": {
+                "evaluated": 7,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "Insert": {
+                "evaluated": 24,
+                "accepted": 1,
+                "improvement": 0.01398446976727874
+              },
+              "Delete": {
+                "evaluated": 7,
+                "accepted": 0,
+                "improvement": 0.0
+              }
+            }
+          },
+          {
+            "start_idx": 2,
+            "initial_name": "nominal_greedy",
+            "J_init": 0.2616400427933594,
+            "J_final": 0.2754262384913462,
+            "n_evals": 300,
+            "runtime_sec": 0.0488809000000856,
+            "accepted_moves": 2,
+            "stopped_reason": "max_evals_exceeded",
+            "operator_stats": {
+              "Replace": {
+                "evaluated": 94,
+                "accepted": 1,
+                "improvement": 0.0038143187289403357
+              },
+              "DwellRebalance": {
+                "evaluated": 120,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "Swap": {
+                "evaluated": 32,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "ChangeDwell": {
+                "evaluated": 18,
+                "accepted": 1,
+                "improvement": 0.009971876969046445
+              },
+              "AdjustWait": {
+                "evaluated": 9,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "Insert": {
+                "evaluated": 17,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "Delete": {
+                "evaluated": 9,
+                "accepted": 0,
+                "improvement": 0.0
+              }
+            }
+          }
+        ],
+        "operator_stats": {
+          "Replace": {
+            "evaluated": 94,
+            "accepted": 1,
+            "improvement": 0.0038143187289403357
+          },
+          "DwellRebalance": {
+            "evaluated": 120,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "Swap": {
+            "evaluated": 32,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "ChangeDwell": {
+            "evaluated": 18,
+            "accepted": 1,
+            "improvement": 0.009971876969046445
+          },
+          "AdjustWait": {
+            "evaluated": 9,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "Insert": {
+            "evaluated": 17,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "Delete": {
+            "evaluated": 9,
+            "accepted": 0,
+            "improvement": 0.0
+          }
+        }
+      },
+      "Ablation_NoReplaceRebalance": {
+        "total_runtime_sec": 0.1851524999999583,
+        "greedy_runtime_sec": 0.06093009999995047,
+        "local_search_runtime_sec": 0.12422240000000784,
+        "total_evals": 852,
+        "greedy_evals": 418,
+        "local_search_evals": 434,
+        "n_evals": 434,
+        "accepted_moves": 6,
+        "stopped_reason": "local_optimum_reached",
+        "selected_start": "nominal_greedy",
+        "J_after_greedy_ens": 0.22019128513350705,
+        "J_after_greedy_nom_under_ensemble": 0.2616400427933594,
+        "starts": [
+          {
+            "start_idx": 1,
+            "initial_name": "greedy_ensemble",
+            "J_init": 0.22019128513350705,
+            "J_final": 0.24791488239269333,
+            "n_evals": 249,
+            "runtime_sec": 0.072845099999995,
+            "accepted_moves": 4,
+            "stopped_reason": "local_optimum_reached",
+            "operator_stats": {
+              "Swap": {
+                "evaluated": 108,
+                "accepted": 2,
+                "improvement": 0.00317862281982606
+              },
+              "ChangeDwell": {
+                "evaluated": 45,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "AdjustWait": {
+                "evaluated": 10,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "Insert": {
+                "evaluated": 39,
+                "accepted": 2,
+                "improvement": 0.024544974439360212
+              },
+              "Delete": {
+                "evaluated": 42,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "Relocate": {
+                "evaluated": 4,
+                "accepted": 0,
+                "improvement": 0.0
+              }
+            }
+          },
+          {
+            "start_idx": 2,
+            "initial_name": "nominal_greedy",
+            "J_init": 0.2616400427933594,
+            "J_final": 0.2808165453889744,
+            "n_evals": 185,
+            "runtime_sec": 0.05137730000001284,
+            "accepted_moves": 2,
+            "stopped_reason": "local_optimum_reached",
+            "operator_stats": {
+              "Swap": {
+                "evaluated": 75,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "ChangeDwell": {
+                "evaluated": 43,
+                "accepted": 2,
+                "improvement": 0.019176502595614986
+              },
+              "AdjustWait": {
+                "evaluated": 13,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "Insert": {
+                "evaluated": 26,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "Delete": {
+                "evaluated": 27,
+                "accepted": 0,
+                "improvement": 0.0
+              }
+            }
+          }
+        ],
+        "operator_stats": {
+          "Swap": {
+            "evaluated": 75,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "ChangeDwell": {
+            "evaluated": 43,
+            "accepted": 2,
+            "improvement": 0.019176502595614986
+          },
+          "AdjustWait": {
+            "evaluated": 13,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "Insert": {
+            "evaluated": 26,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "Delete": {
+            "evaluated": 27,
+            "accepted": 0,
+            "improvement": 0.0
+          }
+        }
+      },
+      "Greedy_Lookahead": {
+        "total_runtime_sec": 0.02767760000006092,
+        "greedy_runtime_sec": 0.02767760000006092,
+        "local_search_runtime_sec": 0.0,
+        "total_evals": 190,
+        "greedy_evals": 190,
+        "local_search_evals": 0,
+        "n_evals": 190,
+        "J_after_greedy_ens": 0.22019128513350705
+      },
+      "Adaptive_GA": {
+        "total_runtime_sec": 0.12689290000002984,
+        "local_search_runtime_sec": 0.12689290000002984,
+        "total_evals": 520,
+        "local_search_evals": 520,
+        "n_evals": 520
+      },
+      "Nominal_Planning": {
+        "total_runtime_sec": 0.17006069999979445,
+        "greedy_runtime_sec": 0.03325249999988955,
+        "local_search_runtime_sec": 0.1368081999999049,
+        "total_evals": 828,
+        "greedy_evals": 228,
+        "local_search_evals": 600,
+        "n_evals": 600,
+        "accepted_moves": 5,
+        "stopped_reason": "max_evals_exceeded",
+        "selected_start": "nominal_greedy",
+        "J_after_greedy": 0.2301345018999882,
+        "starts": [
+          {
+            "start_idx": 1,
+            "initial_name": "nominal_greedy",
+            "J_init": 0.2301345018999882,
+            "J_final": 0.24823226688735112,
+            "n_evals": 600,
+            "runtime_sec": 0.1368081999999049,
+            "accepted_moves": 5,
+            "stopped_reason": "max_evals_exceeded",
+            "operator_stats": {
+              "Replace": {
+                "evaluated": 173,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "DwellRebalance": {
+                "evaluated": 188,
+                "accepted": 3,
+                "improvement": 0.00041056040243181435
+              },
+              "Swap": {
+                "evaluated": 108,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "ChangeDwell": {
+                "evaluated": 55,
+                "accepted": 2,
+                "improvement": 0.017687204584931115
+              },
+              "AdjustWait": {
+                "evaluated": 14,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "Insert": {
+                "evaluated": 25,
+                "accepted": 0,
+                "improvement": 0.0
+              },
+              "Delete": {
+                "evaluated": 36,
+                "accepted": 0,
+                "improvement": 0.0
+              }
+            }
+          }
+        ],
+        "operator_stats": {
+          "Replace": {
+            "evaluated": 173,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "DwellRebalance": {
+            "evaluated": 188,
+            "accepted": 3,
+            "improvement": 0.00041056040243181435
+          },
+          "Swap": {
+            "evaluated": 108,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "ChangeDwell": {
+            "evaluated": 55,
+            "accepted": 2,
+            "improvement": 0.017687204584931115
+          },
+          "AdjustWait": {
+            "evaluated": 14,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "Insert": {
+            "evaluated": 25,
+            "accepted": 0,
+            "improvement": 0.0
+          },
+          "Delete": {
+            "evaluated": 36,
+            "accepted": 0,
+            "improvement": 0.0
+          }
+        }
+      }
+    },
+    "final_schedules": {
+      "Proposed_Fast": {
+        "num_cells": 16,
+        "H": 15,
+        "delta_t": 60.0,
+        "uav_schedules": [
+          {
+            "uav_idx": 0,
+            "r_k": 5,
+            "visits": [
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 3,
+                "wait_ticks": 0,
+                "start_tick": 1
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 4
+              },
+              {
+                "cell_idx": 8,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 7
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 10
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 12
+              }
+            ]
+          },
+          {
+            "uav_idx": 1,
+            "r_k": 4,
+            "visits": [
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 2
+              },
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 4
+              },
+              {
+                "cell_idx": 6,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 7
+              },
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 10
+              }
+            ]
+          }
+        ]
+      },
+      "SingleStart_Fast": {
+        "num_cells": 16,
+        "H": 15,
+        "delta_t": 60.0,
+        "uav_schedules": [
+          {
+            "uav_idx": 0,
+            "r_k": 5,
+            "visits": [
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 3,
+                "wait_ticks": 0,
+                "start_tick": 1
+              },
+              {
+                "cell_idx": 6,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 5
+              },
+              {
+                "cell_idx": 11,
+                "dwell_ticks": 1,
+                "wait_ticks": 0,
+                "start_tick": 8
+              },
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 10
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 1,
+                "wait_ticks": 0,
+                "start_tick": 13
+              }
+            ]
+          },
+          {
+            "uav_idx": 1,
+            "r_k": 4,
+            "visits": [
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 2
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 5
+              },
+              {
+                "cell_idx": 14,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 9
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 1,
+                "wait_ticks": 0,
+                "start_tick": 13
+              }
+            ]
+          }
+        ]
+      },
+      "Proposed_PrefixOnly": {
+        "num_cells": 16,
+        "H": 15,
+        "delta_t": 60.0,
+        "uav_schedules": [
+          {
+            "uav_idx": 0,
+            "r_k": 5,
+            "visits": [
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 3,
+                "wait_ticks": 0,
+                "start_tick": 1
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 4
+              },
+              {
+                "cell_idx": 8,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 7
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 10
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 12
+              }
+            ]
+          },
+          {
+            "uav_idx": 1,
+            "r_k": 4,
+            "visits": [
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 2
+              },
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 4
+              },
+              {
+                "cell_idx": 6,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 7
+              },
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 10
+              }
+            ]
+          }
+        ]
+      },
+      "Ablation_NoReplaceRebalance": {
+        "num_cells": 16,
+        "H": 15,
+        "delta_t": 60.0,
+        "uav_schedules": [
+          {
+            "uav_idx": 0,
+            "r_k": 5,
+            "visits": [
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 3,
+                "wait_ticks": 0,
+                "start_tick": 1
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 4
+              },
+              {
+                "cell_idx": 9,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 7
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 10
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 12
+              }
+            ]
+          },
+          {
+            "uav_idx": 1,
+            "r_k": 4,
+            "visits": [
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 3,
+                "wait_ticks": 0,
+                "start_tick": 2
+              },
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 5
+              },
+              {
+                "cell_idx": 6,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 8
+              },
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 11
+              }
+            ]
+          }
+        ]
+      },
+      "Greedy_Lookahead": {
+        "num_cells": 16,
+        "H": 15,
+        "delta_t": 60.0,
+        "uav_schedules": [
+          {
+            "uav_idx": 0,
+            "r_k": 4,
+            "visits": [
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 1
+              },
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 4
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 7
+              },
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 10
+              }
+            ]
+          },
+          {
+            "uav_idx": 1,
+            "r_k": 3,
+            "visits": [
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 2
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 5
+              },
+              {
+                "cell_idx": 14,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 9
+              }
+            ]
+          }
+        ]
+      },
+      "Adaptive_GA": {
+        "num_cells": 16,
+        "H": 15,
+        "delta_t": 60.0,
+        "uav_schedules": [
+          {
+            "uav_idx": 0,
+            "r_k": 3,
+            "visits": [
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 4,
+                "wait_ticks": 0,
+                "start_tick": 2
+              },
+              {
+                "cell_idx": 11,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 7
+              },
+              {
+                "cell_idx": 11,
+                "dwell_ticks": 3,
+                "wait_ticks": 0,
+                "start_tick": 9
+              }
+            ]
+          },
+          {
+            "uav_idx": 1,
+            "r_k": 2,
+            "visits": [
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 4,
+                "wait_ticks": 0,
+                "start_tick": 1
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 4,
+                "wait_ticks": 0,
+                "start_tick": 5
+              }
+            ]
+          }
+        ]
+      },
+      "Nominal_Planning": {
+        "num_cells": 16,
+        "H": 15,
+        "delta_t": 60.0,
+        "uav_schedules": [
+          {
+            "uav_idx": 0,
+            "r_k": 5,
+            "visits": [
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 3,
+                "wait_ticks": 0,
+                "start_tick": 1
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 3,
+                "wait_ticks": 0,
+                "start_tick": 4
+              },
+              {
+                "cell_idx": 9,
+                "dwell_ticks": 3,
+                "wait_ticks": 0,
+                "start_tick": 8
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 1,
+                "wait_ticks": 0,
+                "start_tick": 12
+              },
+              {
+                "cell_idx": 5,
+                "dwell_ticks": 1,
+                "wait_ticks": 0,
+                "start_tick": 13
+              }
+            ]
+          },
+          {
+            "uav_idx": 1,
+            "r_k": 4,
+            "visits": [
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 2
+              },
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 4
+              },
+              {
+                "cell_idx": 6,
+                "dwell_ticks": 2,
+                "wait_ticks": 0,
+                "start_tick": 7
+              },
+              {
+                "cell_idx": 10,
+                "dwell_ticks": 3,
+                "wait_ticks": 0,
+                "start_tick": 10
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "mission_records": [
+      {
+        "mission_idx": 0,
+        "target_path": [
+          2,
+          2,
+          2,
+          2,
+          1,
+          1,
+          1,
+          1,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          9
+        ],
+        "arms": {
+          "Proposed_Fast": {
+            "detected": 1,
+            "rmst": 13.0,
+            "energy": 317254.833995939,
+            "calib_gap": -0.7245737615086538
+          },
+          "SingleStart_Fast": {
+            "detected": 1,
+            "rmst": 13.0,
+            "energy": 313543.37781593733,
+            "calib_gap": -0.7516582821322322
+          },
+          "Proposed_PrefixOnly": {
+            "detected": 1,
+            "rmst": 13.0,
+            "energy": 317254.833995939,
+            "calib_gap": -0.7245737615086538
+          },
+          "Ablation_NoReplaceRebalance": {
+            "detected": 1,
+            "rmst": 13.0,
+            "energy": 325941.12549695425,
+            "calib_gap": -0.7191834546110256
+          },
+          "Greedy_Lookahead": {
+            "detected": 1,
+            "rmst": 8.0,
+            "energy": 226164.45675830176,
+            "calib_gap": -0.779808714866493
+          },
+          "Adaptive_GA": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 273849.62209982553,
+            "calib_gap": 0.2450486436087358
+          },
+          "Nominal_Planning": {
+            "detected": 1,
+            "rmst": 13.0,
+            "energy": 325941.12549695425,
+            "calib_gap": -0.7517677331126489
+          }
+        }
+      },
+      {
+        "mission_idx": 1,
+        "target_path": [
+          5,
+          5,
+          5,
+          6,
+          6,
+          6,
+          6,
+          2,
+          2,
+          3,
+          3,
+          3,
+          7,
+          6,
+          2
+        ],
+        "arms": {
+          "Proposed_Fast": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 317254.833995939,
+            "calib_gap": 0.2754262384913462
+          },
+          "SingleStart_Fast": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 313543.37781593733,
+            "calib_gap": 0.24834171786776782
+          },
+          "Proposed_PrefixOnly": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 317254.833995939,
+            "calib_gap": 0.2754262384913462
+          },
+          "Ablation_NoReplaceRebalance": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 325941.12549695425,
+            "calib_gap": 0.2808165453889744
+          },
+          "Greedy_Lookahead": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 292678.1652572865,
+            "calib_gap": 0.22019128513350705
+          },
+          "Adaptive_GA": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 273849.62209982553,
+            "calib_gap": 0.2450486436087358
+          },
+          "Nominal_Planning": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 325941.12549695425,
+            "calib_gap": 0.24823226688735112
+          }
+        }
+      },
+      {
+        "mission_idx": 2,
+        "target_path": [
+          5,
+          5,
+          5,
+          5,
+          5,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          0,
+          0
+        ],
+        "arms": {
+          "Proposed_Fast": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 317254.833995939,
+            "calib_gap": 0.2754262384913462
+          },
+          "SingleStart_Fast": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 313543.37781593733,
+            "calib_gap": 0.24834171786776782
+          },
+          "Proposed_PrefixOnly": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 317254.833995939,
+            "calib_gap": 0.2754262384913462
+          },
+          "Ablation_NoReplaceRebalance": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 325941.12549695425,
+            "calib_gap": 0.2808165453889744
+          },
+          "Greedy_Lookahead": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 292678.1652572865,
+            "calib_gap": 0.22019128513350705
+          },
+          "Adaptive_GA": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 273849.62209982553,
+            "calib_gap": 0.2450486436087358
+          },
+          "Nominal_Planning": {
+            "detected": 0,
+            "rmst": 15.0,
+            "energy": 325941.12549695425,
+            "calib_gap": 0.24823226688735112
+          }
+        }
+      }
+    ]
+  }
+}

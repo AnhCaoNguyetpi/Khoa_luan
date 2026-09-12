@@ -5,7 +5,7 @@ import pandas as pd
 
 from sar_uav.experiments.stats import (arm_proportion_table, bootstrap_mean_ci,
                                        compare_arms, mcnemar_exact_p,
-                                       wilson_interval, _norm_ppf)
+                                       student_t_ci, wilson_interval, _norm_ppf)
 
 
 def test_norm_ppf_matches_tables():
@@ -108,3 +108,39 @@ def test_arm_proportion_table():
     assert (tbl.loc["ctrl", "detected_ci_lo"]
             < tbl.loc["ctrl", "detected_est"]
             < tbl.loc["ctrl", "detected_ci_hi"])
+
+
+def test_student_t_ci_properties():
+    # 1. Edge cases
+    mean, se, ci = student_t_ci([])
+    assert np.isnan(mean) and np.isnan(se) and np.isnan(ci[0]) and np.isnan(ci[1])
+
+    # n = 1: Sample mean is preserved, but SE and CI must be NaN because variance cannot be estimated
+    mean1, se1, ci1 = student_t_ci([5.0])
+    assert mean1 == 5.0
+    assert np.isnan(se1)
+    assert np.isnan(ci1[0]) and np.isnan(ci1[1])
+
+    # 2. Sample size 15 (e.g. 15 missions)
+    vals = [10.0, 12.0, 11.0, 9.0, 14.0, 10.0, 13.0, 11.0, 12.0, 8.0, 10.0, 15.0, 11.0, 12.0, 10.0]
+    mean, se, (lo, hi) = student_t_ci(vals, alpha=0.05)
+    assert abs(mean - np.mean(vals)) < 1e-12
+    # At df=14, t_crit is approx 2.145, which is strictly wider than 1.96
+    margin = hi - mean
+    assert margin > 1.96 * se
+    assert abs(margin - 2.1448 * se) < 0.01
+
+    # 3. Domain bounds clipping — tested separately for lower and upper bounds
+    # 3a. Lower bound clipping: positive values with high variance whose raw lower CI penetrates below 0
+    vals_low = [0.1, 0.2, 0.0, 0.3, 0.1, 0.0, 0.2, 0.1, 5.0, 0.1, 0.2, 0.0, 0.1, 0.2, 0.1]
+    _, _, (lo_raw, _) = student_t_ci(vals_low, alpha=0.05, bounds=None)
+    assert lo_raw < 0.0, f"Precondition failed: unclipped lo={lo_raw} must be negative to test clipping"
+    _, _, (lo_clipped, _) = student_t_ci(vals_low, alpha=0.05, bounds=(0.0, 24.0))
+    assert lo_clipped == 0.0, f"Expected lo_clipped == 0.0, got {lo_clipped}"
+
+    # 3b. Upper bound clipping: values near 24.0 with high variance whose raw upper CI penetrates above 24.0
+    vals_high = [23.9, 23.8, 24.0, 23.7, 23.9, 24.0, 23.8, 23.9, 15.0, 23.9, 23.8, 24.0, 23.9, 23.8, 23.9]
+    _, _, (_, hi_raw) = student_t_ci(vals_high, alpha=0.05, bounds=None)
+    assert hi_raw > 24.0, f"Precondition failed: unclipped hi={hi_raw} must be > 24.0 to test clipping"
+    _, _, (_, hi_clipped) = student_t_ci(vals_high, alpha=0.05, bounds=(0.0, 24.0))
+    assert hi_clipped == 24.0, f"Expected hi_clipped == 24.0, got {hi_clipped}"

@@ -1,0 +1,34 @@
+{
+  "generated_at": "2026-09-12T03:18:51Z",
+  "selected_run_id": null,
+  "results_directory": "C:\\Users\\ADMIN\\Downloads\\Kh\u00f3a lu\u1eadn\\uav-sar\\results",
+  "figures": {
+    "fig1_jensen_mechanism": {
+      "source": "analytical_model",
+      "description": "Vegetation-conditioned detection decay curves & Jensen bound"
+    },
+    "fig2_evaluator_benchmark": {
+      "is_single_run": true,
+      "compatibility_status": "single_run_verified",
+      "run_id_tier2": "run_20260912_001837_94d050",
+      "run_id_tier5": "run_20260912_001837_94d050",
+      "timestamp_tier2": "2026-09-11T17:18:40Z",
+      "timestamp_tier5": "2026-09-11T17:18:43Z",
+      "seed_tier2": 42,
+      "seed_tier5": 42,
+      "git_hash_tier2": "b4d62fb94f",
+      "git_hash_tier5": "b4d62fb94f",
+      "source_sha256_tier2": "b412bef1fb09a6c9",
+      "source_sha256_tier5": "b412bef1fb09a6c9",
+      "project_tree_sha256_tier2": "b2b4c0854a9f3e87",
+      "project_tree_sha256_tier5": "b2b4c0854a9f3e87"
+    },
+    "fig3_tay_nguyen_case_study": {
+      "source": "gis_optimization",
+      "elevation_dataset": "Copernicus DEM 100m",
+      "vegetation_dataset": "ESA WorldCover 100m",
+      "H": 24,
+      "num_uavs": 3
+    }
+  }
+}

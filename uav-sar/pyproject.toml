@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sar-uav"
+version = "0.2.0"
+description = "Multi-UAV Routing and Search-Effort Allocation under Persistent Detection Uncertainty"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "numpy>=1.22",
+    "matplotlib>=3.5",
+    "scipy>=1.8",
+]
+
+[project.scripts]
+sar-uav = "sar_uav.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

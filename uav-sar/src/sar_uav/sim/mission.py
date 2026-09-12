@@ -1,384 +1,280 @@
-"""Mission simulation loop (proposal section "Quy trinh mo phong tong the").
+"""Simulation execution of joint multi-UAV schedules.
 
-    P^t -> assignment -> routing -> search -> observation -> Bayesian update
-        -> P^{t+1} -> re-optimise
-
-``MissionSetup`` bundles everything that must be *shared across strategy
-arms* of one replicate (common random numbers): area, weather, IPP, hidden
-target trajectory.  ``run_mission`` then executes one strategy against that
-shared environment.
+Corresponds to proposal section:
+    - Safe return-to-depot protocol upon target detection (including mid-flight completion to endpoint v)
+    - Statistical metrics collection (DSR, RMST, actual energy, Calibration Gap)
 """
 
 from __future__ import annotations
 
-import logging
-import time
-import zlib
-from pathlib import Path
-from typing import Dict, List, Optional
-
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Tuple, TYPE_CHECKING
 import numpy as np
 
-from ..belief.models import build_initial_belief
-from ..belief.motion import MotionModel, perturb_betas, PROFILES
-from ..belief.update import bayes_negative_update
-from ..config import DEFAULT_CONFIG, deep_update
-from ..data.area import AreaData, get_or_build_area
-from ..data.weather import WeatherSeries, load_weather, make_weather
-from ..detection.sensors import q_tick, q_dwell
-from ..planning import make_planner, PlanningProblem
-from ..uav.platform import UAVSpec
-from ..uav.state import UAVState
-from ..utils.seed import spawn_rngs
-from .metrics import MissionResult
-from .target import LostPersonSim, sample_profile
-
-log = logging.getLogger(__name__)
+if TYPE_CHECKING:
+    from sar_uav.experiments.rng import IndexedRNGStream
+from sar_uav.planning.constraints import ConstraintChecker, JointSchedule, UAVSchedule
 
 
-def resolve_belief_model_file(belief_cfg: Dict, area_name: str) -> Optional[str]:
-    mf = belief_cfg.get("model_file")
-    if mf:
-        return mf
-    default = Path(__file__).resolve().parents[3] / "data" / "models" \
-        / f"{area_name}_pmr.npz"
-    return str(default) if default.exists() else None
+@dataclass
+class MissionExecutionResult:
+    """Outcomes of executing a schedule in simulation under ground truth."""
+    detected: bool
+    detection_tick: Optional[int]
+    rmst_time: float               # min(T_r, T_max) in ticks
+    actual_energy_joules: float    # total energy consumed across all UAVs
+    predicted_J: float             # planner expected J_S(a)
+    calibration_gap: float         # predicted_J - (1.0 if detected else 0.0)
+    details: Dict
 
 
-class MissionSetup:
-    """Environment shared by all arms of one replicate (CRN)."""
+class ScheduleSimulator:
+    """Executes a JointSchedule against hidden true target path."""
 
-    def __init__(self, cfg: Dict, area: AreaData, weather: WeatherSeries,
-                 ipp_idx: int, profile: str, burn_min: int,
-                 target_path: np.ndarray, seed: int):
-        self.cfg = cfg
-        self.area = area
-        self.weather = weather
-        self.ipp_idx = int(ipp_idx)
-        self.profile = profile
-        self.burn_min = int(burn_min)
-        self.target_path = target_path          # absolute-tick indexed
-        self.seed = int(seed)
+    def __init__(
+        self,
+        checker: ConstraintChecker,
+        true_lambda_rates: np.ndarray,
+        delta_t: float = 60.0
+    ):
+        self.checker = checker
+        self.true_lambda = np.asarray(true_lambda_rates, dtype=np.float64)
+        if self.true_lambda.ndim != 1:
+            raise ValueError(f"true_lambda_rates must be a 1D array, got ndim={self.true_lambda.ndim}")
+        num_nodes = self.checker.dist_matrix.shape[0]
+        if len(self.true_lambda) != num_nodes:
+            raise ValueError(
+                f"true_lambda_rates length ({len(self.true_lambda)}) must match checker cell count ({num_nodes})"
+            )
+        if not np.all(np.isfinite(self.true_lambda)):
+            raise ValueError("true_lambda_rates must be finite (no NaN or Inf)")
+        if np.any(self.true_lambda < 0.0):
+            raise ValueError(f"true_lambda_rates must be non-negative, got min={float(np.min(self.true_lambda))}")
+        if not (np.isfinite(delta_t) and delta_t > 0.0):
+            raise ValueError(f"delta_t must be finite and positive, got {delta_t}")
+        self.delta_t = delta_t
 
-    @classmethod
-    def create(cls, cfg: Dict, seed: int, area: Optional[AreaData] = None,
-               ipp_idx: Optional[int] = None,
-               profile: Optional[str] = None,
-               moving: Optional[bool] = None) -> "MissionSetup":
-        mcfg = deep_update(DEFAULT_CONFIG, cfg)
-        rngs = spawn_rngs(seed, 2)
-        rng_env, rng_target = rngs
+    def run_simulation(
+        self,
+        joint_sched: JointSchedule,
+        target_path: np.ndarray,
+        mission_idx: int = 0,
+        rng_stream: Optional["IndexedRNGStream"] = None,
+        predicted_J: float = 0.0
+    ) -> MissionExecutionResult:
+        """Simulates schedule execution tick by tick.
 
-        if area is None:
-            area = get_or_build_area(mcfg["area"]["name"],
-                                     Path(__file__).resolve().parents[3] / "data",
-                                     mcfg)
+        Enforces input validation: schedules must be valid according to the checker
+        and consistent in horizon, delta_t, and cell dimensions before simulation.
+        Also validates target_path length, dtype, coordinate ranges, and 1D shape.
+        """
+        if abs(self.delta_t - self.checker.delta_t) > 1e-6:
+            raise ValueError(
+                f"Simulator delta_t ({self.delta_t}) != checker delta_t ({self.checker.delta_t})"
+            )
 
-        horizon = float(mcfg["mission"]["horizon_min"])
-        dt = float(mcfg["mission"]["dt_min"])
-        burn_lo, burn_hi = mcfg["target"].get("burn_min_range", [45, 120])
-        burn_max = int(max(burn_lo, burn_hi))
-        total_min = horizon + burn_max + 2 * dt
-        weather_file = Path(__file__).resolve().parents[3] / "data" / "areas" \
-            / area.name / "weather.npz"
-        if weather_file.exists():
-            weather = load_weather(weather_file)
-            if len(weather) * weather.dt_min < total_min:
-                raise ValueError(f"weather series too short for mission: {weather_file}")
-        else:
-            weather = make_weather(total_min, dt, rng_env, mcfg["weather"])
-        rain_fn = lambda tick: float(weather.rain[min(int(tick), len(weather) - 1)])
+        feasible, reason = self.checker.check_joint_schedule(joint_sched)
+        if not feasible:
+            raise ValueError(f"Infeasible schedule rejected by simulator: {reason}")
 
-        burn = int(rng_env.integers(int(burn_lo), int(burn_hi) + 1))
-        prof = profile or sample_profile(rng_target,
-                                         mcfg["target"]["profile_probs"])
+        if rng_stream is None:
+            from sar_uav.experiments.rng import IndexedRNGStream
+            rng_stream = IndexedRNGStream(master_seed=42)
 
-        if ipp_idx is None:
-            trail_cells = np.flatnonzero(area.trail_mask.reshape(-1))
-            pool = trail_cells if len(trail_cells) > 4 else area.land_idx()
-            ipp = int(rng_env.choice(pool))
-        else:
-            ipp = int(ipp_idx)
+        H = joint_sched.H
+        target_path_arr = np.asarray(target_path)
+        if target_path_arr.ndim != 1:
+            raise ValueError(f"target_path must be a 1D array of cell indices, got ndim={target_path_arr.ndim}")
+        if len(target_path_arr) < H:
+            raise ValueError(
+                f"target_path length ({len(target_path_arr)}) is less than schedule horizon H ({H})"
+            )
+        if not np.issubdtype(target_path_arr.dtype, np.integer):
+            raise ValueError(f"target_path must contain integer cell indices, got dtype={target_path_arr.dtype}")
+        if not np.all(np.isfinite(target_path_arr)):
+            raise ValueError("target_path must contain finite cell indices")
+        num_nodes = self.checker.dist_matrix.shape[0]
+        min_cell = int(np.min(target_path_arr[:H]))
+        max_cell = int(np.max(target_path_arr[:H]))
+        if min_cell < 0 or max_cell >= num_nodes:
+            raise ValueError(
+                f"target_path cell indices out of range [0, {num_nodes - 1}]: min={min_cell}, max={max_cell}"
+            )
 
-        sim = LostPersonSim(area, prof, ipp, rng_target,
-                            moving=bool(mcfg["target"]["moving"]) if moving is None
-                            else bool(moving))
-        path = sim.full_path(burn, horizon, rain_fn)
+        # Pre-calculate active action for each UAV at each tick:
+        # action[k, t] = ('search', cell_idx) or ('fly', from_node, to_node) or ('wait', node) or ('depot', 0)
+        uav_actions: Dict[int, List[Tuple]] = {}
 
-        return cls(mcfg, area, weather, ipp, prof, burn, path, seed)
+        for u_sched in joint_sched.uav_schedules:
+            k = u_sched.uav_idx
+            actions = [('depot', self.checker.depot_idx) for _ in range(H)]
+            if u_sched.r_k > 0:
+                current_node = self.checker.depot_idx
+                for l_idx, v in enumerate(u_sched.visits):
+                    dest_node = v.cell_idx
+                    tau_leg = self.checker.tau_bar[k, current_node, dest_node]
 
-    # ------------------------------------------------------------------
-    def rain_at(self, abs_tick: int) -> float:
-        return float(self.weather.rain[min(int(abs_tick), len(self.weather) - 1)])
+                    if l_idx == 0:
+                        # Departure delay at depot
+                        for t in range(0, min(H, v.wait_ticks)):
+                            actions[t] = ('wait_depot', self.checker.depot_idx)
+                        flight_start = v.wait_ticks
+                    else:
+                        prev_v = u_sched.visits[l_idx - 1]
+                        flight_start = prev_v.start_tick + prev_v.dwell_ticks
 
+                    # Flight leg
+                    for t in range(flight_start, min(H, flight_start + tau_leg)):
+                        actions[t] = ('fly', current_node, dest_node)
 
-# ---------------------------------------------------------------------------
+                    # Arrival wait (l >= 2)
+                    if l_idx > 0 and v.wait_ticks > 0:
+                        wait_start = flight_start + tau_leg
+                        for t in range(wait_start, min(H, wait_start + v.wait_ticks)):
+                            actions[t] = ('wait_station', dest_node)
 
-def _auto_bases(area, fleet: List[UAVSpec]) -> List[np.ndarray]:
-    """Place bases near distinct map corners (trailhead depots)."""
-    H, W = area.shape
-    fracs = [(0.12, 0.12), (0.88, 0.88), (0.12, 0.88),
-             (0.88, 0.12), (0.5, 0.5)]
-    bases = []
-    land = area.land_idx()
-    xy = area.centers_xy()
-    for k in range(len(fleet)):
-        fx, fy = fracs[k % len(fracs)]
-        target = np.array([fx * W * area.cell, fy * H * area.cell])
-        d = np.hypot(xy[land][:, 0] - target[0], xy[land][:, 1] - target[1])
-        bases.append(xy[land[int(np.argmin(d))]])
-    return bases
+                    # Search dwell
+                    for t in range(v.start_tick, min(H, v.start_tick + v.dwell_ticks)):
+                        actions[t] = ('search', dest_node)
 
+                    current_node = dest_node
 
-def run_mission(setup: MissionSetup,
-                planner_cfg: Optional[Dict] = None,
-                initial_model: Optional[str] = None,
-                belief_override: Optional[np.ndarray] = None,
-                q_est_bias: float = 1.0,
-                beta_est_bias: float = 0.0,
-                forecast_enabled: Optional[bool] = None,
-                arm_name: str = "",
-                replicate: int = -1,
-                render_dir: Optional[str] = None,
-                render_every: int = 25,
-                obs_seed: Optional[int] = None,
-                collect_trace: bool = False,
-                assign_criterion: str = "pq",
-                fleet_cfg: Optional[List[Dict]] = None,
-                moving_target: Optional[bool] = None) -> MissionResult:
-    """Execute one SAR mission of a given strategy against ``setup``."""
-    cfg = setup.cfg
-    area = setup.area
-    dt = float(cfg["mission"]["dt_min"])
-    horizon = float(cfg["mission"]["horizon_min"])
-    dwell = int(cfg["detection"]["dwell_ticks"])
-    fp_side = float(cfg["detection"].get("footprint_side", 0.45))
-    moving = bool(cfg["target"]["moving"]) if moving_target is None \
-        else bool(moving_target)
-    if forecast_enabled is None:
-        forecast_enabled = bool(cfg["belief"]["forecast_enabled"]) and moving
+                # Return leg to depot
+                last_v = u_sched.visits[-1]
+                ret_start = last_v.start_tick + last_v.dwell_ticks
+                tau_ret = self.checker.tau_bar[k, current_node, self.checker.depot_idx]
+                for t in range(ret_start, min(H, ret_start + tau_ret)):
+                    actions[t] = ('fly_return', current_node, self.checker.depot_idx)
 
-    # ---- fleet & states -------------------------------------------------
-    fleet_src = fleet_cfg if fleet_cfg is not None else cfg["fleet"]
-    fleet = [UAVSpec(**{k: v for k, v in c.items()
-                        if k in UAVSpec.__dataclass_fields__})
-             for c in fleet_src]
-    bases_xy = _auto_bases(area, fleet)
-    states: Dict[str, UAVState] = {}
-    for spec, bxy in zip(fleet, bases_xy):
-        if spec.base_cell is not None:
-            bxy = area.centers_xy()[spec.base_cell]
-        states[spec.name] = UAVState(spec, area, bxy)
+            uav_actions[k] = actions
 
-    # ---- planner's information world ------------------------------------
-    true_betas = PROFILES[setup.profile]
-    est_betas = perturb_betas(true_betas, float(beta_est_bias))
-    motion_est = MotionModel(area, est_betas)
+        # Tick-by-tick simulation loop
+        detected = False
+        detection_tick = None
+        detecting_uav = None
 
-    def weather_fn(t_rel: float) -> Dict[str, float]:
-        return setup.weather.window_mean(int(setup.burn_min + t_rel), dwell)
+        for t in range(H):
+            target_cell = int(target_path[t])
 
-    problem = PlanningProblem(area, fleet, motion_est, dwell_ticks=dwell,
-                              weather_fn=weather_fn, dt_min=dt)
-    if abs(q_est_bias - 1.0) > 1e-9:
-        # wrap q_matrix to apply the RQ5 estimation bias
-        base_qm = problem.q_matrix
-
-        def biased_qm(t, _b=float(q_est_bias)):
-            return np.clip(_b * base_qm(t), 0.0, 0.999)
-
-        problem.q_matrix = biased_qm            # type: ignore[method-assign]
-
-    if assign_criterion == "p":
-        # RQ3 ablation: assignment ignores detectability (uses p_i^t only);
-        # observations/Bayes updates still use the real detection model
-        K = len(fleet)
-
-        def p_only_qm(t):
-            return np.ones((K, problem.n))
-
-        problem.q_matrix = p_only_qm            # type: ignore[method-assign]
-
-    p_cfg = deep_update(cfg["planner"], planner_cfg or {})
-    planner = make_planner(p_cfg, problem)
-
-    # ---- initial belief --------------------------------------------------
-    if belief_override is not None:
-        belief = np.asarray(belief_override, dtype=float).reshape(-1).copy()
-    else:
-        model_name = initial_model or cfg["belief"]["initial_model"]
-        bcfg = dict(cfg["belief"])
-        if model_name == "datadriven":
-            mf = resolve_belief_model_file(bcfg, area.name)
-            if mf is None:
-                raise ValueError(
-                    "No trained PMR weights found -- run "
-                    "scripts/train_belief_model.py first, or pick another "
-                    "initial_model.")
-            bcfg["model_file"] = mf
-        belief = build_initial_belief(model_name, area, setup.ipp_idx,
-                                      float(setup.burn_min), bcfg)
-
-    # ---- observation RNG -------------------------------------------------
-    if obs_seed is None:
-        obs_seed = setup.seed * 1000 + zlib.crc32(arm_name.encode()) % 1000
-    obs_rng = np.random.default_rng(obs_seed)
-
-    veg_flat = np.clip(area.veg.reshape(-1), 0, 1)
-
-    # ---- main loop -------------------------------------------------------
-    detected = False
-    detect_t = float("nan")
-    n_replans, replan_ms = 0, 0.0
-    idle_streak = 0
-    frames: List[Dict] = []
-    trace: List[Dict] = [] if collect_trace else None
-    t = 0.0
-
-    while t < horizon - 1e-9:
-        tabs = int(round(setup.burn_min + t))
-
-        # 1) belief forecast under the planner's motion model
-        if forecast_enabled and t > 0:
-            belief = motion_est.forecast(belief, setup.rain_at(tabs))
-
-        # 2) planning (only ever sees the belief)
-        t0 = time.perf_counter()
-        routes = planner.decide(states, belief, t, horizon_left=horizon - t)
-        replan_ms += (time.perf_counter() - t0) * 1000.0
-        if routes:
-            n_replans += 1
-            idle_streak = 0
-            for name, cycles in routes.items():
-                try:
-                    states[name].assign_cycles(cycles)
-                except RuntimeError:
-                    pass                       # became busy mid-decision: skip
-
-        # 3) tick dynamics + observations
-        any_searching = False
-        for st in states.values():
-            ev = st.tick(dt)
-            if "searching" in ev:
-                any_searching = True
-                cell = int(ev["searching"])
-                # sensor footprint: centre cell at full q, neighbours attenuated
-                fp_cells = [cell] + area.neighbor_idx(cell)
-                true_cell = int(setup.target_path[tabs])
-                q_true_tick = q_tick(st.spec.sensor, veg_flat[cell],
-                                     setup.weather.cloud[tabs],
-                                     setup.weather.rain[tabs],
-                                     setup.weather.wind_ms[tabs])
-                p_hit = 0.0
-                for fc in fp_cells:
-                    if fc == true_cell:
-                        p_hit += q_true_tick * (1.0 if fc == cell else fp_side)
-                if p_hit > 0 and obs_rng.random() < min(p_hit, 0.999):
-                    detected = True
-                    detect_t = min(t + dt, horizon)
-                    break
-            if "search_done" in ev and not detected:
-                cell = int(ev["search_done"])
-                wmean = setup.weather.window_mean(tabs - dwell + 1, dwell)
-                q_cen = q_dwell(st.spec.sensor, veg_flat[cell], wmean, dwell)
-                q_cen *= float(q_est_bias)
-                fp_cells = [cell] + area.neighbor_idx(cell)
-                qs = [q_cen] + [q_cen * fp_side] * (len(fp_cells) - 1)
-                belief = bayes_negative_update(belief, fp_cells, qs)
-                if collect_trace:
-                    present = sum(int(setup.target_path[max(tabs - dt_i, 0)]
-                                      in set(fp_cells))
-                                  for dt_i in range(int(dwell)))
-                    order = np.argsort(-belief)
-                    trace.append({
-                        "t": t, "uav": st.spec.name, "cell": cell,
-                        "q_est": q_cen, "target_present_ticks": int(present),
-                        "belief_at_cell": float(belief[cell]),
-                        "true_rank_after": int(np.where(order == cell)[0][0]),
-                    })
-        if detected:
-            break
-
-        # 4) early stop when nothing is happening anymore
-        all_idle = all((not st.is_active) or
-                       (st.is_idle and not st.has_pending_work())
-                       for st in states.values())
-        if all_idle and not any_searching:
-            idle_streak += 1
-            if idle_streak >= 3:
+            for k, actions in uav_actions.items():
+                act = actions[t]
+                if act[0] == 'search':
+                    search_cell = act[1]
+                    if search_cell == target_cell:
+                        # True detection probability
+                        rate = self.true_lambda[search_cell]
+                        q_true = 1.0 - np.exp(-rate * (self.delta_t / 60.0))
+                        u_rand = rng_stream.uniform(mission_idx, t, k, "detection")
+                        if u_rand < q_true:
+                            detected = True
+                            detection_tick = t
+                            detecting_uav = k
+                            break
+            if detected:
                 break
-        else:
-            idle_streak = 0
 
-        if render_dir and int(t) % max(render_every, 1) == 0:
-            frames.append({
-                "t": t, "belief": belief.copy(),
-                "uav_xy": {n: s.pos.copy() for n, s in states.items()},
-                "target_cell": int(setup.target_path[tabs]),
-            })
-        t += dt
+        # Sortie battery energy consumption calculation with early termination.
+        # Evaluates actual energy drawn during departure wait, flight legs, on-station wait,
+        # and search dwell, plus safe return to depot upon early detection or mission completion.
+        # Aligns strictly with ConstraintChecker.check_uav_feasibility().
+        total_energy = 0.0
+        end_tick = detection_tick if detected else H - 1
 
-    # ---- result ----------------------------------------------------------
-    res = MissionResult(detected=detected, detect_time_min=detect_t,
-                        horizon_min=horizon)
-    dist = sum(s.dist_flown for s in states.values())
-    energy = sum(s.energy_spent for s in states.values())
-    searched = {}
-    for s in states.values():
-        for c, nvis in s.visits.items():
-            searched[c] = searched.get(c, 0) + nvis
-    ops = int(sum(searched.values()))
-    uniq = len(searched)
-    res.flight_distance_m = float(dist)
-    res.energy_wh = float(energy)
-    res.search_minutes = float(sum(s.search_minutes for s in states.values()))
-    res.unique_cells_searched = uniq
-    res.total_search_ops = ops
-    res.redundant_search_ops = max(ops - uniq, 0)
-    res.n_swaps = int(sum(s.n_swaps for s in states.values()))
-    res.n_replans = n_replans
-    res.replan_ms_total = float(replan_ms)
-    res.planner = p_cfg.get("kind", "")
-    res.initial_model = initial_model or cfg["belief"]["initial_model"] \
-        if belief_override is None else "custom"
-    res.area_name = area.name
-    res.seed = setup.seed
-    res.replicate = replicate
-    res.arm = arm_name
-    res.target_profile = setup.profile
-    res.elapsed_before_min = float(setup.burn_min)
-    res.n_uavs = len(fleet)
-    res.moving_target = moving
-    res.per_uav = {n: {"dist": s.dist_flown, "energy": s.energy_spent,
-                       "swaps": s.n_swaps, "visits": dict(s.visits)}
-                   for n, s in states.items()}
-    res.trace = trace
+        for u_sched in joint_sched.uav_schedules:
+            k = u_sched.uav_idx
+            spec = self.checker.uav_specs[k]
 
-    if render_dir:
-        frames.append({"t": t, "belief": belief.copy(),
-                       "uav_xy": {n: s.pos.copy() for n, s in states.items()},
-                       "target_cell": int(setup.target_path[tabs])})
-        _render_frames(setup, states, res, frames, render_dir)
+            if u_sched.r_k == 0:
+                # Inactive UAV at depot: zero sortie energy consumed
+                continue
 
-    return res
+            current_node = self.checker.depot_idx
+            mission_ended = False
 
+            for l_idx, v in enumerate(u_sched.visits):
+                dest_node = v.cell_idx
+                tau_leg = self.checker.tau_bar[k, current_node, dest_node]
 
-# ---------------------------------------------------------------------------
-def _render_frames(setup, states, res, frames, render_dir):
-    try:
-        from ..viz.maps import render_mission_frame
-    except ImportError:                                  # pragma: no cover
-        return
-    out = Path(render_dir)
-    out.mkdir(parents=True, exist_ok=True)
-    tag = f"{res.arm or res.planner}_seed{setup.seed}"
-    for i, fr in enumerate(frames):
-        render_mission_frame(
-            setup.area, fr["belief"],
-            uav_xy=fr["uav_xy"],
-            target_cells=[int(c) for c in
-                          setup.target_path[:int(setup.burn_min + fr["t"]) + 1]],
-            ipp_cell=setup.ipp_idx,
-            bases={n: s.base_xy for n, s in states.items()},
-            title=f"{res.arm} t={fr['t']:.0f} min detected={res.detected}",
-            save=out / f"{tag}_t{int(fr['t']):04d}.png")
+                # Departure tick and wait before flight
+                if l_idx == 0:
+                    departure_tick = v.wait_ticks
+                    if end_tick < departure_tick:
+                        # Detection during initial depot delay: abort before takeoff
+                        total_energy += spec.p_idle * (end_tick + 1) * self.delta_t
+                        mission_ended = True
+                        break
+                    else:
+                        total_energy += spec.p_idle * v.wait_ticks * self.delta_t
+                else:
+                    prev_v = u_sched.visits[l_idx - 1]
+                    departure_tick = prev_v.start_tick + prev_v.dwell_ticks
+                    if end_tick < departure_tick:
+                        # Detection occurred at or before departure tick
+                        mission_ended = True
+                        break
+
+                # Flight leg from current_node to dest_node
+                flight_end_tick = departure_tick + tau_leg - 1
+
+                if end_tick < departure_tick:
+                    mission_ended = True
+                    break
+
+                if end_tick < flight_end_tick:
+                    # Detection mid-flight: complete current leg to dest_node, then return
+                    total_energy += self.checker.e_bar[k, current_node, dest_node]
+                    total_energy += self.checker.e_bar[k, dest_node, self.checker.depot_idx]
+                    mission_ended = True
+                    break
+                else:
+                    # Full flight leg completed
+                    total_energy += self.checker.e_bar[k, current_node, dest_node]
+
+                # On-station wait at dest_node (for l_idx >= 1)
+                dwell_start = v.start_tick
+                if l_idx > 0 and v.wait_ticks > 0:
+                    wait_start = departure_tick + tau_leg
+                    if end_tick < dwell_start:
+                        # Detection during on-station wait
+                        completed_wait = max(0, end_tick - wait_start + 1)
+                        total_energy += spec.p_idle * completed_wait * self.delta_t
+                        total_energy += self.checker.e_bar[k, dest_node, self.checker.depot_idx]
+                        mission_ended = True
+                        break
+                    else:
+                        total_energy += spec.p_idle * v.wait_ticks * self.delta_t
+
+                # Search dwell at dest_node
+                dwell_end = dwell_start + v.dwell_ticks - 1
+
+                if end_tick <= dwell_end:
+                    # Detection occurred during dwell (including first, middle, or exact last tick)
+                    dwell_done = max(0, end_tick - dwell_start + 1)
+                    total_energy += spec.p_search * dwell_done * self.delta_t
+                    # Abort further schedule and return to depot from dest_node
+                    total_energy += self.checker.e_bar[k, dest_node, self.checker.depot_idx]
+                    mission_ended = True
+                    break
+                else:
+                    # Full dwell completed
+                    total_energy += spec.p_search * v.dwell_ticks * self.delta_t
+
+                current_node = dest_node
+
+            if not mission_ended:
+                # All visits completed without detection: UAV returns to depot
+                total_energy += self.checker.e_bar[k, current_node, self.checker.depot_idx]
+
+        rmst = float(detection_tick) if detected else float(H)
+        indicator = 1.0 if detected else 0.0
+        calib_gap = float(predicted_J - indicator)
+
+        return MissionExecutionResult(
+            detected=detected,
+            detection_tick=detection_tick,
+            rmst_time=rmst,
+            actual_energy_joules=total_energy,
+            predicted_J=predicted_J,
+            calibration_gap=calib_gap,
+            details={"detecting_uav": detecting_uav, "end_tick": end_tick}
+        )

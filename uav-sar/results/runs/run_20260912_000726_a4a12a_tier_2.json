@@ -1,0 +1,143 @@
+{
+  "metadata": {
+    "tier": 2,
+    "run_id": "run_20260912_000726_a4a12a",
+    "seed": 42,
+    "quick": true,
+    "timestamp": "2026-09-11T17:07:29Z",
+    "runtime_sec": 2.0455,
+    "environment": {
+      "python_version": "3.12.2",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "git_hash": "b4d62fb94f",
+      "git_hash_full": "b4d62fb94ffc3e3099d6e93b527d2e7ce49788a3",
+      "git_branch": "main",
+      "git_is_dirty": true,
+      "source_sha256": "53ade0da2bebaa38"
+    },
+    "experiment_config": {
+      "seed": 42,
+      "quick": true
+    }
+  },
+  "results": {
+    "exact_J_star": 0.1838584886697685,
+    "fast_evaluator_J": 0.1737871732080457,
+    "prefix_only_J": 0.1737871732080457,
+    "full_evaluator_J": 0.1737871732080457,
+    "optimality_gap_absolute": 0.010071315461722796,
+    "optimality_gap_relative": 0.054777538609120546,
+    "micro_benchmark": {
+      "identical_candidate_count": 58,
+      "repeats": 10,
+      "latency_full_ms": 0.09340293103464163,
+      "latency_full_ms_std": 0.002899990210152763,
+      "latency_prefix_ms": 0.058048965517063435,
+      "latency_prefix_ms_std": 0.0022804366256014494,
+      "latency_fast_ms": 0.05581689655204613,
+      "latency_fast_ms_std": 0.002956178917291452,
+      "speedup_vs_full": 1.6733809438428493,
+      "speedup_vs_prefix": 1.0399891270009258,
+      "max_abs_err_fast": 4.440892098500626e-16,
+      "max_abs_err_prefix": 4.440892098500626e-16,
+      "breakdown_by_interval": {
+        "short_L_le_3": {
+          "count": 6,
+          "full_ms": 0.0983116666626908,
+          "prefix_ms": 0.07199999999632685,
+          "fast_ms": 0.020418333330477857,
+          "full_ms_std": 0.010826958381588815,
+          "prefix_ms_std": 0.012401762119705152,
+          "fast_ms_std": 0.0020177522330334374,
+          "speedup_vs_full": 4.814872255804729,
+          "speedup_vs_prefix": 3.5262427560066585
+        },
+        "medium_L_4_to_6": {
+          "count": 0,
+          "full_ms": null,
+          "prefix_ms": null,
+          "fast_ms": null,
+          "full_ms_std": null,
+          "prefix_ms_std": null,
+          "fast_ms_std": null,
+          "speedup_vs_full": null,
+          "speedup_vs_prefix": null
+        },
+        "long_or_shifted_to_H": {
+          "count": 52,
+          "full_ms": 0.09450653846119376,
+          "prefix_ms": 0.05973884615330531,
+          "fast_ms": 0.061973076923147984,
+          "full_ms_std": 0.0009673954955877619,
+          "prefix_ms_std": 0.0028771834183188134,
+          "fast_ms_std": 0.0021293198727102758,
+          "speedup_vs_full": 1.524961211436865,
+          "speedup_vs_prefix": 0.9639483646646541
+        }
+      }
+    },
+    "speedup_vs_full": 2.0429627715866023,
+    "speedup_vs_prefix": 1.114951820382052,
+    "total_time_speedup_vs_full": 1.6236889845482974,
+    "solver_runtime_fast_sec": 0.01537929999994958,
+    "solver_runtime_prefix_sec": 0.016286699999909615,
+    "solver_runtime_full_sec": 0.024971199999981764,
+    "cache_update_time_fast_sec": 0.00047730000005685724,
+    "operator_stats_fast": {
+      "Replace": {
+        "evaluated": 40,
+        "accepted": 0,
+        "improvement": 0.0
+      },
+      "ChangeDwell": {
+        "evaluated": 11,
+        "accepted": 0,
+        "improvement": 0.0
+      },
+      "Insert": {
+        "evaluated": 118,
+        "accepted": 2,
+        "improvement": 0.13938541578445085
+      },
+      "Delete": {
+        "evaluated": 6,
+        "accepted": 0,
+        "improvement": 0.0
+      },
+      "DwellRebalance": {
+        "evaluated": 3,
+        "accepted": 0,
+        "improvement": 0.0
+      },
+      "Swap": {
+        "evaluated": 5,
+        "accepted": 0,
+        "improvement": 0.0
+      }
+    },
+    "evaluator_stats_fast": {
+      "name": "ForwardBackwardFastEvaluator",
+      "eval_count": 183,
+      "total_time_sec": 0.009277799999381386,
+      "avg_time_ms": 0.050698360652357305,
+      "mean_l_affected": 7.043715846994536,
+      "median_l_affected": 8.0
+    },
+    "evaluator_stats_prefix": {
+      "name": "PrefixOnlyEvaluator",
+      "eval_count": 183,
+      "total_time_sec": 0.010344299998450879,
+      "avg_time_ms": 0.05652622949973158,
+      "mean_l_affected": 8.251366120218579,
+      "median_l_affected": 8.0
+    },
+    "evaluator_stats_full": {
+      "name": "FullEvaluator",
+      "eval_count": 183,
+      "total_time_sec": 0.018954200000962373,
+      "avg_time_ms": 0.10357486339323702,
+      "mean_l_affected": 7.043715846994536,
+      "median_l_affected": 8.0
+    }
+  }
+}

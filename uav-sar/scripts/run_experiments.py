@@ -1,33 +1,33 @@
-"""Run the RQ experiment suite: --rq 1..5 or --rq all."""
+"""Run the 5-tier experiment suite: --tier 1..5 or --tier all."""
+
 from _bootstrap import *  # noqa: F401,F403
 import argparse
 import logging
-import time
-
-from sar_uav.config import load_config
-from sar_uav.experiments import rq1, rq2, rq3, rq4, rq5
+from pathlib import Path
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO,
-                        format="%(asctime)s %(levelname)s %(message)s",
-                        datefmt="%H:%M:%S")
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--config", default=None)
-    ap.add_argument("--rq", default="4", help="1..5, comma list, or 'all'")
-    ap.add_argument("--replicates", type=int, default=24)
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(message)s",
+        datefmt="%H:%M:%S"
+    )
+    ap = argparse.ArgumentParser(description="Multi-UAV SAR 5-Tier Experiment Runner")
+    ap.add_argument("--tier", default="1", help="1..5, comma list, or 'all'")
     ap.add_argument("--out", default=str(ROOT / "results"))
-    ap.add_argument("--quick", action="store_true",
-                    help="reduced sizes for smoke-testing the pipeline")
-    a = ap.parse_args()
+    ap.add_argument("--quick", action="store_true", help="reduced size for smoke testing")
+    ap.add_argument("--seed", type=int, default=42)
+    args = ap.parse_args()
 
-    cfg = load_config(a.config)
-    rqs = list(range(1, 6)) if a.rq == "all" else \
-        [int(x) for x in a.rq.split(",")]
-    mods = {1: rq1, 2: rq2, 3: rq3, 4: rq4, 5: rq5}
+    from sar_uav.experiments.experiment_runner import run_experiment_suite
 
-    for n in rqs:
-        t0 = time.time()
-        print(f"\n================ RQ{n} ================")
-        mods[n].run(cfg, replicates=a.replicates, out_dir=a.out,
-                    quick=a.quick)
-        print(f"RQ{n} done in {time.time()-t0:.0f}s")
+    tier_selection = (
+        list(range(1, 6)) if args.tier == "all"
+        else [int(x) for x in args.tier.split(",")]
+    )
+    run_experiment_suite(
+        tier_selection=tier_selection,
+        out_dir=Path(args.out),
+        seed=args.seed,
+        quick=args.quick,
+    )
+    print(f"\nAll requested tiers completed. Results saved to {args.out}")
