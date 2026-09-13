@@ -39,35 +39,36 @@ Kết quả được ghi tự động vào `results/tier_{1..5}_results.json` v�
 
 ### Tier 3 — Benchmark So sánh Đa phương pháp (Main Benchmark)
 * **File mã nguồn:** `src/sar_uav/experiments/tier3_main_benchmark.py` & `src/sar_uav/experiments/tier3_multi_instance.py`
-* **Cấu trúc hai cấp thực nghiệm (Two-level experimental hierarchy):**
-  1. **Cấp Problem Instance:** Khảo sát trên 10 cấu hình thực nghiệm độc lập với sự đa dạng về Prior $b_0$ (đa đỉnh, dải sườn núi, thung lũng dốc, bimodal, phân tán trung tâm), ma trận Markov khuếch tán và trôi dạt có hướng ($M$), môi trường thảm phủ và 3 chế độ Ground Truth:
-     - *In-Ensemble (Instances 0–3):* Môi trường thực bám theo giả thuyết trong tập ensemble nhưng khác nominal.
-     - *Nominal-Matched (Instances 4–6):* Môi trường thực trùng khớp chính xác với nominal (đo lường chi phí bảo thủ của ensemble).
-     - *Misspecified Out-of-Ensemble (Instances 7–9):* Môi trường thực bị suy giảm cảm biến (sương mù thung lũng, dòng chảy xiết ngoài mô hình, che khuất tán rừng).
-  2. **Cấp Mission trong Instance:** 100 mission ngẫu nhiên mô phỏng đường đi mục tiêu và sự kiện cảm biến theo Common Random Numbers (CRN), tổng cộng **1.000 missions** đánh giá ghép cặp.
+* **Cấu trúc hai cấp thực nghiệm tách rời (Decoupled two-level experimental hierarchy):**
+  1. **Cấp Scenario & Chế độ Ground Truth:** Khảo sát trên 10 kịch bản/scenario độc lập với sự đa dạng về Prior $b_0$ (đa đỉnh, dải sườn núi, thung lũng dốc, bimodal, phân tán trung tâm), ma trận Markov khuếch tán và trôi dạt có hướng ($M$) và môi trường thảm phủ. Mỗi scenario được đánh giá đầy đủ qua cả **3 chế độ Ground Truth**:
+     - *In-Ensemble (10 scenarios):* Môi trường thực bám theo một giả thuyết cụ thể trong tập ensemble của planner nhưng khác nominal.
+     - *Nominal-Matched (10 scenarios):* Môi trường thực trùng khớp chính xác với nominal (đo lường chi phí bảo thủ của ensemble khi nominal chuẩn xác).
+     - *Misspecified Out-of-Ensemble (10 scenarios):* Môi trường thực bị suy giảm cảm biến thực địa ngoài tập giả thuyết (sương mù thung lũng, trôi dạt xiết, che khuất tán rừng vượt ngưỡng).
+     Tạo thành $10 \times 3 = 30$ evaluations hoàn chỉnh.
+  2. **Cấp Mission trong Scenario:** 100 mission ngẫu nhiên mô phỏng đường đi mục tiêu và sự kiện cảm biến theo Common Random Numbers (CRN), tổng cộng **3.000 missions** đánh giá ghép cặp.
 * **Mục tiêu so sánh đối đầu:**
-  - **Nhóm 1 (Đóng góp thuật toán - Multi-start & Evaluators):**
+  - **Nhóm 1 (Đóng góp thuật toán - Multi-start, Single-start & Evaluators):**
     - `Proposed_Fast`: Multi-start (2 starts: greedy ensemble + greedy nominal) + Forward-Backward Fast Evaluator (300+300 evals).
     - `SingleStart_Fast_FixedLS`: Single-start từ greedy ensemble với ngân sách Local Search cố định (300 evals).
-    - `SingleStart_Fast_MatchedTotal`: Single-start bù trừ ngân sách evaluation:
-      - Ngân sách Local Search: $B_{\mathrm{LS}}^{\mathrm{matched}} = 600 + N_{\mathrm{eval}}^{\mathrm{greedy\_nom}}$ evals.
-      - Tổng evaluation toàn phương pháp: $N_{\mathrm{total}} = N_{\mathrm{eval}}^{\mathrm{greedy\_ens}} + B_{\mathrm{LS}}^{\mathrm{matched}}$ evals.
-      > *Lưu ý về protocol:* Đối chứng này đảm bảo tổng số lần truy vấn hàm mục tiêu $N_{\mathrm{total}}$ của Single-start bằng đúng $N_{\mathrm{total}}$ của Multi-start. Đây là đối chứng kiểm soát **trần số lượt đánh giá hàm mục tiêu** (matched evaluation budget ceiling), không phải cùng tổng thời gian thực (wall-clock time).
+    - `SingleStart_Fast_MatchedTotal`: Single-start bù trừ ngân sách evaluation ($B_{\mathrm{LS}}^{\mathrm{matched}} = 600 + N_{\mathrm{eval}}^{\mathrm{greedy\_nom}}$ evals, trần tổng evaluation $N_{\mathrm{total}}$ bằng đúng Multi-start).
     - `Proposed_PrefixOnly`: Multi-start + Prefix-only Evaluator (300+300 evals, bóc tách giá trị của backward continuation).
-    - **4 cấu hình Toán tử Ablation:**
+    - **4 cấu hình Toán tử Ablation (thu thập thống kê single-solve trên 10 scenario runs):**
       - `Proposed_Fast` (Đầy đủ: Replace=Có, Rebalance=Có)
       - `Ablation_NoReplace` (Bỏ Replace, giữ Rebalance)
       - `Ablation_NoRebalance` (Giữ Replace, bỏ Rebalance)
       - `Ablation_NoReplaceRebalance` (Bỏ cả Replace và Rebalance)
     - `Greedy_Lookahead`: Chiến lược tham lam phân bổ tức thời (Search SAR benchmark).
-    - `GA_Baseline` (alias `Adaptive_GA` trong mã nguồn): Thuật toán di truyền chuẩn (Standard Genetic Algorithm baseline) triển khai qua `SimpleEvolutionaryPlanner` với chọn lọc giải đấu (tournament size 2), lai ghép 1 điểm (1-point crossover), đột biến ô và dwell với xác suất cố định ($p_{\mathrm{mut}} = 0.3$), và cơ chế repair cắt đuôi bảo đảm ràng buộc an toàn/pin. Không sử dụng cơ chế tự thích nghi tham số.
+    - `GA_Baseline` (alias `Adaptive_GA` trong mã nguồn): Thuật toán di truyền chuẩn (Standard Genetic Algorithm baseline) triển khai qua `SimpleEvolutionaryPlanner` với chọn lọc giải đấu (tournament size 2), lai ghép 1 điểm (1-point crossover), đột biến ô và dwell ($p_{\mathrm{mut}} = 0.3$), kèm repair cắt đuôi bảo đảm an toàn/pin.
   - **Nhóm 2 (Đóng góp mô hình - Ensemble vs Nominal):**
-    - `Nominal_Planning`: Lập kế hoạch dưới mô hình điểm ($S=1$) rồi đánh giá trên môi trường thực.
-* **Chỉ số đánh giá:** Tỷ lệ tìm thấy $DSR$, thời gian tìm trung bình giới hạn $RMST$, năng lượng tiêu thụ thực tế ($kJ$), Calibration Gap ($J_{\mathcal{S}} - DSR$), và phân vị Student's $t$ CI với $df=M-1$ kèm clipping miền vật lý $[0, H]$.
+    - `Nominal_2Start`: Đối chứng mô hình thuần túy (Pure Model baseline) sử dụng cùng giải thuật Multi-start 2-start nhưng tối ưu hóa trên mô hình nominal duy nhất ($S=1$), bóc tách chính xác ưu thế của ensemble khi cùng solver.
+    - `Nominal_Planning`: Đối chứng pipeline 1-start trên mô hình nominal ($S=1$).
+* **Chỉ số đánh giá & Thống kê suy luận:**
+  - Tỷ lệ tìm thấy $DSR$, thời gian tìm trung bình giới hạn $RMST$, năng lượng tiêu thụ thực tế ($kJ$), Calibration Gap ($J_{\mathcal{S}} - DSR$).
+  - Khoảng tin cậy Scenario Cluster Bootstrap 95% và Student's $t$ CI với $df = N_{\mathrm{scenarios}} - 1$ kèm clipping miền vật lý.
+  - Phân tích chi tiết theo từng chế độ Ground Truth (In-Ensemble, Nominal-Matched, Misspecified).
 * **Nguyên tắc phân tích thực nghiệm:**
-  - Báo cáo trung thực cả trường hợp phương pháp đề xuất vượt trội và trường hợp các biến thể ablation/nominal đạt kết quả tốt hơn.
-  - Phân tích nguyên nhân thuật toán: chi phí ngân sách của từng toán tử, tính trơn của search landscape dưới mô hình đơn vs mô hình ensemble.
-  - Mọi khác biệt về DSR và RMST được kiểm định ghép cặp (McNemar cho binary, Student's $t$ CI và Wilcoxon signed-rank test cho phân bố qua các instance).
+  - Báo cáo trung thực cả trường hợp phương pháp đề xuất vượt trội và trường hợp các biến thể ablation/single-start đạt kết quả tương đương.
+  - Phân biệt rõ ràng giữa các tương phản có ý nghĩa thống kê ($p < 0.05$) và các khác biệt không có ý nghĩa thống kê (khoảng tin cậy chứa 0).
 
 ### Tier 4 — Kiểm tra Khả năng Chống chịu Sai đặc tả (Model Misspecification)
 * **File mã nguồn:** `src/sar_uav/experiments/tier4_misspecification.py`

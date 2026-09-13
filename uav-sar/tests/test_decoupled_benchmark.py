@@ -1,8 +1,9 @@
-"""Unit tests for decoupled benchmark, operator ordering behavior, and stratified statistics."""
-
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import pytest
+
+ROOT = Path(__file__).resolve().parent.parent
 
 from sar_uav.experiments.stats import (
     stratified_bootstrap_ci,
@@ -206,6 +207,9 @@ def test_cross_process_reproducibility():
     import json
 
     code = """
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src") if "__file__" in locals() else "src")
 import json
 from sar_uav.experiments.tier3_multi_instance import create_instance, solve_instance_strategies, evaluate_scenario_multi_regimes
 
@@ -228,16 +232,18 @@ print("JSON_OUT:" + json.dumps(out))
     import os
     full_env1 = os.environ.copy()
     full_env1.update(env1)
+    full_env1["PYTHONPATH"] = str(ROOT / "src")
     full_env2 = os.environ.copy()
     full_env2.update(env2)
+    full_env2["PYTHONPATH"] = str(ROOT / "src")
 
     proc1 = subprocess.run(
         [sys.executable, "-c", code],
-        capture_output=True, text=True, check=True, env=full_env1
+        capture_output=True, text=True, check=True, env=full_env1, cwd=str(ROOT)
     )
     proc2 = subprocess.run(
         [sys.executable, "-c", code],
-        capture_output=True, text=True, check=True, env=full_env2
+        capture_output=True, text=True, check=True, env=full_env2, cwd=str(ROOT)
     )
 
     line1 = [l for l in proc1.stdout.splitlines() if l.startswith("JSON_OUT:")][0][9:]
