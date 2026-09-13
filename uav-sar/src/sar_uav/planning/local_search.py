@@ -70,9 +70,12 @@ class JointRouteEffortLocalSearch:
 
         operator_stats: Dict[str, Dict[str, float]] = {}
 
-        stopped_reason = "local_optimum"
+        if hasattr(self.explorer, "reset_iteration"):
+            self.explorer.reset_iteration()
 
         while True:
+            if hasattr(self.explorer, "step_iteration") and iteration > 0:
+                self.explorer.step_iteration()
             iteration += 1
             delta_J_max = delta_J_threshold
             best_cand: Optional[JointSchedule] = None

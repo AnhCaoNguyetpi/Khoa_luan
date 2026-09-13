@@ -78,33 +78,22 @@ def run_tier3_benchmark(
     # Planners
     eval_fast = ForwardBackwardFastEvaluator(engine_ens)
     eval_prefix = PrefixOnlyEvaluator(engine_ens)
-    explorer_full = NeighborhoodExplorer(checker, candidate_cells, allowed_dwells=(1, 2, 3))
-
-    max_evals_total = 600
-    max_evals_per_start = max_evals_total // 2  # 300 each for multi-start
-    time_limit = 15.0
-
-    # Ablation: explorer without Replace and DwellRebalance (keeps same detect_affected_interval)
-    from sar_uav.planning.neighborhood import detect_affected_interval
-
-    class AblatedExplorer(NeighborhoodExplorer):
-        def generate_all_neighbors(self, current_sched):
-            operators = [
-                ("Swap", self.gen_reorder_visits),
-                ("ChangeDwell", self.gen_change_dwell),
-                ("AdjustWait", self.gen_adjust_wait),
-                ("Insert", self.gen_insert_visits),
-                ("Delete", self.gen_delete_visits),
-                ("Relocate", self.gen_relocate_visits),
-            ]
-            for op_name, op_func in operators:
-                for cand in op_func(current_sched):
-                    feasible, _ = self.checker.check_joint_schedule(cand)
-                    if feasible:
-                        t_a, t_b = detect_affected_interval(current_sched, cand)
-                        yield op_name, cand, t_a, t_b
-
-    explorer_ablated = AblatedExplorer(checker, candidate_cells, allowed_dwells=(1, 2, 3))
+    explorer_full = NeighborhoodExplorer(
+        checker, candidate_cells, allowed_dwells=(1, 2, 3),
+        enable_replace=True, enable_dwell_rebalance=True
+    )
+    explorer_no_replace = NeighborhoodExplorer(
+        checker, candidate_cells, allowed_dwells=(1, 2, 3),
+        enable_replace=False, enable_dwell_rebalance=True
+    )
+    explorer_no_rebalance = NeighborhoodExplorer(
+        checker, candidate_cells, allowed_dwells=(1, 2, 3),
+        enable_replace=True, enable_dwell_rebalance=False
+    )
+    explorer_no_both = NeighborhoodExplorer(
+        checker, candidate_cells, allowed_dwells=(1, 2, 3),
+        enable_replace=False, enable_dwell_rebalance=False
+    )
 
     # Initial greedy construction (Ensemble & Nominal)
     greedy_planner_ens = GreedyLookaheadPlanner(checker, engine_ens, candidate_cells, default_dwell=2)
@@ -248,10 +237,25 @@ def run_tier3_benchmark(
         max_evals_total, time_limit
     )
 
-    # 4. Operator Ablation (2-start, fast evaluator, ablated explorer without Replace/Rebalance)
-    # Fair comparison against Proposed Fast: identical multi-start, identical 300+300 budget
-    sched_ablated, J_ablated, meta_ablated = run_two_start_local_search(
-        explorer_ablated,
+    # 4a. Operator Ablation: No Replace (keeps Dwell Rebalance)
+    sched_no_repl, J_no_repl, meta_no_repl = run_two_start_local_search(
+        explorer_no_replace,
+        lambda: ForwardBackwardFastEvaluator(engine_ens),
+        sched_greedy_ens, sched_greedy_nom,
+        max_evals_total, time_limit
+    )
+
+    # 4b. Operator Ablation: No Dwell Rebalance (keeps Replace)
+    sched_no_rebal, J_no_rebal, meta_no_rebal = run_two_start_local_search(
+        explorer_no_rebalance,
+        lambda: ForwardBackwardFastEvaluator(engine_ens),
+        sched_greedy_ens, sched_greedy_nom,
+        max_evals_total, time_limit
+    )
+
+    # 4c. Operator Ablation: Neither Replace nor Dwell Rebalance
+    sched_no_both, J_no_both, meta_no_both = run_two_start_local_search(
+        explorer_no_both,
         lambda: ForwardBackwardFastEvaluator(engine_ens),
         sched_greedy_ens, sched_greedy_nom,
         max_evals_total, time_limit
@@ -273,7 +277,9 @@ def run_tier3_benchmark(
         "SingleStart_Fast_FixedLS": (sched_single_fixed, J_single_fixed),
         "SingleStart_Fast_MatchedTotal": (sched_single_matched, J_single_matched),
         "Proposed_PrefixOnly": (sched_prefix, J_prefix),
-        "Ablation_NoReplaceRebalance": (sched_ablated, J_ablated),
+        "Ablation_NoReplace": (sched_no_repl, J_no_repl),
+        "Ablation_NoRebalance": (sched_no_rebal, J_no_rebal),
+        "Ablation_NoReplaceRebalance": (sched_no_both, J_no_both),
         "Greedy_Lookahead": (sched_greedy_ens, J_greedy_ens),
         "Adaptive_GA": (sched_ga, J_ga),
         "Nominal_Planning": (sched_nom, J_nom_self)
@@ -368,21 +374,53 @@ def run_tier3_benchmark(
             "starts": meta_prefix["starts"],
             "operator_stats": meta_prefix.get("operator_stats", {})
         },
-        "Ablation_NoReplaceRebalance": {
-            "total_runtime_sec": float(rt_both_greedy + meta_ablated["local_search_runtime_sec"]),
+        "Ablation_NoReplace": {
+            "total_runtime_sec": float(rt_both_greedy + meta_no_repl["local_search_runtime_sec"]),
             "greedy_runtime_sec": float(rt_both_greedy),
-            "local_search_runtime_sec": float(meta_ablated["local_search_runtime_sec"]),
-            "total_evals": int(ev_both_greedy + meta_ablated["local_search_evals"]),
+            "local_search_runtime_sec": float(meta_no_repl["local_search_runtime_sec"]),
+            "total_evals": int(ev_both_greedy + meta_no_repl["local_search_evals"]),
             "greedy_evals": int(ev_both_greedy),
-            "local_search_evals": int(meta_ablated["local_search_evals"]),
-            "n_evals": int(meta_ablated["local_search_evals"]),
-            "accepted_moves": int(meta_ablated["accepted_moves"]),
-            "stopped_reason": meta_ablated["stopped_reason"],
-            "selected_start": meta_ablated["selected_start"],
+            "local_search_evals": int(meta_no_repl["local_search_evals"]),
+            "n_evals": int(meta_no_repl["local_search_evals"]),
+            "accepted_moves": int(meta_no_repl["accepted_moves"]),
+            "stopped_reason": meta_no_repl["stopped_reason"],
+            "selected_start": meta_no_repl["selected_start"],
             "J_after_greedy_ens": float(J_greedy_ens),
             "J_after_greedy_nom_under_ensemble": float(J_after_greedy_nom_under_ensemble),
-            "starts": meta_ablated["starts"],
-            "operator_stats": meta_ablated.get("operator_stats", {})
+            "starts": meta_no_repl["starts"],
+            "operator_stats": meta_no_repl.get("operator_stats", {})
+        },
+        "Ablation_NoRebalance": {
+            "total_runtime_sec": float(rt_both_greedy + meta_no_rebal["local_search_runtime_sec"]),
+            "greedy_runtime_sec": float(rt_both_greedy),
+            "local_search_runtime_sec": float(meta_no_rebal["local_search_runtime_sec"]),
+            "total_evals": int(ev_both_greedy + meta_no_rebal["local_search_evals"]),
+            "greedy_evals": int(ev_both_greedy),
+            "local_search_evals": int(meta_no_rebal["local_search_evals"]),
+            "n_evals": int(meta_no_rebal["local_search_evals"]),
+            "accepted_moves": int(meta_no_rebal["accepted_moves"]),
+            "stopped_reason": meta_no_rebal["stopped_reason"],
+            "selected_start": meta_no_rebal["selected_start"],
+            "J_after_greedy_ens": float(J_greedy_ens),
+            "J_after_greedy_nom_under_ensemble": float(J_after_greedy_nom_under_ensemble),
+            "starts": meta_no_rebal["starts"],
+            "operator_stats": meta_no_rebal.get("operator_stats", {})
+        },
+        "Ablation_NoReplaceRebalance": {
+            "total_runtime_sec": float(rt_both_greedy + meta_no_both["local_search_runtime_sec"]),
+            "greedy_runtime_sec": float(rt_both_greedy),
+            "local_search_runtime_sec": float(meta_no_both["local_search_runtime_sec"]),
+            "total_evals": int(ev_both_greedy + meta_no_both["local_search_evals"]),
+            "greedy_evals": int(ev_both_greedy),
+            "local_search_evals": int(meta_no_both["local_search_evals"]),
+            "n_evals": int(meta_no_both["local_search_evals"]),
+            "accepted_moves": int(meta_no_both["accepted_moves"]),
+            "stopped_reason": meta_no_both["stopped_reason"],
+            "selected_start": meta_no_both["selected_start"],
+            "J_after_greedy_ens": float(J_greedy_ens),
+            "J_after_greedy_nom_under_ensemble": float(J_after_greedy_nom_under_ensemble),
+            "starts": meta_no_both["starts"],
+            "operator_stats": meta_no_both.get("operator_stats", {})
         },
         "Greedy_Lookahead": {
             "total_runtime_sec": float(rt_greedy_ens),

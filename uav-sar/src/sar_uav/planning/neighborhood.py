@@ -65,34 +65,80 @@ class NeighborhoodExplorer:
         candidate_cells: Sequence[int],
         allowed_dwells: Sequence[int] = (1, 2, 3, 4, 5),
         max_wait_ticks: int = 10,
-        max_visits: Optional[int] = None
+        max_visits: Optional[int] = None,
+        enable_replace: bool = True,
+        enable_dwell_rebalance: bool = True,
+        order_strategy: str = "fixed",
+        seed: Optional[int] = None,
     ):
         self.checker = checker
         self.candidate_cells = list(candidate_cells)
         self.allowed_dwells = list(allowed_dwells)
         self.max_wait_ticks = max_wait_ticks
         self.max_visits = max_visits
+        self.enable_replace = bool(enable_replace)
+        self.enable_dwell_rebalance = bool(enable_dwell_rebalance)
+        self.order_strategy = str(order_strategy).lower()
+        self.seed = seed
+        self._iteration = 0
+
+    def reset_iteration(self) -> None:
+        """Reset iteration counter for deterministic behavior."""
+        self._iteration = 0
+
+    def step_iteration(self) -> None:
+        """Advance iteration counter."""
+        self._iteration += 1
+
+    def get_operator_order(self) -> List[str]:
+        """Returns the ordered list of active operator names for the current iteration."""
+        operators = []
+        if self.enable_replace:
+            operators.append("Replace")
+        if self.enable_dwell_rebalance:
+            operators.append("DwellRebalance")
+        operators.extend([
+            "Swap",
+            "ChangeDwell",
+        ])
+        if self.max_wait_ticks > 0:
+            operators.append("AdjustWait")
+        operators.extend([
+            "Insert",
+            "Delete",
+            "Relocate",
+        ])
+
+        if len(operators) > 1:
+            if self.order_strategy == "round_robin":
+                shift = self._iteration % len(operators)
+                operators = operators[shift:] + operators[:shift]
+            elif self.order_strategy == "shuffled":
+                rng = np.random.default_rng(
+                    (self.seed if self.seed is not None else 42) + self._iteration * 10007
+                )
+                perm = rng.permutation(len(operators))
+                operators = [operators[i] for i in perm]
+        return operators
 
     def generate_all_neighbors(
         self,
         current_sched: JointSchedule
     ) -> Generator[Tuple[str, JointSchedule, int, int], None, None]:
         """Yields (operator_name, candidate_sched, t_a, t_b) lazily."""
-        operators = [
-            ("Replace", self.gen_replace_visits),
-            ("DwellRebalance", self.gen_dwell_rebalance),
-            ("Swap", self.gen_reorder_visits),
-            ("ChangeDwell", self.gen_change_dwell),
-        ]
-        if self.max_wait_ticks > 0:
-            operators.append(("AdjustWait", self.gen_adjust_wait))
-        operators.extend([
-            ("Insert", self.gen_insert_visits),
-            ("Delete", self.gen_delete_visits),
-            ("Relocate", self.gen_relocate_visits),
-        ])
+        op_map = {
+            "Replace": self.gen_replace_visits,
+            "DwellRebalance": self.gen_dwell_rebalance,
+            "Swap": self.gen_reorder_visits,
+            "ChangeDwell": self.gen_change_dwell,
+            "AdjustWait": self.gen_adjust_wait,
+            "Insert": self.gen_insert_visits,
+            "Delete": self.gen_delete_visits,
+            "Relocate": self.gen_relocate_visits,
+        }
 
-        for op_name, op_func in operators:
+        for op_name in self.get_operator_order():
+            op_func = op_map[op_name]
             for cand in op_func(current_sched):
                 feasible, _ = self.checker.check_joint_schedule(cand)
                 if feasible:

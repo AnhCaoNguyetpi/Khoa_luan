@@ -1,11 +1,11 @@
 {
   "metadata": {
     "tier": 4,
-    "run_id": "run_20260912_103514_7cb5c4",
+    "run_id": "run_20260912_103503_3990fb",
     "seed": 42,
-    "quick": false,
-    "timestamp": "2026-09-12T03:35:18Z",
-    "runtime_sec": 0.1863,
+    "quick": true,
+    "timestamp": "2026-09-12T03:35:07Z",
+    "runtime_sec": 0.0915,
     "environment": {
       "python_version": "3.12.2",
       "platform": "Windows-11-10.0.26200-SP0",
@@ -18,37 +18,37 @@
     },
     "experiment_config": {
       "seed": 42,
-      "quick": false,
-      "num_missions": 10
+      "quick": true,
+      "num_missions": 3
     }
   },
   "results": {
     "protocol_1_calibration": {
       "J_predicted_ensemble": 0.0832418981007852,
-      "empirical_DSR_ensemble": 0.1,
-      "empirical_DSR_nominal": 0.1,
-      "ensemble_calibration_gap": -0.01675810189921481
+      "empirical_DSR_ensemble": 0.0,
+      "empirical_DSR_nominal": 0.0,
+      "ensemble_calibration_gap": 0.0832418981007852
     },
     "protocol_2_robustness_boundary": {
       "0.3": {
-        "DSR_Ensemble": 0.1,
+        "DSR_Ensemble": 0.0,
         "DSR_Nominal": 0.0,
-        "DSR_Delta": 0.1
+        "DSR_Delta": 0.0
       },
       "0.6": {
-        "DSR_Ensemble": 0.2,
+        "DSR_Ensemble": 0.0,
         "DSR_Nominal": 0.0,
-        "DSR_Delta": 0.2
+        "DSR_Delta": 0.0
       },
       "1.0": {
-        "DSR_Ensemble": 0.1,
-        "DSR_Nominal": 0.1,
+        "DSR_Ensemble": 0.0,
+        "DSR_Nominal": 0.0,
         "DSR_Delta": 0.0
       },
       "1.5": {
-        "DSR_Ensemble": 0.1,
-        "DSR_Nominal": 0.2,
-        "DSR_Delta": -0.1
+        "DSR_Ensemble": 0.0,
+        "DSR_Nominal": 0.0,
+        "DSR_Delta": 0.0
       },
       "2.0": {
         "DSR_Ensemble": 0.0,

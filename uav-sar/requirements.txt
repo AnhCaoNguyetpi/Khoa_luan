@@ -1,6 +1,7 @@
 numpy==2.5.2
 pandas==3.0.5
 matplotlib==3.11.1
+scipy>=1.8
 
 # Test
 pytest==9.1.1

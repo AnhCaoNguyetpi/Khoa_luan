@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-12T03:18:51Z",
+  "generated_at": "2026-09-12T03:35:43Z",
   "selected_run_id": null,
   "results_directory": "C:\\Users\\ADMIN\\Downloads\\Kh\u00f3a lu\u1eadn\\uav-sar\\results",
   "figures": {
@@ -10,18 +10,18 @@
     "fig2_evaluator_benchmark": {
       "is_single_run": true,
       "compatibility_status": "single_run_verified",
-      "run_id_tier2": "run_20260912_001837_94d050",
-      "run_id_tier5": "run_20260912_001837_94d050",
-      "timestamp_tier2": "2026-09-11T17:18:40Z",
-      "timestamp_tier5": "2026-09-11T17:18:43Z",
+      "run_id_tier2": "run_20260912_103514_7cb5c4",
+      "run_id_tier5": "run_20260912_103514_7cb5c4",
+      "timestamp_tier2": "2026-09-12T03:35:16Z",
+      "timestamp_tier5": "2026-09-12T03:35:20Z",
       "seed_tier2": 42,
       "seed_tier5": 42,
-      "git_hash_tier2": "b4d62fb94f",
-      "git_hash_tier5": "b4d62fb94f",
-      "source_sha256_tier2": "b412bef1fb09a6c9",
-      "source_sha256_tier5": "b412bef1fb09a6c9",
-      "project_tree_sha256_tier2": "b2b4c0854a9f3e87",
-      "project_tree_sha256_tier5": "b2b4c0854a9f3e87"
+      "git_hash_tier2": "a448ca304e",
+      "git_hash_tier5": "a448ca304e",
+      "source_sha256_tier2": "2ff9942aef3dbfb1",
+      "source_sha256_tier5": "2ff9942aef3dbfb1",
+      "project_tree_sha256_tier2": "17a57dde7b277dcd",
+      "project_tree_sha256_tier5": "17a57dde7b277dcd"
     },
     "fig3_tay_nguyen_case_study": {
       "source": "gis_optimization",
@@ -29,6 +29,59 @@
       "vegetation_dataset": "ESA WorldCover 100m",
       "H": 24,
       "num_uavs": 3
+    },
+    "fig4_multi_instance_benchmark": {
+      "source": "results\\multi_instance_tier3_results.json",
+      "input_file_sha256": "324456c57ee78f1b37a1e1879c43cb68276788676796cbb0eafc890fd89f2697",
+      "run_id": "run_20260913_220633_fd7cfb",
+      "git_hash": "a448ca304e",
+      "git_hash_full": "a448ca304eb4aeabce4ea94f7c3ec3b15ef29a3f",
+      "git_branch": "main",
+      "git_is_dirty": true,
+      "source_sha256": "2ba820b39338fba8",
+      "project_tree_sha256": "c699e06cba4d5cc9",
+      "timestamp": "2026-09-13T15:07:04Z",
+      "num_instances": 30,
+      "num_missions_per_instance": 100,
+      "provenance_status": "source_recorded",
+      "verification_status": "verified",
+      "compatibility_status": "source_recorded_and_verified",
+      "verification_checks": {
+        "run_id_present": true,
+        "git_hash_present": true,
+        "instances_non_empty": true,
+        "instances_count_matches_config": true,
+        "strategies_complete": true,
+        "paired_stats_complete": true,
+        "budget_consistent_fixed_ls": true
+      }
+    },
+    "fig5_operator_ablation": {
+      "source": "results\\multi_instance_tier3_results.json",
+      "input_file_sha256": "324456c57ee78f1b37a1e1879c43cb68276788676796cbb0eafc890fd89f2697",
+      "run_id": "run_20260913_220633_fd7cfb",
+      "git_hash": "a448ca304e",
+      "git_hash_full": "a448ca304eb4aeabce4ea94f7c3ec3b15ef29a3f",
+      "git_branch": "main",
+      "git_is_dirty": true,
+      "source_sha256": "2ba820b39338fba8",
+      "project_tree_sha256": "c699e06cba4d5cc9",
+      "timestamp": "2026-09-13T15:07:04Z",
+      "ablation_arms": [
+        "Proposed_Fast",
+        "Ablation_NoReplace",
+        "Ablation_NoRebalance",
+        "Ablation_NoReplaceRebalance"
+      ],
+      "provenance_status": "source_recorded",
+      "verification_status": "verified",
+      "compatibility_status": "source_recorded_and_verified",
+      "verification_checks": {
+        "run_id_present": true,
+        "git_hash_present": true,
+        "ablation_arms_complete": true,
+        "operator_stats_valid": true
+      }
     }
   }
 }
