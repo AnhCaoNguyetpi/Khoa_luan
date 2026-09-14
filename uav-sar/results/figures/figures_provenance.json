@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-12T03:35:43Z",
+  "generated_at": "2026-09-14T03:41:48Z",
   "selected_run_id": null,
   "results_directory": "C:\\Users\\ADMIN\\Downloads\\Kh\u00f3a lu\u1eadn\\uav-sar\\results",
   "figures": {
@@ -29,59 +29,6 @@
       "vegetation_dataset": "ESA WorldCover 100m",
       "H": 24,
       "num_uavs": 3
-    },
-    "fig4_multi_instance_benchmark": {
-      "source": "results\\multi_instance_tier3_results.json",
-      "input_file_sha256": "324456c57ee78f1b37a1e1879c43cb68276788676796cbb0eafc890fd89f2697",
-      "run_id": "run_20260913_220633_fd7cfb",
-      "git_hash": "a448ca304e",
-      "git_hash_full": "a448ca304eb4aeabce4ea94f7c3ec3b15ef29a3f",
-      "git_branch": "main",
-      "git_is_dirty": true,
-      "source_sha256": "2ba820b39338fba8",
-      "project_tree_sha256": "c699e06cba4d5cc9",
-      "timestamp": "2026-09-13T15:07:04Z",
-      "num_instances": 30,
-      "num_missions_per_instance": 100,
-      "provenance_status": "source_recorded",
-      "verification_status": "verified",
-      "compatibility_status": "source_recorded_and_verified",
-      "verification_checks": {
-        "run_id_present": true,
-        "git_hash_present": true,
-        "instances_non_empty": true,
-        "instances_count_matches_config": true,
-        "strategies_complete": true,
-        "paired_stats_complete": true,
-        "budget_consistent_fixed_ls": true
-      }
-    },
-    "fig5_operator_ablation": {
-      "source": "results\\multi_instance_tier3_results.json",
-      "input_file_sha256": "324456c57ee78f1b37a1e1879c43cb68276788676796cbb0eafc890fd89f2697",
-      "run_id": "run_20260913_220633_fd7cfb",
-      "git_hash": "a448ca304e",
-      "git_hash_full": "a448ca304eb4aeabce4ea94f7c3ec3b15ef29a3f",
-      "git_branch": "main",
-      "git_is_dirty": true,
-      "source_sha256": "2ba820b39338fba8",
-      "project_tree_sha256": "c699e06cba4d5cc9",
-      "timestamp": "2026-09-13T15:07:04Z",
-      "ablation_arms": [
-        "Proposed_Fast",
-        "Ablation_NoReplace",
-        "Ablation_NoRebalance",
-        "Ablation_NoReplaceRebalance"
-      ],
-      "provenance_status": "source_recorded",
-      "verification_status": "verified",
-      "compatibility_status": "source_recorded_and_verified",
-      "verification_checks": {
-        "run_id_present": true,
-        "git_hash_present": true,
-        "ablation_arms_complete": true,
-        "operator_stats_valid": true
-      }
     }
   }
 }

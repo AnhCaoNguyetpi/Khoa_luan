@@ -102,9 +102,15 @@ def plot_fig4_multi_instance(data: dict, out_dir: Path):
     ax1.bar(x + 0.5 * width, greedy_dsr, width, label="Greedy_Lookahead", color="#2ca02c", edgecolor="black", linewidth=0.8)
     ax1.bar(x + 1.5 * width, ga_dsr, width, label="GA baseline", color="#d62728", edgecolor="black", linewidth=0.8)
 
+    meta = data.get("metadata", {}).get("experiment_config", {}) or data.get("benchmark_metadata", {})
+    unique_scenarios = set(inst.get("scenario_id", i % 10) for i, inst in enumerate(instances))
+    n_scenarios = meta.get("num_unique_scenarios", len(unique_scenarios))
+    unique_regimes = set(inst.get("gt_category", "in_ensemble") for inst in instances)
+    n_regimes = len(unique_regimes)
+
     ax1.set_xlabel("Evaluated Instance (Scenario ID . GT Regime)")
     ax1.set_ylabel(f"Empirical DSR ({n_missions} missions/eval)")
-    ax1.set_title(f"(a) Performance Across {n_inst} Evaluations (10 Scenarios × 3 GT Regimes)", fontsize=9.5)
+    ax1.set_title(f"(a) Performance Across {n_inst} Evaluations ({n_scenarios} Scenarios × {n_regimes} GT Regimes)", fontsize=9.5)
     ax1.set_xticks(x)
     ax1.set_xticklabels(names, rotation=90, fontsize=6.5)
     all_dsr = prop_dsr + nom_dsr + greedy_dsr + ga_dsr

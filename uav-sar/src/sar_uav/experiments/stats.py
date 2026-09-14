@@ -243,11 +243,14 @@ def stratified_bootstrap_ci(
     metric_col: str,
     alpha: float = 0.05,
     n_boot: int = 5000,
-    seed: int = 0
+    seed: int = 0,
+    equal_group_weight: bool = True,
 ) -> Tuple[float, float, Tuple[float, float]]:
     """Performs cluster/stratified bootstrap resampled at the group level.
 
-    Resamples groups with replacement, computing overall mean for each bootstrap draw.
+    Resamples groups with replacement.
+    When ``equal_group_weight=True`` (default), each group (e.g. scenario) receives equal
+    weight 1/N_groups regardless of group size or replicate imbalance.
     Returns (point_estimate, se, (ci_lo, ci_hi)).
     """
     groups = list(data[group_col].unique())
@@ -255,21 +258,28 @@ def stratified_bootstrap_ci(
     if n_groups == 0:
         return float("nan"), float("nan"), (float("nan"), float("nan"))
 
-    point_est = float(data[metric_col].mean())
-    if n_groups < 2:
-        return point_est, float("nan"), (float("nan"), float("nan"))
-
     group_means = {g: float(data.loc[data[group_col] == g, metric_col].mean()) for g in groups}
     group_sizes = {g: int(len(data.loc[data[group_col] == g])) for g in groups}
+
+    if equal_group_weight:
+        point_est = float(np.mean([group_means[g] for g in groups]))
+    else:
+        point_est = float(data[metric_col].mean())
+
+    if n_groups < 2:
+        return point_est, float("nan"), (float("nan"), float("nan"))
 
     rng = np.random.default_rng(seed)
     boot_means = np.empty(n_boot, dtype=float)
 
     for b in range(n_boot):
         sample_g = rng.choice(groups, size=n_groups, replace=True)
-        total_sum = sum(group_means[g] * group_sizes[g] for g in sample_g)
-        total_n = sum(group_sizes[g] for g in sample_g)
-        boot_means[b] = total_sum / total_n if total_n > 0 else np.nan
+        if equal_group_weight:
+            boot_means[b] = float(np.mean([group_means[g] for g in sample_g]))
+        else:
+            total_sum = sum(group_means[g] * group_sizes[g] for g in sample_g)
+            total_n = sum(group_sizes[g] for g in sample_g)
+            boot_means[b] = total_sum / total_n if total_n > 0 else np.nan
 
     lo, hi = np.nanquantile(boot_means, [alpha / 2.0, 1.0 - alpha / 2.0])
     se = float(np.nanstd(boot_means, ddof=1))
@@ -283,11 +293,14 @@ def stratified_paired_bootstrap_ci(
     col_b: str,
     alpha: float = 0.05,
     n_boot: int = 5000,
-    seed: int = 0
+    seed: int = 0,
+    equal_group_weight: bool = True,
 ) -> Tuple[float, float, Tuple[float, float], float]:
     """Performs cluster/stratified bootstrap on paired differences (col_a - col_b).
 
     Resamples groups with replacement, preserving within-group and within-mission pairing.
+    When ``equal_group_weight=True`` (default), each group (e.g. scenario) receives equal
+    weight 1/N_groups regardless of group size or replicate imbalance.
     Returns (mean_diff, se, (ci_lo, ci_hi), p_boot).
     """
     groups = list(data[group_col].unique())
@@ -296,21 +309,28 @@ def stratified_paired_bootstrap_ci(
         return float("nan"), float("nan"), (float("nan"), float("nan")), float("nan")
 
     diff_series = data[col_a].astype(float) - data[col_b].astype(float)
-    point_diff = float(diff_series.mean())
-    if n_groups < 2:
-        return point_diff, float("nan"), (float("nan"), float("nan")), float("nan")
-
     group_diffs = {g: float(diff_series.loc[data[group_col] == g].mean()) for g in groups}
     group_sizes = {g: int(len(data.loc[data[group_col] == g])) for g in groups}
+
+    if equal_group_weight:
+        point_diff = float(np.mean([group_diffs[g] for g in groups]))
+    else:
+        point_diff = float(diff_series.mean())
+
+    if n_groups < 2:
+        return point_diff, float("nan"), (float("nan"), float("nan")), float("nan")
 
     rng = np.random.default_rng(seed)
     boot_diffs = np.empty(n_boot, dtype=float)
 
     for b in range(n_boot):
         sample_g = rng.choice(groups, size=n_groups, replace=True)
-        total_sum = sum(group_diffs[g] * group_sizes[g] for g in sample_g)
-        total_n = sum(group_sizes[g] for g in sample_g)
-        boot_diffs[b] = total_sum / total_n if total_n > 0 else np.nan
+        if equal_group_weight:
+            boot_diffs[b] = float(np.mean([group_diffs[g] for g in sample_g]))
+        else:
+            total_sum = sum(group_diffs[g] * group_sizes[g] for g in sample_g)
+            total_n = sum(group_sizes[g] for g in sample_g)
+            boot_diffs[b] = total_sum / total_n if total_n > 0 else np.nan
 
     lo, hi = np.nanquantile(boot_diffs, [alpha / 2.0, 1.0 - alpha / 2.0])
     se = float(np.nanstd(boot_diffs, ddof=1))

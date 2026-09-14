@@ -322,3 +322,71 @@ def test_operator_stats_verification_distinguishes_unevaluated():
     assert checks_malformed["operator_stats_valid"] is False
     assert passed_malformed is False
 
+
+def test_unequal_replicates_benchmark_aggregation_and_metadata():
+    """Verify benchmark correctly handles unequal replicates per scenario with equal weighting."""
+    res = run_multi_instance_benchmark(
+        num_instances=15,
+        num_missions_per_instance=2,
+        master_seed=42,
+        H=6,
+        max_evals_total=20,
+        time_limit_sec=2.0
+    )
+
+    # Check metadata separation
+    exp_cfg = res["metadata"]["experiment_config"]
+    assert exp_cfg["num_unique_scenarios"] == 10
+    assert exp_cfg["num_designs"] == 15
+    assert exp_cfg["aggregation_weighting"] == "equal_scenario_weight"
+    assert exp_cfg["replicates_per_scenario"][0] == 2
+    assert exp_cfg["replicates_per_scenario"][5] == 1
+
+    # Check equal scenario weighting in summary
+    for s_name, s_summary in res["cross_instance_summary"].items():
+        scen_means = s_summary["per_scenario_mean_DSR"]
+        assert len(scen_means) == 10
+        assert abs(s_summary["mean_DSR"] - float(np.mean(scen_means))) < 1e-9
+
+    # Check paired comparisons have scenario-level weighting
+    for p_name, p_data in res["cross_instance_paired"].items():
+        scen_deltas = p_data["per_scenario_delta_DSR"]
+        assert len(scen_deltas) == 10
+        assert abs(p_data["mean_delta_DSR"] - float(np.mean(scen_deltas))) < 1e-9
+
+    # Check regime breakdown has scenario-level CIs
+    for cat, reg_data in res["regime_breakdown"].items():
+        assert "ci95_delta_DSR_student_t" in reg_data["delta_Proposed_vs_Nominal_2Start"]
+        assert "ci95_delta_DSR_bootstrap" in reg_data["delta_Proposed_vs_Nominal_2Start"]
+
+    # Check ablation summary has scenario-level CIs
+    for arm, arm_data in res["ablation_summary"].items():
+        assert "ci95_J_ensemble" in arm_data
+        assert "ci95_DSR" in arm_data
+        assert "ci95_delta_DSR_student_t" in arm_data
+
+
+def test_plot_figures_supports_variable_configurations(tmp_path):
+    """Verify plot scripts handle 3, 10, and 15 design results seamlessly."""
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
+    from plot_multi_instance_figures import plot_fig4_multi_instance, plot_fig5_operator_ablation
+
+    for n_inst in (3, 10, 15):
+        res = run_multi_instance_benchmark(
+            num_instances=n_inst,
+            num_missions_per_instance=2,
+            master_seed=42,
+            H=6,
+            max_evals_total=20,
+            time_limit_sec=2.0
+        )
+        out_dir = tmp_path / f"figs_n{n_inst}"
+        out_dir.mkdir(parents=True, exist_ok=True)
+        plot_fig4_multi_instance(res, out_dir)
+        plot_fig5_operator_ablation(res, out_dir)
+        assert (out_dir / "fig4_multi_instance_benchmark.png").exists()
+        assert (out_dir / "fig5_operator_ablation.png").exists()
+
+

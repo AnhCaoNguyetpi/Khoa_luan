@@ -1097,36 +1097,44 @@ def run_multi_instance_benchmark(
         j_gt_list = df_s["j_gt"].tolist()
 
         # Scenario-aggregated means (N_scenarios independent problem designs)
+        # Equal weighting across unique scenarios: mean of scenario means
         scenario_dsr = df_s.groupby("scenario_id")["dsr"].mean().tolist()
         scenario_rmst = df_s.groupby("scenario_id")["rmst"].mean().tolist()
         scenario_energy = df_s.groupby("scenario_id")["energy"].mean().tolist()
+        scenario_j_gt = df_s.groupby("scenario_id")["j_gt"].mean().tolist()
 
         # Scenario-level parametric Student's t CI (on the scenario means)
         s_mean_dsr, s_se_dsr, s_ci_dsr = student_t_ci(scenario_dsr, alpha=0.05, bounds=(0.0, 1.0))
         s_mean_rmst, s_se_rmst, s_ci_rmst = student_t_ci(scenario_rmst, alpha=0.05, bounds=(0.0, float(H)))
         s_mean_energy, s_se_energy, s_ci_energy = student_t_ci(scenario_energy, alpha=0.05)
+        s_mean_j_gt, s_se_j_gt, s_ci_j_gt = student_t_ci(scenario_j_gt, alpha=0.05)
 
-        # Hierarchical / Cluster Bootstrap by Scenario
+        # Hierarchical / Cluster Bootstrap by Scenario (equal scenario weighting)
         boot_dsr_mean, boot_dsr_se, boot_dsr_ci = stratified_bootstrap_ci(
-            df_s, group_col="scenario_id", metric_col="dsr", seed=master_seed
+            df_s, group_col="scenario_id", metric_col="dsr", seed=master_seed, equal_group_weight=True
         )
         boot_rmst_mean, boot_rmst_se, boot_rmst_ci = stratified_bootstrap_ci(
-            df_s, group_col="scenario_id", metric_col="rmst", seed=master_seed
+            df_s, group_col="scenario_id", metric_col="rmst", seed=master_seed, equal_group_weight=True
+        )
+        boot_energy_mean, boot_energy_se, boot_energy_ci = stratified_bootstrap_ci(
+            df_s, group_col="scenario_id", metric_col="energy", seed=master_seed, equal_group_weight=True
         )
 
         cross_instance_summary[s_name] = {
-            "mean_DSR": float(np.mean(dsr_list)),
+            "mean_DSR": float(np.mean(scenario_dsr)),
             "ci95_DSR": list(boot_dsr_ci),  # Primary scenario-level bootstrap CI
             "ci95_DSR_stratified_bootstrap": list(boot_dsr_ci),
             "ci95_DSR_scenario_level_t": list(s_ci_dsr),
             "se_DSR_stratified_bootstrap": boot_dsr_se,
-            "mean_RMST_ticks": float(np.mean(rmst_list)),
+            "mean_RMST_ticks": float(np.mean(scenario_rmst)),
             "ci95_RMST": list(boot_rmst_ci),  # Primary scenario-level bootstrap CI
             "ci95_RMST_stratified_bootstrap": list(boot_rmst_ci),
             "ci95_RMST_scenario_level_t": list(s_ci_rmst),
-            "mean_energy_kJ": float(np.mean(energy_list)),
+            "mean_energy_kJ": float(np.mean(scenario_energy)),
             "ci95_energy_kJ": list(s_ci_energy),
-            "mean_J_true_gt": float(np.mean(j_gt_list)),
+            "ci95_energy_kJ_bootstrap": list(boot_energy_ci),
+            "mean_J_true_gt": float(np.mean(scenario_j_gt)),
+            "ci95_J_true_gt_scenario_level_t": list(s_ci_j_gt),
             "per_instance_DSR": dsr_list,
             "per_instance_RMST": rmst_list,
             "per_scenario_mean_DSR": scenario_dsr,
@@ -1187,9 +1195,12 @@ def run_multi_instance_benchmark(
         s_m_d_rmst, s_se_d_rmst, s_ci_d_rmst = student_t_ci(scenario_delta_rmst, alpha=0.05, bounds=(-float(H), float(H)))
         s_m_d_energy, s_se_d_energy, s_ci_d_energy = student_t_ci(scenario_delta_energy, alpha=0.05)
 
-        # Cluster paired bootstrap
+        # Cluster paired bootstrap (equal scenario weighting)
         boot_diff_dsr, boot_se_d_dsr, boot_ci_d_dsr, p_boot = stratified_paired_bootstrap_ci(
-            merged, group_col="scenario_id", col_a="dsr_prop", col_b="dsr_base", seed=master_seed
+            merged, group_col="scenario_id", col_a="dsr_prop", col_b="dsr_base", seed=master_seed, equal_group_weight=True
+        )
+        boot_diff_rmst, boot_se_d_rmst, boot_ci_d_rmst, _ = stratified_paired_bootstrap_ci(
+            merged, group_col="scenario_id", col_a="rmst_prop", col_b="rmst_base", seed=master_seed, equal_group_weight=True
         )
 
         nonzero_diffs = [d for d in scenario_delta_dsr if abs(d) > 1e-6]
@@ -1205,14 +1216,15 @@ def run_multi_instance_benchmark(
 
         cross_instance_paired[f"Proposed_vs_{b_name}"] = {
             "instance_record": {"wins": wins, "losses": losses, "ties": ties},
-            "mean_delta_DSR": float(np.mean(delta_dsr_list)),
+            "mean_delta_DSR": float(np.mean(scenario_delta_dsr)),
             "ci95_delta_DSR": list(boot_ci_d_dsr),  # Primary scenario-level bootstrap CI
             "ci95_delta_DSR_stratified_bootstrap": list(boot_ci_d_dsr),
             "ci95_delta_DSR_scenario_level_t": list(s_ci_d_dsr),
             "p_boot_stratified": p_boot,
-            "mean_delta_RMST_ticks": float(np.mean(delta_rmst_list)),
+            "mean_delta_RMST_ticks": float(np.mean(scenario_delta_rmst)),
             "ci95_delta_RMST": list(s_ci_d_rmst),
-            "mean_delta_energy_kJ": float(np.mean(delta_energy_list)),
+            "ci95_delta_RMST_bootstrap": list(boot_ci_d_rmst),
+            "mean_delta_energy_kJ": float(np.mean(scenario_delta_energy)),
             "ci95_delta_energy_kJ": list(s_ci_d_energy),
             "wilcoxon_p_value": wilcoxon_p,
             "per_instance_delta_DSR": delta_dsr_list,
@@ -1226,59 +1238,112 @@ def run_multi_instance_benchmark(
     regime_breakdown: Dict[str, Dict] = {}
     for cat in categories:
         cat_insts = [ir for ir in instance_results if ir["gt_category"] == cat]
+        df_regime = df_flat[df_flat["gt_regime"] == cat]
         n_cat = len(cat_insts)
         if n_cat > 0:
+            reg_scenarios = sorted(df_regime["scenario_id"].unique())
+            num_reg_scenarios = len(reg_scenarios)
+
+            # Per-strategy scenario means in this regime
+            df_reg_prop = df_regime[df_regime["strategy"] == "Proposed_Fast"]
+            df_reg_nom2 = df_regime[df_regime["strategy"] == "Nominal_2Start"]
+            df_reg_nom1 = df_regime[df_regime["strategy"] == "Nominal_Planning"]
+
+            scen_prop_dsr = df_reg_prop.groupby("scenario_id")["dsr"].mean().tolist()
+            scen_prop_rmst = df_reg_prop.groupby("scenario_id")["rmst"].mean().tolist()
+            _, _, ci_prop_dsr = student_t_ci(scen_prop_dsr, bounds=(0.0, 1.0))
+            _, _, ci_prop_rmst = student_t_ci(scen_prop_rmst, bounds=(0.0, float(H)))
+
+            scen_nom2_dsr = df_reg_nom2.groupby("scenario_id")["dsr"].mean().tolist() if not df_reg_nom2.empty else []
+            scen_nom2_rmst = df_reg_nom2.groupby("scenario_id")["rmst"].mean().tolist() if not df_reg_nom2.empty else []
+            _, _, ci_nom2_dsr = student_t_ci(scen_nom2_dsr, bounds=(0.0, 1.0)) if scen_nom2_dsr else (0, 0, (float("nan"), float("nan")))
+            _, _, ci_nom2_rmst = student_t_ci(scen_nom2_rmst, bounds=(0.0, float(H))) if scen_nom2_rmst else (0, 0, (float("nan"), float("nan")))
+
+            scen_nom1_dsr = df_reg_nom1.groupby("scenario_id")["dsr"].mean().tolist() if not df_reg_nom1.empty else []
+            scen_nom1_rmst = df_reg_nom1.groupby("scenario_id")["rmst"].mean().tolist() if not df_reg_nom1.empty else []
+            _, _, ci_nom1_dsr = student_t_ci(scen_nom1_dsr, bounds=(0.0, 1.0)) if scen_nom1_dsr else (0, 0, (float("nan"), float("nan")))
+            _, _, ci_nom1_rmst = student_t_ci(scen_nom1_rmst, bounds=(0.0, float(H))) if scen_nom1_rmst else (0, 0, (float("nan"), float("nan")))
+
+            # Paired differences within regime
+            merged_nom2 = pd.merge(df_reg_prop, df_reg_nom2, on=["scenario_id", "replicate_id"], suffixes=("_prop", "_base"))
+            merged_nom2["delta_dsr"] = merged_nom2["dsr_prop"] - merged_nom2["dsr_base"]
+            merged_nom2["delta_rmst"] = merged_nom2["rmst_prop"] - merged_nom2["rmst_base"]
+            scen_delta_nom2_dsr = merged_nom2.groupby("scenario_id")["delta_dsr"].mean().tolist()
+            scen_delta_nom2_rmst = merged_nom2.groupby("scenario_id")["delta_rmst"].mean().tolist()
+            _, _, ci_d_nom2_dsr = student_t_ci(scen_delta_nom2_dsr, bounds=(-1.0, 1.0))
+            _, _, ci_d_nom2_rmst = student_t_ci(scen_delta_nom2_rmst, bounds=(-float(H), float(H)))
+            _, _, boot_ci_d_nom2_dsr, p_boot_nom2 = stratified_paired_bootstrap_ci(
+                merged_nom2, group_col="scenario_id", col_a="dsr_prop", col_b="dsr_base", seed=master_seed, equal_group_weight=True
+            )
+
+            merged_nom1 = pd.merge(df_reg_prop, df_reg_nom1, on=["scenario_id", "replicate_id"], suffixes=("_prop", "_base"))
+            merged_nom1["delta_dsr"] = merged_nom1["dsr_prop"] - merged_nom1["dsr_base"]
+            merged_nom1["delta_rmst"] = merged_nom1["rmst_prop"] - merged_nom1["rmst_base"]
+            scen_delta_nom1_dsr = merged_nom1.groupby("scenario_id")["delta_dsr"].mean().tolist()
+            scen_delta_nom1_rmst = merged_nom1.groupby("scenario_id")["delta_rmst"].mean().tolist()
+            _, _, ci_d_nom1_dsr = student_t_ci(scen_delta_nom1_dsr, bounds=(-1.0, 1.0))
+            _, _, ci_d_nom1_rmst = student_t_ci(scen_delta_nom1_rmst, bounds=(-float(H), float(H)))
+            _, _, boot_ci_d_nom1_dsr, p_boot_nom1 = stratified_paired_bootstrap_ci(
+                merged_nom1, group_col="scenario_id", col_a="dsr_prop", col_b="dsr_base", seed=master_seed, equal_group_weight=True
+            )
+
             regime_breakdown[cat] = {
                 "num_instances": n_cat,
+                "num_scenarios": num_reg_scenarios,
                 "instances": [ci["name"] for ci in cat_insts],
                 "Proposed_Fast": {
-                    "mean_DSR": float(np.mean([ci["summary"]["Proposed_Fast"]["DSR"] for ci in cat_insts])),
-                    "mean_RMST": float(np.mean([ci["summary"]["Proposed_Fast"]["mean_RMST_ticks"] for ci in cat_insts])),
+                    "mean_DSR": float(np.mean(scen_prop_dsr)),
+                    "ci95_DSR": list(ci_prop_dsr),
+                    "mean_RMST": float(np.mean(scen_prop_rmst)),
+                    "ci95_RMST": list(ci_prop_rmst),
                 },
                 "Nominal_2Start": {
-                    "mean_DSR": float(np.mean([ci["summary"]["Nominal_2Start"]["DSR"] for ci in cat_insts])),
-                    "mean_RMST": float(np.mean([ci["summary"]["Nominal_2Start"]["mean_RMST_ticks"] for ci in cat_insts])),
+                    "mean_DSR": float(np.mean(scen_nom2_dsr)),
+                    "ci95_DSR": list(ci_nom2_dsr),
+                    "mean_RMST": float(np.mean(scen_nom2_rmst)),
+                    "ci95_RMST": list(ci_nom2_rmst),
                 },
                 "Nominal_Planning": {
-                    "mean_DSR": float(np.mean([ci["summary"]["Nominal_Planning"]["DSR"] for ci in cat_insts])),
-                    "mean_RMST": float(np.mean([ci["summary"]["Nominal_Planning"]["mean_RMST_ticks"] for ci in cat_insts])),
+                    "mean_DSR": float(np.mean(scen_nom1_dsr)),
+                    "ci95_DSR": list(ci_nom1_dsr),
+                    "mean_RMST": float(np.mean(scen_nom1_rmst)),
+                    "ci95_RMST": list(ci_nom1_rmst),
                 },
                 "delta_Proposed_vs_Nominal_2Start": {
-                    "mean_delta_DSR": float(np.mean([
-                        ci["paired_comparisons"]["Proposed_vs_Nominal_2Start"]["mean_delta_DSR"]
-                        for ci in cat_insts
-                    ])),
-                    "mean_delta_RMST": float(np.mean([
-                        ci["paired_comparisons"]["Proposed_vs_Nominal_2Start"]["mean_delta_RMST_ticks"]
-                        for ci in cat_insts
-                    ])),
+                    "mean_delta_DSR": float(np.mean(scen_delta_nom2_dsr)),
+                    "ci95_delta_DSR_student_t": list(ci_d_nom2_dsr),
+                    "ci95_delta_DSR_bootstrap": list(boot_ci_d_nom2_dsr),
+                    "p_boot": p_boot_nom2,
+                    "mean_delta_RMST": float(np.mean(scen_delta_nom2_rmst)),
+                    "ci95_delta_RMST_student_t": list(ci_d_nom2_rmst),
                 },
                 "delta_Proposed_vs_Nominal": {
-                    "mean_delta_DSR": float(np.mean([
-                        ci["paired_comparisons"]["Proposed_vs_Nominal_Planning"]["mean_delta_DSR"]
-                        for ci in cat_insts
-                    ])),
-                    "mean_delta_RMST": float(np.mean([
-                        ci["paired_comparisons"]["Proposed_vs_Nominal_Planning"]["mean_delta_RMST_ticks"]
-                        for ci in cat_insts
-                    ])),
+                    "mean_delta_DSR": float(np.mean(scen_delta_nom1_dsr)),
+                    "ci95_delta_DSR_student_t": list(ci_d_nom1_dsr),
+                    "ci95_delta_DSR_bootstrap": list(boot_ci_d_nom1_dsr),
+                    "p_boot": p_boot_nom1,
+                    "mean_delta_RMST": float(np.mean(scen_delta_nom1_rmst)),
+                    "ci95_delta_RMST_student_t": list(ci_d_nom1_rmst),
                 }
             }
         else:
             regime_breakdown[cat] = {
                 "num_instances": 0,
+                "num_scenarios": 0,
                 "instances": [],
-                "Proposed_Fast": {"mean_DSR": float("nan"), "mean_RMST": float("nan")},
-                "Nominal_2Start": {"mean_DSR": float("nan"), "mean_RMST": float("nan")},
-                "Nominal_Planning": {"mean_DSR": float("nan"), "mean_RMST": float("nan")},
-                "delta_Proposed_vs_Nominal_2Start": {"mean_delta_DSR": float("nan"), "mean_delta_RMST": float("nan")},
-                "delta_Proposed_vs_Nominal": {"mean_delta_DSR": float("nan"), "mean_delta_RMST": float("nan")}
+                "Proposed_Fast": {"mean_DSR": float("nan"), "ci95_DSR": [float("nan"), float("nan")], "mean_RMST": float("nan"), "ci95_RMST": [float("nan"), float("nan")]},
+                "Nominal_2Start": {"mean_DSR": float("nan"), "ci95_DSR": [float("nan"), float("nan")], "mean_RMST": float("nan"), "ci95_RMST": [float("nan"), float("nan")]},
+                "Nominal_Planning": {"mean_DSR": float("nan"), "ci95_DSR": [float("nan"), float("nan")], "mean_RMST": float("nan"), "ci95_RMST": [float("nan"), float("nan")]},
+                "delta_Proposed_vs_Nominal_2Start": {"mean_delta_DSR": float("nan"), "ci95_delta_DSR_student_t": [float("nan"), float("nan")], "ci95_delta_DSR_bootstrap": [float("nan"), float("nan")], "p_boot": float("nan"), "mean_delta_RMST": float("nan"), "ci95_delta_RMST_student_t": [float("nan"), float("nan")]},
+                "delta_Proposed_vs_Nominal": {"mean_delta_DSR": float("nan"), "ci95_delta_DSR_student_t": [float("nan"), float("nan")], "ci95_delta_DSR_bootstrap": [float("nan"), float("nan")], "p_boot": float("nan"), "mean_delta_RMST": float("nan"), "ci95_delta_RMST_student_t": [float("nan"), float("nan")]}
             }
 
     # Operator Ablation Aggregation strictly across unique scenario solutions (not multiplied by GT regimes)
     ablation_arms = ["Proposed_Fast", "Ablation_NoReplace", "Ablation_NoRebalance", "Ablation_NoReplaceRebalance"]
     ablation_summary: Dict[str, Dict] = {}
     scenario_records = list(evaluations_by_scenario.values())
+
+    prop_scenario_j = [rec["regime_summaries"]["in_ensemble"]["Proposed_Fast"]["J_ensemble"] for rec in scenario_records]
 
     for arm in ablation_arms:
         # Search & optimization metrics: aggregated across unique scenario solves
@@ -1287,9 +1352,28 @@ def run_multi_instance_benchmark(
         arm_evals = [rec["solver_stats"][arm]["total_evals"] for rec in scenario_records]
         arm_moves = [rec["solver_stats"][arm]["accepted_moves"] for rec in scenario_records]
 
-        # Mission outcome metrics: aggregated across all evaluated instances
-        arm_dsr = [ir["summary"][arm]["DSR"] for ir in instance_results]
-        arm_rmst = [ir["summary"][arm]["mean_RMST_ticks"] for ir in instance_results]
+        _, _, ci_arm_j = student_t_ci(arm_j)
+
+        # Delta J vs Proposed_Fast (paired per scenario)
+        delta_j = [p_j - a_j for p_j, a_j in zip(prop_scenario_j, arm_j)]
+        _, _, ci_delta_j = student_t_ci(delta_j)
+
+        # Mission outcome metrics: aggregated across scenarios
+        df_arm = df_flat[df_flat["strategy"] == arm]
+        scen_arm_dsr = df_arm.groupby("scenario_id")["dsr"].mean().tolist()
+        scen_arm_rmst = df_arm.groupby("scenario_id")["rmst"].mean().tolist()
+
+        _, _, ci_arm_dsr = student_t_ci(scen_arm_dsr, bounds=(0.0, 1.0))
+        _, _, ci_arm_rmst = student_t_ci(scen_arm_rmst, bounds=(0.0, float(H)))
+
+        # Paired DSR difference vs Proposed_Fast
+        merged_ablation = pd.merge(df_prop, df_arm, on=["scenario_id", "replicate_id", "gt_regime"], suffixes=("_prop", "_arm"))
+        merged_ablation["delta_dsr"] = merged_ablation["dsr_prop"] - merged_ablation["dsr_arm"]
+        scen_delta_abl_dsr = merged_ablation.groupby("scenario_id")["delta_dsr"].mean().tolist()
+        _, _, ci_d_abl_dsr = student_t_ci(scen_delta_abl_dsr, bounds=(-1.0, 1.0))
+        _, _, boot_ci_d_abl_dsr, p_boot_abl = stratified_paired_bootstrap_ci(
+            merged_ablation, group_col="scenario_id", col_a="dsr_prop", col_b="dsr_arm", seed=master_seed, equal_group_weight=True
+        )
 
         ALL_OPERATORS = [
             "Replace", "DwellRebalance", "Swap", "ChangeDwell",
@@ -1310,8 +1394,17 @@ def run_multi_instance_benchmark(
 
         ablation_summary[arm] = {
             "mean_J_ensemble": float(np.mean(arm_j)),
-            "mean_DSR": float(np.mean(arm_dsr)),
-            "mean_RMST_ticks": float(np.mean(arm_rmst)),
+            "ci95_J_ensemble": list(ci_arm_j),
+            "mean_delta_J_vs_proposed": float(np.mean(delta_j)),
+            "ci95_delta_J_vs_proposed": list(ci_delta_j),
+            "mean_DSR": float(np.mean(scen_arm_dsr)),
+            "ci95_DSR": list(ci_arm_dsr),
+            "mean_delta_DSR_vs_proposed": float(np.mean(scen_delta_abl_dsr)),
+            "ci95_delta_DSR_student_t": list(ci_d_abl_dsr),
+            "ci95_delta_DSR_bootstrap": list(boot_ci_d_abl_dsr),
+            "p_boot_delta_DSR": p_boot_abl,
+            "mean_RMST_ticks": float(np.mean(scen_arm_rmst)),
+            "ci95_RMST": list(ci_arm_rmst),
             "mean_runtime_sec": float(np.mean(arm_rt)),
             "mean_total_evals": float(np.mean(arm_evals)),
             "mean_accepted_moves": float(np.mean(arm_moves)),
@@ -1327,6 +1420,12 @@ def run_multi_instance_benchmark(
         for regime in gt_regimes
     }
 
+    unique_scenarios = sorted(list(set(inst.instance_id % 10 for inst in base_instances)))
+    replicates_map = {
+        int(s): sum(1 for inst in base_instances if (inst.instance_id % 10) == s)
+        for s in unique_scenarios
+    }
+
     metadata_dict = {
         "tier": 3,
         "subtier": "multi_instance",
@@ -1337,7 +1436,8 @@ def run_multi_instance_benchmark(
         "ci_methods": {
             "primary_ci": "stratified_scenario_cluster_bootstrap_95",
             "parametric_scenario_ci": "scenario_aggregated_student_t_95",
-            "sampling_level": "scenario_id"
+            "sampling_level": "scenario_id",
+            "aggregation_weighting": "equal_scenario_weight"
         },
         "simulation_seeds": simulation_seeds,
         "environment": {
@@ -1347,8 +1447,10 @@ def run_multi_instance_benchmark(
         },
         "experiment_config": {
             "num_instances": num_instances,
-            "num_scenarios": num_instances,
+            "num_unique_scenarios": len(unique_scenarios),
             "num_designs": num_instances,
+            "replicates_per_scenario": replicates_map,
+            "aggregation_weighting": "equal_scenario_weight",
             "gt_regimes": gt_regimes,
             "num_evaluations_total": len(instance_results),
             "num_missions_per_instance": num_missions_per_instance,
@@ -1368,6 +1470,10 @@ def run_multi_instance_benchmark(
         "benchmark_metadata": {
             **metadata_dict,
             "num_instances": num_instances,
+            "num_unique_scenarios": len(unique_scenarios),
+            "num_designs": num_instances,
+            "replicates_per_scenario": replicates_map,
+            "aggregation_weighting": "equal_scenario_weight",
             "num_missions_per_instance": num_missions_per_instance,
             "total_missions_evaluated": len(instance_results) * num_missions_per_instance,
             "master_seed": master_seed,

@@ -144,3 +144,41 @@ def test_student_t_ci_properties():
     assert hi_raw > 24.0, f"Precondition failed: unclipped hi={hi_raw} must be > 24.0 to test clipping"
     _, _, (_, hi_clipped) = student_t_ci(vals_high, alpha=0.05, bounds=(0.0, 24.0))
     assert hi_clipped == 24.0, f"Expected hi_clipped == 24.0, got {hi_clipped}"
+
+
+def test_stratified_bootstrap_equal_group_weight():
+    """Verify equal group weighting in bootstrap when groups have unequal sample sizes."""
+    from sar_uav.experiments.stats import stratified_bootstrap_ci, stratified_paired_bootstrap_ci
+
+    # Group 0 has 4 records of 0.20 -> group mean = 0.20
+    # Group 1 has 1 record of 0.80 -> group mean = 0.80
+    # Unweighted row mean = (4*0.20 + 0.80)/5 = 0.32
+    # Equal group weighted mean = (0.20 + 0.80)/2 = 0.50
+    df = pd.DataFrame({
+        "group_id": [0, 0, 0, 0, 1],
+        "metric": [0.20, 0.20, 0.20, 0.20, 0.80],
+        "col_a": [0.30, 0.30, 0.30, 0.30, 0.90],
+        "col_b": [0.10, 0.10, 0.10, 0.10, 0.10],
+    })
+
+    pt_eq, se_eq, (lo_eq, hi_eq) = stratified_bootstrap_ci(
+        df, group_col="group_id", metric_col="metric", seed=42, equal_group_weight=True
+    )
+    assert abs(pt_eq - 0.50) < 1e-9
+    assert lo_eq < 0.50 < hi_eq
+
+    pt_uneq, se_uneq, (lo_uneq, hi_uneq) = stratified_bootstrap_ci(
+        df, group_col="group_id", metric_col="metric", seed=42, equal_group_weight=False
+    )
+    assert abs(pt_uneq - 0.32) < 1e-9
+
+    # Paired test:
+    # Group 0 diff = 0.20
+    # Group 1 diff = 0.80
+    # Equal group diff = 0.50
+    pt_p_eq, se_p_eq, (lo_p_eq, hi_p_eq), p_b_eq = stratified_paired_bootstrap_ci(
+        df, group_col="group_id", col_a="col_a", col_b="col_b", seed=42, equal_group_weight=True
+    )
+    assert abs(pt_p_eq - 0.50) < 1e-9
+    assert lo_p_eq < 0.50 < hi_p_eq
+

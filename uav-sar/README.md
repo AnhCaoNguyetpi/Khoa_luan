@@ -77,7 +77,7 @@ uav-sar/
 │       ├── tier3_multi_instance.py      # Tier 3: Benchmark đa kịch bản 3 Ground Truth
 │       ├── tier4_misspecification.py    # Tier 4: Kiểm tra sai đặc tả q* not in S
 │       └── tier5_scalability.py         # Tier 5: Khảo sát khả năng mở rộng Quality-vs-Runtime
-├── tests/                       # 99 unit tests tự động (100% pass)
+├── tests/                       # 102 unit tests tự động (100% pass)
 └── results/                     # Kết quả JSON, logs XML và biểu đồ PDF/PNG
     ├── logs/validation_latest.xml # Log thực thi test suite
     ├── figures/                 # 5 biểu đồ nghiên cứu chuẩn IEEE/ACM
@@ -92,7 +92,7 @@ uav-sar/
 # 1. Kích hoạt môi trường ảo (trên Windows)
 .venv\Scripts\activate
 
-# 2. Chạy toàn bộ 99 unit tests kiểm thử tự động
+# 2. Chạy toàn bộ 102 unit tests kiểm thử tự động
 pytest -q --junitxml=results/logs/validation_latest.xml
 ```
 
