@@ -12,6 +12,7 @@
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{multirow}
+\usepackage{tabularx}
 
 \usepackage{enumitem}
 \usepackage{float}
@@ -36,131 +37,100 @@
 \onehalfspacing
 \setlength{\emergencystretch}{2em}
 
-\newtheorem{proposition}{Proposition}
+% Math theorem environments
+\newtheorem{theorem}{Định lý}
+\newtheorem{proposition}{Mệnh đề}
+\newtheorem{lemma}{Bổ đề}
+\newtheorem{definition}{Định nghĩa}
+\newtheorem{hypothesis}{Giả thuyết}
+\newtheorem{remark}{Nhận xét}
 
 \title{
-\textbf{Multi-UAV Routing and Search-Effort Allocation\\
-under Persistent Detection-Model Uncertainty}
+\textbf{Hướng nghiên cứu: Tối ưu hóa Định tuyến và Phân bổ Thời lượng Tìm kiếm Đa UAV dưới Độ bất định Mô hình Phát hiện}\\[0.5em]
+\large Từ bài toán cứu hộ cứu nạn cơ sở đến các câu hỏi nghiên cứu có thể kiểm chứng
 }
 
-\author{Cao Nguyệt Ánh}
-\date{September 2026}
+\author{\textbf{Cao Nguyệt Ánh}}
+\date{Tháng 9 năm 2026}
 
 \begin{document}
 \maketitle
 
+\begin{abstract}
+Tài liệu này trình bày đề cương nghiên cứu về bài toán lập kế hoạch phối hợp đường bay (routing) và phân bổ thời lượng tìm kiếm (dwell time, wait time) cho đội hình nhiều phương tiện bay không người lái (Multi-UAV) trong nhiệm vụ tìm kiếm cứu nạn (Wilderness Search and Rescue -- SAR). Trọng tâm nghiên cứu giải quyết thách thức khi sai số mô hình cảm biến phát hiện mang tính hệ thống và kéo dài suốt nhiệm vụ (persistent uncertainty). 
+
+Nghiên cứu xuất phát từ phân tích giải tích bất đẳng thức Jensen trên đường cong xác suất phát hiện tích lũy, chứng minh sự sai lệch tất yếu của mô hình danh định (nominal) và đặt cơ sở cho mô hình hóa tập giả thuyết $\mathcal{S}$. Về mặt lý thuyết, nghiên cứu chứng minh tính tương đương giữa chính sách (policy) tổng quát và lịch hành động phối hợp rời rạc trên nhánh quan sát toàn âm tính (Proposition~1). Về mặt thuật toán, nghiên cứu đề xuất giải thuật tìm kiếm cục bộ phối hợp Route--Effort trên không gian 8 toán tử láng giềng mở rộng (hỗ trợ revisit, thay thế vùng và tái cân bằng dwell), kết hợp bộ đánh giá nhanh hai chiều Forward--Backward Fast Evaluator giúp giảm chi phí tính toán từ toàn bộ horizon $H$ xuống chỉ còn đoạn biến đổi $[t_a, t_b]$. Hệ thống 5 câu hỏi nghiên cứu (RQ1--RQ5), thiết kế thực nghiệm 5 tầng kiểm chứng trên dữ liệu GIS Tây Nguyên thực tế, cùng lộ trình thực hiện 6 mốc chuyển tiếp được thiết lập chặt chẽ nhằm bảo đảm tính tái lập và khả năng kiểm chứng độc lập.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
 % ============================================================
-\section*{Định hướng và trọng tâm nghiên cứu}
+\section{Đặt vấn đề và Trọng tâm nghiên cứu}
 % ============================================================
 
-\textbf{Lập kế hoạch phối hợp đường bay và thời lượng tìm kiếm cho nhiều
-UAV khi sai số mô hình phát hiện tồn tại xuyên suốt nhiệm vụ; khai thác
-cấu trúc xác suất chưa phát hiện để tối ưu hiệu quả và xác định khi nào
-mô hình nhiều giả thuyết đem lại lợi ích.}
+Trong các chiến dịch tìm kiếm cứu nạn tại địa hình rừng núi hoang dã (Wilderness Search and Rescue -- SAR), việc ứng dụng đội hình nhiều UAV (Multi-UAV) mang lại tiềm năng bao phủ diện tích rộng lớn trong thời gian ngắn, giúp gia tăng cơ hội sống sót của nạn nhân. Tuy nhiên, hiệu quả của hệ thống phụ thuộc chặt chẽ vào độ chính xác của mô hình cảm biến phát hiện (detection model).
 
-Nghiên cứu thuộc dạng \textbf{bài toán thuật toán lập kế hoạch robot},
-lấy Search and Rescue (SAR) làm bài toán ứng dụng. Đề tài tập trung giải
-quyết ba vấn đề cốt lõi:
-\begin{enumerate}
-    \item \textbf{Khó khăn:} Các phương pháp lập kế hoạch hiện có xử lý
-    kém hiệu quả khi sai số mô hình phát hiện mang tính hệ thống và kéo
-    dài (persistent uncertainty) trong suốt thời gian thực thi nhiệm vụ.
-    \item \textbf{Cấu trúc:} Khai thác tính chất tương đương của lịch
-    hành động trên nhánh quan sát toàn âm tính và cấu trúc lan truyền xác
-    suất chưa phát hiện hai chiều (tiền tố forward unnormalized mass / hậu
-    tố backward continuation) để tăng tốc đánh giá không gian nghiệm.
-    \item \textbf{Bằng chứng:} Chứng minh thực nghiệm điều kiện và phạm vi
-    mà phương pháp phối hợp nhiều giả thuyết vượt trội so với các mô hình
-    danh định (nominal) và tối ưu hóa tách rời; đồng thời xác định ranh giới
-    suy giảm khi mô hình bị sai đặc tả.
+Đề tài thuộc dạng \textbf{bài toán thuật toán lập kế hoạch robot}, lấy Wilderness SAR làm bài toán ứng dụng then chốt. Đề tài tập trung giải quyết ba vấn đề cốt lõi:
+\begin{enumerate}[label=\textbf{\arabic*.}]
+    \item \textbf{Khó khăn cốt lõi:} Các phương pháp lập kế hoạch hiện có thường giả định mô hình phát hiện là chính xác hoặc sai số chỉ là nhiễu trắng độc lập từng thời điểm. Trong thực tế, sai số mô hình phát hiện mang tính hệ thống và tồn tại xuyên suốt nhiệm vụ (\emph{persistent uncertainty}) do đặc tính thời tiết, ánh sáng, góc nghiêng cảm biến và lớp thảm thực vật cục bộ không đổi trong suốt phiên bay.
+    \item \textbf{Cấu trúc toán học và thuật toán:} Khai thác tính chất tương đương của lịch hành động trên nhánh quan sát toàn âm tính (Proposition~\ref{prop:equiv}) và cấu trúc lan truyền xác suất chưa phát hiện hai chiều (tiền tố \emph{forward unnormalized mass} kết hợp hậu tố \emph{backward continuation}) để xây dựng bộ đánh giá nhanh cục bộ (\emph{Fast Evaluator}), tăng tốc độ khám phá không gian nghiệm phối hợp Route--Effort.
+    \item \textbf{Bằng chứng thực nghiệm:} Xác lập điều kiện và phạm vi thực nghiệm mà tại đó phương pháp phối hợp nhiều giả thuyết ($\mathcal{S}$) đem lại ưu thế vượt trội so với các mô hình danh định (nominal) và tối ưu hóa tách rời; đồng thời xác định chính xác ranh giới suy giảm hiệu năng khi mô hình thực tế bị sai đặc tả ngoài phân phối.
 \end{enumerate}
 
-Phân bố vị trí ban đầu và mô hình chuyển động của mục tiêu được cung cấp
-dưới dạng đầu vào chuẩn tắc và dùng chung giữa các phương pháp đối chứng.
-Phạm vi nghiên cứu tập trung vào bài toán thuật toán và ra quyết định trên
-cấu trúc mô hình đã cho, đảm bảo tính chặt chẽ và khả năng kiểm chứng độc
-lập.
+Phân bố vị trí ban đầu và mô hình chuyển động của mục tiêu được cung cấp dưới dạng đầu vào chuẩn tắc và dùng chung giữa các phương pháp đối chứng. Phạm vi nghiên cứu tập trung vào bài toán thuật toán và ra quyết định trên cấu trúc mô hình đã cho, bảo đảm tính chặt chẽ, minh bạch và khả năng kiểm chứng độc lập.
 
 % ============================================================
-\section*{Động cơ nghiên cứu: cơ chế persistent uncertainty}
+\section{Động cơ nghiên cứu: Cơ chế Bất định dai dẳng và Bất đẳng thức Jensen}
 % ============================================================
 
-Trong wilderness SAR, xác suất người mất tích có mặt tại một vùng và xác
-suất UAV phát hiện được người đó là hai đại lượng vật lý và xác suất khác
-nhau. Một vùng có khả năng chứa mục tiêu cao có thể bị che khuất bởi tán
-cây rậm rạp, địa hình dốc hoặc cần thời lượng quan sát lớn. Do đó, hệ thống
-phải giải quyết bài toán đánh đổi giữa thời gian bay di chuyển giữa các
-vùng và thời lượng quan sát tại mỗi vùng.
+Trong wilderness SAR, xác suất người mất tích có mặt tại một vùng và xác suất UAV phát hiện được người đó là hai đại lượng vật lý và xác suất hoàn toàn khác biệt. Một khu vực có khả năng chứa mục tiêu cao có thể bị che khuất bởi tán rừng rậm rạp hoặc địa hình dốc đứng, đòi hỏi thời lượng quan sát lớn mới có thể phát hiện. Do đó, hệ thống lập kế hoạch phải liên tục giải quyết bài toán đánh đổi giữa thời gian bay di chuyển giữa các vùng và thời lượng quan sát tại mỗi vùng.
 
-Khó khăn trung tâm là \textbf{sai số mô hình phát hiện tồn tại xuyên suốt
-nhiệm vụ} (persistent uncertainty) do đặc tính cảm biến và môi trường cục
-bộ không đổi trong phiên bay, khác với nhiễu độc lập lấy mẫu lại ngẫu
-nhiên ở từng thời điểm. Điều này tạo ra một cơ chế sai lệch có tính hệ
-thống ảnh hưởng trực tiếp đến quyết định lập kế hoạch.
+Thách thức trung tâm là \textbf{sai số mô hình phát hiện tồn tại xuyên suốt nhiệm vụ} (\emph{persistent uncertainty}). Sai số này xuất phát từ đặc tính cảm biến và môi trường thực địa cố định trong suốt phiên bay, khác hoàn toàn với nhiễu ngẫu nhiên độc lập được lấy mẫu lại ở từng thời điểm.
 
-\subsection*{Cơ chế Jensen: sai lệch xác suất phát hiện tích lũy}
+\subsection{Cơ chế Jensen: Sai lệch xác suất phát hiện tích lũy}
 
-Xét trường hợp mục tiêu đứng yên, có mặt trong vùng quan sát với thời lượng
-exposure tích lũy $e$. Khi detection rate $\lambda$ là một biến ngẫu
-nhiên chưa biết nhưng \emph{cố định trong suốt nhiệm vụ}, xác suất phát
-hiện lấy trung bình theo phân phối tiên nghiệm của $\lambda$ là
-\[
-P_D(e) = 1 - \mathbb{E}_\lambda[\exp(-\lambda e)].
-\]
-Nếu planner xấp xỉ bài toán bằng cách thay rate trung bình $\mathbb{E}[\lambda]$:
-\[
-P_D^{\mathrm{mean}}(e) = 1 - \exp(-\mathbb{E}[\lambda]\,e).
-\]
-Do tính lồi của hàm mũ $f(x) = \exp(-x e)$ đối với $e > 0$, theo
-bất đẳng thức Jensen, khi $\lambda$ không suy biến (tức $\mathrm{Var}(\lambda) > 0$):
-\[
-\mathbb{E}_\lambda[\exp(-\lambda e)]
-> \exp(-\mathbb{E}[\lambda]\,e),
-\qquad\text{suy ra}\quad
+Xét trường hợp mục tiêu đứng yên, có mặt trong vùng quan sát với thời lượng exposure tích lũy $e$. Khi detection rate $\lambda$ là một biến ngẫu nhiên chưa biết nhưng \emph{cố định trong suốt nhiệm vụ}, xác suất phát hiện thực tế lấy kỳ vọng theo phân phối tiên nghiệm của $\lambda$ là:
+\begin{equation}
+P_D(e) = 1 - \mathbb{E}_\lambda\left[\exp(-\lambda e)\right].
+\end{equation}
+Nếu planner xấp xỉ bài toán bằng cách thay thế trực tiếp rate trung bình danh định $\mathbb{E}[\lambda]$:
+\begin{equation}
+P_D^{\mathrm{mean}}(e) = 1 - \exp\left(-\mathbb{E}[\lambda]\,e\right).
+\end{equation}
+Do hàm mũ $f(x) = \exp(-x e)$ là hàm lồi nghiêm ngặt đối với $e > 0$, theo \textbf{bất đẳng thức Jensen}, khi $\lambda$ không suy biến ($\mathrm{Var}(\lambda) > 0$), ta có:
+\begin{equation}
+\mathbb{E}_\lambda\left[\exp(-\lambda e)\right] > \exp\left(-\mathbb{E}[\lambda]\,e\right)
+\quad\implies\quad
 P_D(e) < P_D^{\mathrm{mean}}(e).
-\]
-Khi $S=1$ (không có bất định), dấu bằng xảy ra và hai mô hình cho cùng kết quả.
+\end{equation}
+Khi $S=1$ (không có độ bất định), dấu bằng xảy ra và hai mô hình trùng khớp hoàn toàn.
 
-\textbf{Ví dụ số.} Xét $\lambda \in \{0.01, 0.19\}$ với xác suất $1/2$ mỗi
-trường hợp, và thời lượng tìm $e = 10$:
+\subsection{Ví dụ số minh họa sai lệch danh định}
+
+Xét bài toán với $\lambda \in \{0.01, 0.19\}$ nhận xác suất $1/2$ mỗi trường hợp, và thời lượng tìm kiếm $e = 10$:
 \begin{itemize}
-    \item Đánh giá đúng theo phân phối:
-    $P_D = 1 - \tfrac{1}{2}(e^{-0.1} + e^{-1.9}) \approx 0.473$.
-    \item Dùng rate trung bình $\bar\lambda = 0.1$:
-    $P_D^{\mathrm{mean}} = 1 - e^{-1.0} \approx 0.632$.
+    \item \textbf{Đánh giá đúng theo phân phối giả thuyết:}
+    \[
+    P_D = 1 - \tfrac{1}{2}\left(e^{-0.01 \times 10} + e^{-0.19 \times 10}\right) = 1 - \tfrac{1}{2}\left(e^{-0.1} + e^{-1.9}\right) \approx 0.473.
+    \]
+    \item \textbf{Dùng rate trung bình danh định $\bar\lambda = 0.1$:}
+    \[
+    P_D^{\mathrm{mean}} = 1 - e^{-0.1 \times 10} = 1 - e^{-1.0} \approx 0.632.
+    \]
 \end{itemize}
-Chênh lệch $\sim$16 điểm phần trăm cho thấy planner sử dụng nominal model
-có thể \textbf{đánh giá quá cao} xác suất phát hiện tích lũy trong mô hình
-exponential. Sai lệch này làm thay đổi đường cong lợi ích theo exposure;
-hướng sai lệch của lợi ích biên và tác động đến lịch tối ưu cần được phân
-tích riêng, vì đạo hàm $P_D'(e) = \mathbb{E}[\lambda e^{-\lambda e}]$ và
-$(P_D^{\mathrm{mean}})'(e) = \bar\lambda e^{-\bar\lambda e}$ không có thứ tự
-lớn--nhỏ cố định. Kết quả Jensen chỉ bảo đảm sai lệch trên xác suất tích
-lũy; sai lệch đó có thể làm thay đổi phân bổ thời gian tìm và lựa chọn
-vùng, nhưng không bảo đảm quyết định tối ưu chắc chắn thay đổi trong mọi
-cấu hình.
 
-\textit{Định vị vai trò:} Bất đẳng thức Jensen đóng vai trò là một \textbf{kết
-quả giải tích nền tảng}, giải thích nguyên nhân lý thuyết dẫn đến sai lệch
-của ước lượng điểm nominal và đặt cơ sở cho việc mô hình hóa tập giả thuyết
-$\mathcal{S}$. Bản thân bất đẳng thức không phải là đóng góp thuật toán
-chính; trọng tâm cải tiến khoa học của đề tài nằm ở việc thiết kế không gian
-tìm kiếm phối hợp, bộ đánh giá nhanh hai chiều và xác lập ranh giới thực
-nghiệm mà tại đó mô hình giả thuyết mang lại lợi thế vượt trội.
+Chênh lệch $\approx 16$ điểm phần trăm ($0.473$ so với $0.632$) cho thấy planner sử dụng mô hình danh định sẽ \textbf{đánh giá quá cao} xác suất phát hiện tích lũy. Sai lệch này làm thay đổi hình dạng đường cong lợi ích theo thời lượng tìm kiếm; hướng sai lệch của lợi ích biên và tác động đến lịch trình tối ưu cần được phân tích riêng, do đạo hàm $P_D'(e) = \mathbb{E}[\lambda e^{-\lambda e}]$ và $(P_D^{\mathrm{mean}})'(e) = \bar\lambda e^{-\bar\lambda e}$ không có quan hệ thứ tự lớn--nhỏ cố định trên toàn miền $e$.
+
+\begin{remark}[Định vị vai trò lý thuyết nền tảng]
+Bất đẳng thức Jensen đóng vai trò là một \textbf{kết quả giải tích nền tảng}, giải thích nguyên nhân toán học dẫn đến sự sai lệch tất yếu của ước lượng điểm danh định và đặt cơ sở cho việc mô hình hóa tập giả thuyết $\mathcal{S}$. Trọng tâm đóng góp thuật toán của đề tài nằm ở việc thiết kế không gian tìm kiếm phối hợp Route--Effort, bộ đánh giá nhanh hai chiều và xác lập ranh giới thực nghiệm mang lại lợi thế.
+\end{remark}
 
 % ============================================================
-\section*{Bằng chứng tính mới và Literature Review}
+\section{Tổng quan nghiên cứu và Khoảng trống khoa học}
 % ============================================================
 
-Để xác lập khoảng trống nghiên cứu, Bảng~\ref{tab:relwork} đối chiếu các
-công trình liên quan gần nhất theo các chiều thuộc tính formulation toán học,
-trong đó tách bạch rõ bất định vị trí mục tiêu và bất định mô hình phát
-hiện. Các đặc trưng được tổng hợp từ bài báo gốc; một tài liệu kỹ thuật
-phụ lục (Technical Appendix) sẽ cung cấp trích dẫn số trang, mục và phương
-trình cụ thể cho từng ô phân loại (bao gồm cơ chế Receding Horizon / Dynamic
-Programming trong Hansen et al.~\cite{hansen2007}, biểu diễn khoảng tham số
-trong Bertuccelli \& How~\cite{bertuccelli2005}, và tích hợp route--dwell
-trong Berger et al.~\cite{berger2021}) để phục vụ kiểm chứng độc lập.
+Để xác lập rõ ràng khoảng trống khoa học, Bảng~\ref{tab:relwork} đối chiếu formulation toán học của đề tài với các công trình tiêu biểu gần nhất trong tài liệu chuyên ngành, tách bạch rõ giữa bất định vị trí mục tiêu và bất định mô hình phát hiện.
 
 \begin{table}[H]
 \centering
@@ -244,351 +214,206 @@ Có (ngoài mẫu test) \\
 \end{tabular}
 \end{table}
 
-Multi-UAV receding-horizon search dựa trên probability model đã được khảo
-sát trong Ge et al.~\cite{ge2024}. Mối liên hệ giữa search effort và path
-planning trên bản đồ xác suất được đặt nền móng trong Hansen et al.~\cite{hansen2007}.
-Lý thuyết phân bổ search effort cho mục tiêu di chuyển~\cite{brown1980}, kế
-hoạch dự đoán phản hồi tìm kiếm~\cite{berger2021}, bất định probability map
-dạng khoảng~\cite{bertuccelli2005} và Bayesian multi-UAV search~\cite{niu2026}
-đều đã có các đóng góp riêng rẽ.
+\subsection{Phân tích khoảng trống nghiên cứu}
 
-\textbf{Khoảng trống nghiên cứu ứng viên:} Qua đối chiếu literature,
-chưa có công trình nào \emph{đồng thời}:
+Qua đối chiếu literature, chưa có công trình nào \textbf{đồng thời}:
 \begin{enumerate}[label=(\alph*)]
-    \item Tối ưu hóa phối hợp đồng thời cả 4 thành phần: phân công UAV,
-    lộ trình ghé thăm (hỗ trợ revisit), thời lượng dwell và thời điểm chờ (wait).
-    \item Đặt dưới mô hình sai số cảm biến mang tính hệ thống kéo dài
-    suốt nhiệm vụ (persistent uncertainty qua tập giả thuyết $\mathcal{S}$).
-    \item Khai thác cấu trúc lan truyền xác suất chưa phát hiện hai chiều
-    (tiền tố forward mass kết hợp hậu tố backward continuation) để xây dựng
-    thuật toán đánh giá nhanh cục bộ phục vụ tìm kiếm nghiệm.
-    \item Đánh giá thực nghiệm xác định điều kiện ranh giới khi nào mô
-    hình tập giả thuyết đem lại lợi ích quyết định so với mô hình danh định,
-    và kiểm tra khả năng chống chịu khi mô hình thực tế bị sai đặc tả.
+    \item Tối ưu hóa phối hợp đồng thời cả 4 thành phần quyết định: phân công đội UAV, lộ trình ghé thăm (hỗ trợ revisit), thời lượng tìm kiếm (dwell time) và thời điểm chờ chủ động (wait time).
+    \item Đặt bài toán dưới mô hình sai số cảm biến mang tính hệ thống kéo dài suốt nhiệm vụ (persistent uncertainty qua tập giả thuyết $\mathcal{S}$).
+    \item Khai thác cấu trúc lan truyền xác suất chưa phát hiện hai chiều (tiền tố forward unnormalized mass kết hợp hậu tố backward continuation) để xây dựng thuật toán đánh giá nhanh cục bộ phục vụ tìm kiếm nghiệm.
+    \item Đánh giá thực nghiệm xác định điều kiện ranh giới khi nào mô hình tập giả thuyết đem lại lợi ích quyết định so với mô hình danh định, và kiểm tra khả năng chống chịu khi mô hình thực tế bị sai đặc tả ngoài tập giả thuyết.
 \end{enumerate}
 
 % ============================================================
-\section*{Problem Statement}
+\section{Phát biểu bài toán và Tính chất nền tảng}
 % ============================================================
 
 \begin{quote}
-Cho khu vực tìm kiếm được rời rạc hóa thành lưới ô, phân bố vị trí ban
-đầu và mô hình Markov chuyển động của mục tiêu; một đội UAV có ràng buộc
-vận tốc, năng lượng pin và thời hạn nhiệm vụ. Khả năng phát hiện mục tiêu
-tại mỗi ô phụ thuộc vào footprint cảm biến và điều kiện che phủ, nhưng
-hệ thống chỉ có mô hình ước lượng danh định cùng một tập giả thuyết rời rạc
-về sai lệch của mô hình đó. Khi không phát hiện thấy mục tiêu, thông tin âm
-tính này có thể do mục tiêu vắng mặt hoặc do cảm biến bỏ sót dưới điều kiện
-thực tế. Bài toán đặt ra là: xác định đồng thời phân công nhiệm vụ UAV, thứ
-tự ghé thăm, thời lượng tìm kiếm và thời điểm chờ tại từng vùng nhằm tối
-đa hóa xác suất phát hiện kỳ vọng trước thời hạn theo tập giả thuyết, đồng
-thời bảo đảm tính khả thi về động học, giới hạn thời gian và năng lượng
-quay về an toàn.
+\textbf{Phát biểu bài toán tổng quát:} Cho khu vực tìm kiếm cứu nạn được rời rạc hóa thành lưới ô địa lý, phân bố vị trí ban đầu và mô hình Markov chuyển động của người mất tích; một đội UAV có ràng buộc vận tốc, năng lượng pin và thời hạn nhiệm vụ. Khả năng phát hiện mục tiêu tại mỗi ô phụ thuộc vào footprint cảm biến và điều kiện che phủ, nhưng hệ thống chỉ có mô hình ước lượng danh định cùng một tập giả thuyết rời rạc về sai lệch của mô hình đó. Khi không phát hiện thấy mục tiêu, thông tin âm tính này có thể do mục tiêu vắng mặt hoặc do cảm biến bỏ sót dưới điều kiện thực tế. Bài toán đặt ra là: xác định đồng thời phân công nhiệm vụ UAV, thứ tự ghé thăm, thời lượng tìm kiếm và thời điểm chờ tại từng vùng nhằm tối đa hóa xác suất phát hiện kỳ vọng trước thời hạn theo tập giả thuyết, đồng thời bảo đảm tính khả thi về động học, giới hạn thời gian và năng lượng quay về an toàn.
 \end{quote}
 
-\textbf{Đầu vào cố định:} Bản đồ địa hình và lớp phủ, vị trí depot, đội
-UAV $K$, giới hạn thời gian $T_{\max}$, thông số năng lượng pin $\{B_k, R_k\}$,
-initial belief $b_0$, ma trận chuyển động Markov $M$, mô hình danh định
-$\widehat q$ và tập giả thuyết sai số $\mathcal{S} = \{q^s, w_s\}_{s=1}^S$.
-
-\textbf{Biến quyết định:} Chuỗi vùng ghé thăm $\rho_k$, dwell time $d_{k\ell}$,
-thời điểm bắt đầu $s_{k\ell}$ và thời gian chờ $w_{k\ell}$ cho mỗi UAV $k$.
-
-\textbf{Đầu ra:} Lịch hành động phối hợp khả thi $a = (a_0, \ldots, a_{H-1})$.
-
-\textbf{Tiêu chí tối ưu:} Xác suất phát hiện kỳ vọng $J_{\mathcal{S}}(a)$
-trên tập giả thuyết trước thời hạn $T_{\max}$.
-
-\subsection*{Phạm vi nghiên cứu}
+\subsection{Các thành phần bài toán}
 
 \begin{itemize}
-    \item \textbf{Mục tiêu:} Một người mất tích; vị trí thực là biến trạng
-    thái ẩn. Chuyển động tuân theo mô hình Markov đã cho. Trường hợp mục tiêu
-    đứng yên là ca kiểm chứng đặc biệt.
-    \item \textbf{Đội UAV:} Hệ thống gồm $m$ UAV đồng nhất, điều phối tập
-    trung; các phương pháp nhận cùng thông tin đầu vào; các UAV chia sẻ thông
-    tin tức thời.
-    \item \textbf{Chu kỳ nhiệm vụ:} Một depot xuất phát và kết thúc, một
-    sortie duy nhất cho mỗi UAV, không thay pin giữa chặng. UAV phải luôn
-    đủ năng lượng quay về depot với mức dự phòng an toàn $R_k$.
-    \item \textbf{Bay và tìm kiếm:} Bay ở độ cao cố định trên đồ thị cạnh
-    khả thi. Không thu thập quan sát trong khi đang bay di chuyển giữa các
-    vùng. Hành động tìm kiếm và bay không thực hiện đồng thời.
-    \item \textbf{Cơ chế dừng:} Một phát hiện dương tính được xác nhận sẽ
-    kết thúc nhiệm vụ tìm kiếm và kích hoạt quy trình quay về an toàn.
-    Chưa xét false positive trong mô hình cơ sở.
-    \item \textbf{Thông tin môi trường:} Không có nguồn tin bên ngoài bổ
-    sung trong quá trình bay.
+    \item \textbf{Đầu vào cố định:} Bản đồ địa hình và lớp phủ thực bì GIS, vị trí depot $o$, đội UAV $K=\{1,\ldots,m\}$, giới hạn thời gian $T_{\max}$, thông số năng lượng pin $\{B_k, R_k\}$, initial belief $b_0$, ma trận chuyển động Markov $M$, mô hình danh định $\widehat q$ và tập giả thuyết sai số $\mathcal{S} = \{q^s, w_s\}_{s=1}^S$.
+    \item \textbf{Biến quyết định:} Chuỗi vùng ghé thăm $\rho_k = (v_{k1}, \ldots, v_{kr_k})$, thời lượng dwell $d_{k\ell} \in \mathcal{D}$, thời điểm bắt đầu tìm kiếm $s_{k\ell}$ và thời gian chờ $w_{k\ell}$ cho mỗi UAV $k$.
+    \item \textbf{Đầu ra:} Lịch hành động phối hợp khả thi $a = (a_0, a_1, \ldots, a_{H-1})$.
+    \item \textbf{Tiêu chí tối ưu:} Xác suất phát hiện kỳ vọng $J_{\mathcal{S}}(a)$ trên tập giả thuyết trước thời hạn $T_{\max}$.
 \end{itemize}
 
-\subsection*{Tính chất nền tảng: Lịch trên nhánh chưa phát hiện}
+\subsection{Phạm vi và Giả định bài toán}
+
+\begin{itemize}
+    \item \textbf{Mục tiêu:} Một người mất tích; vị trí thực là biến trạng thái ẩn. Chuyển động tuân theo mô hình Markov đã cho. Trường hợp mục tiêu đứng yên là ca kiểm chứng đặc biệt.
+    \item \textbf{Đội UAV:} Gồm $m$ UAV đồng nhất, điều phối tập trung; các UAV chia sẻ thông tin tức thời và nhận cùng dữ liệu đầu vào.
+    \item \textbf{Chu kỳ nhiệm vụ:} Một depot xuất phát và kết thúc, một sortie duy nhất cho mỗi UAV, không thay pin giữa chặng. UAV phải luôn đủ năng lượng quay về depot với mức dự phòng an toàn $R_k$.
+    \item \textbf{Bay và tìm kiếm:} Bay ở độ cao cố định trên đồ thị cạnh khả thi. Không thu thập quan sát trong khi đang bay di chuyển giữa các vùng. Hành động tìm kiếm và bay không thực hiện đồng thời.
+    \item \textbf{Cơ chế dừng:} Một phát hiện dương tính được xác nhận sẽ kết thúc nhiệm vụ tìm kiếm và kích hoạt quy trình quay về an toàn. Chưa xét false positive trong mô hình cơ sở.
+\end{itemize}
+
+\subsection{Tính chất nền tảng: Lịch trên nhánh chưa phát hiện}
 
 \begin{proposition}[Tương đương giữa Policy và Lịch hành động trên nhánh toàn âm tính]
-Xét bài toán tìm kiếm với các giả định: (i)~chỉ có chuỗi quan sát âm tính
-trước khi có phát hiện kết thúc nhiệm vụ, (ii)~không có quan sát ngoài,
-(iii)~thực thi xác định (deterministic execution), (iv)~phát hiện kết
-thúc tìm kiếm, và (v)~thông tin ban đầu $(b_0, \mathcal{S})$ cố định,
-kèm quy tắc quay về sau phát hiện đã chốt.
-Khi đó mỗi policy xác định
-$\pi$ tương ứng duy nhất với một lịch hành động $a = (a_0, a_1, \ldots, a_{H-1})$
-trên nhánh toàn âm tính, và hai biểu diễn này đạt cùng giá trị hàm mục tiêu
-xác suất phát hiện trước thời hạn $J_{\mathcal{S}}(\pi) = J_{\mathcal{S}}(a)$.
+\label{prop:equiv}
+Xét bài toán tìm kiếm với các giả định: (i)~chỉ có chuỗi quan sát âm tính trước khi có phát hiện kết thúc nhiệm vụ, (ii)~không có quan sát ngoại lai ngoài hệ thống, (iii)~thực thi xác định (deterministic execution), (iv)~phát hiện kết thúc tìm kiếm, và (v)~thông tin ban đầu $(b_0, \mathcal{S})$ cố định, kèm quy tắc quay về sau phát hiện đã chốt.
+
+Khi đó, mỗi policy xác định $\pi$ tương ứng duy nhất với một lịch hành động $a = (a_0, a_1, \ldots, a_{H-1})$ trên nhánh toàn âm tính, và hai biểu diễn này đạt cùng giá trị hàm mục tiêu xác suất phát hiện trước thời hạn:
+\begin{equation}
+J_{\mathcal{S}}(\pi) = J_{\mathcal{S}}(a).
+\end{equation}
 \end{proposition}
 
-\begin{proof}[Chứng minh tóm tắt]
-Dưới chính sách xác định $\pi$ và môi trường thực thi không có nhiễu chấp
-hành, hành động tại thời điểm $t$ là hàm của lịch sử quan sát $a_t = \pi(t, Y_{0:t-1})$.
-Trước khi phát hiện mục tiêu, do không có quan sát ngoại lai, chỉ tồn tại
-duy nhất một chuỗi quan sát có thể xảy ra là toàn bộ các cảm biến đều cho
-kết quả âm tính: $Y_{0:t-1} = \emptyset$. Do đó, chuỗi hành động $a_0, a_1, \ldots, a_{H-1}$
-được xác định một cách đơn định dọc theo nhánh này. Tại mỗi tick $t$, likelihood
-chưa phát hiện $\ell_t^s(i, a_t)$ chỉ phụ thuộc vào $a_t$. Xác suất không phát
-hiện tích lũy đến horizon $H$ của policy $\pi$ chính là xác suất của nhánh
-toàn âm tính sinh bởi lịch $a$. Khi phát hiện mục tiêu tại thời điểm $T_D \le T_{\max}$,
-nhiệm vụ dừng lại và UAV chuyển sang chế độ quay về depot. Do đó, việc tối ưu
-hóa policy $\pi$ tương đương hoàn toàn với việc tìm lịch hành động $a$ tối ưu
-hóa xác suất phát hiện trên nhánh này.
+\begin{proof}
+Dưới chính sách xác định $\pi$ và môi trường thực thi không có nhiễu chấp hành, hành động tại thời điểm $t$ là hàm của lịch sử quan sát $a_t = \pi(t, Y_{0:t-1})$. Trước khi phát hiện mục tiêu, do không có quan sát ngoại lai, chỉ tồn tại duy nhất một chuỗi quan sát có thể xảy ra là toàn bộ các cảm biến đều cho kết quả âm tính: $Y_{0:t-1} = \emptyset$. Do đó, chuỗi hành động $a_0, a_1, \ldots, a_{H-1}$ được xác định một cách đơn định dọc theo nhánh này. 
+
+Tại mỗi tick $t$, likelihood chưa phát hiện $\ell_t^s(i, a_t)$ chỉ phụ thuộc vào $a_t$. Xác suất không phát hiện tích lũy đến horizon $H$ của policy $\pi$ chính là xác suất của nhánh toàn âm tính sinh bởi lịch $a$. Khi phát hiện mục tiêu tại thời điểm $T_D \le T_{\max}$, nhiệm vụ dừng lại và UAV chuyển sang chế độ quay về depot. Do đó, việc tối ưu hóa policy $\pi$ tương đương hoàn toàn với việc tìm lịch hành động $a$ tối ưu hóa xác suất phát hiện trên nhánh này.
 \end{proof}
 
-Proposition~1 đóng vai trò là một \textbf{tính chất nền tảng}, cho phép
-thu hẹp không gian tìm kiếm từ dạng policy tổng quát về không gian lịch hành
-động phối hợp rời rạc, làm cơ sở lý thuyết cho thuật toán tìm kiếm cục bộ đề
-xuất.
+\begin{remark}
+Mệnh đề~\ref{prop:equiv} đóng vai trò là \textbf{tính chất nền tảng}, cho phép thu hẹp không gian tìm kiếm từ dạng policy nhánh cây tổng quát về không gian lịch hành động phối hợp rời rạc, làm cơ sở lý thuyết vững chắc cho thuật toán tìm kiếm cục bộ đề xuất.
+\end{remark}
 
 % ============================================================
-\section*{Mô hình toán học}
+\section{Mô hình toán học chi tiết}
 % ============================================================
 
-\subsection*{Không gian, thời gian và thông tin}
+\subsection{Không gian, thời gian và thông tin}
 
-Đặt $K=\{1,\ldots,m\}$ là tập UAV và $G$ là tập ô mô phỏng không gian vị
-trí của mục tiêu. Không gian mô phỏng được thiết kế có vùng đệm bao quanh
-để bảo toàn khối lượng xác suất $\sum_{i\in G} b_t(i) = 1$ khi mục tiêu di
-chuyển.
+Đặt $K=\{1,\ldots,m\}$ là tập UAV và $G$ là tập ô mô phỏng không gian vị trí của mục tiêu. Không gian mô phỏng được thiết kế có vùng đệm bao quanh để bảo toàn khối lượng xác suất $\sum_{i\in G} b_t(i) = 1$ khi mục tiêu di chuyển.
 
-Thời điểm bắt đầu nhiệm vụ là $t=0$, cách thời điểm ghi nhận dấu vết cuối
-cùng một khoảng trễ $\Delta$. Initial belief $b_0(i)$ phản ánh sự lan truyền
-xác suất trong khoảng trễ này:
-\[
+Thời điểm bắt đầu nhiệm vụ là $t=0$, cách thời điểm ghi nhận dấu vết cuối cùng một khoảng trễ $\Delta$. Initial belief $b_0(i)$ phản ánh sự lan truyền xác suất trong khoảng trễ này:
+\begin{equation}
 b_0(i) \geq 0,\qquad \sum_{i\in G}b_0(i)=1.
-\]
-Mô hình chuyển động của mục tiêu được biểu diễn qua ma trận chuyển đổi Markov
-$M(i,j) = P(L_{t+1}=j \mid L_t=i)$ với $M(i,j)\geq0$ và $\sum_j M(i,j)=1$.
+\end{equation}
+Mô hình chuyển động của mục tiêu được biểu diễn qua ma trận chuyển đổi Markov $M(i,j) = P(L_{t+1}=j \mid L_t=i)$ thỏa mãn $M(i,j)\geq0$ và $\sum_j M(i,j)=1$.
 
-Thời gian nhiệm vụ được chia thành $H$ khoảng quan sát đều nhau (tick), mỗi
-khoảng dài $\delta t$, với $T_{\max} = H\delta t$. Tại mỗi tick $t$, thứ tự
-sự kiện diễn ra: (1)~UAV thực hiện hành động $a_t$, thu nhận quan sát tại
-vị trí hiện tại $L_t$, sau đó (2)~mục tiêu chuyển trạng thái sang $L_{t+1}$
-theo ma trận $M$.
+Thời gian nhiệm vụ được chia thành $H$ khoảng quan sát đều nhau (tick), mỗi khoảng dài $\delta t$, với $T_{\max} = H\delta t$. Tại mỗi tick $t$, thứ tự sự kiện diễn ra: (1)~UAV thực hiện hành động $a_t$, thu nhận quan sát tại vị trí hiện tại $L_t$, sau đó (2)~mục tiêu chuyển trạng thái sang $L_{t+1}$ theo ma trận $M$.
 
-\subsection*{Rời rạc hóa thời gian, hành động và năng lượng}
+\subsection{Rời rạc hóa thời gian, hành động và năng lượng}
 
 Để đảm bảo tính nhất quán toán học giữa mô hình thời gian liên tục và rời rạc:
-
 \begin{enumerate}
-    \item \textbf{Thời gian bay rời rạc:} Thời gian bay liên tục $\tau^k_{ij}$
-    giữa hai vùng $i$ và $j$ được làm tròn lên số nguyên lần tick:
-    \[
+    \item \textbf{Thời gian bay rời rạc:} Thời gian bay liên tục $\tau^k_{ij}$ giữa hai vùng $i$ và $j$ được làm tròn lên số nguyên lần tick:
+    \begin{equation}
     \bar\tau_{ij}^k = \delta t \left\lceil \frac{\tau_{ij}^k}{\delta t} \right\rceil.
-    \]
-    Trong suốt các tick bay, UAV không thực hiện quan sát tìm kiếm. Phần thời
-    gian dư do làm tròn $\bar\tau_{ij}^k - \tau_{ij}^k$ được quy ước là thời
-    gian giảm tốc/chờ tại điểm đến và tiêu hao công suất idle. Chi phí năng
-    lượng bay bao gồm cả phần làm tròn này:
-    \[
+    \end{equation}
+    Trong suốt các tick bay, UAV không thực hiện quan sát tìm kiếm. Phần thời gian dư do làm tròn $\bar\tau_{ij}^k - \tau_{ij}^k$ được quy ước là thời gian giảm tốc/chờ tại điểm đến và tiêu hao công suất idle. Chi phí năng lượng bay bao gồm cả phần làm tròn này:
+    \begin{equation}
     \bar{e}_{ij}^k = e_{ij}^{k,\mathrm{flight}} + P_k^{\mathrm{idle}}(\bar\tau_{ij}^k - \tau_{ij}^k).
-    \]
+    \end{equation}
     
-    \item \textbf{Chờ chủ động (Active Idle):} UAV được phép chờ tại vị trí
-    quy định không tìm kiếm. Năng lượng tiêu thụ cho một tick chờ là:
-    \[
-    E_{\mathrm{idle,tick}}^k = P_k^{\mathrm{idle}}\delta t.
-    \]
-    Chờ chủ động được sử dụng để đồng bộ thời gian giữa các UAV hoặc đợi xác
-    suất mục tiêu tập trung vào vùng quan sát. Khi UAV không nhận nhiệm vụ
-    ($r_k = 0$), UAV ở depot và không tiêu năng lượng mission; các ràng buộc
-    lần ghé không áp dụng.
+    \item \textbf{Chờ chủ động (Active Idle):} UAV được phép chờ tại vị trí quy định không tìm kiếm. Năng lượng tiêu thụ cho một tick chờ là $E_{\mathrm{idle,tick}}^k = P_k^{\mathrm{idle}}\delta t$. Chờ chủ động được sử dụng để đồng bộ thời gian giữa các UAV hoặc đợi xác suất mục tiêu tập trung vào vùng quan sát. Khi UAV không nhận nhiệm vụ ($r_k = 0$), UAV ở depot và không tiêu năng lượng mission.
     
-    \item \textbf{Footprint cảm biến:} Một hành động tìm kiếm tại ô $v$ của
-    UAV $k$ tạo ra footprint $\mathcal{F}_k(v) \subseteq G$. Đặt $F_{ki}(a_{kt}) \in [0, 1]$
-    là mức độ bao phủ quang học đối với ô $i$; $F_{ki}(a_{kt}) > 0 \iff i \in \mathcal{F}_k(v)$.
+    \item \textbf{Footprint cảm biến:} Một hành động tìm kiếm tại ô $v$ của UAV $k$ tạo ra footprint $\mathcal{F}_k(v) \subseteq G$. Đặt $F_{ki}(a_{kt}) \in [0, 1]$ là mức độ bao phủ quang học đối với ô $i$; $F_{ki}(a_{kt}) > 0 \iff i \in \mathcal{F}_k(v)$.
     
-    \item \textbf{Thời lượng tìm kiếm (Dwell Time):} Dwell time $d_{k\ell} \in \mathcal{D}$
-    là số tick liên tiếp UAV $k$ thực hiện tìm kiếm tại lần ghé $\ell$. Tập
-    thời lượng cho phép $\mathcal{D} = \{1, 2, \ldots, d_{\max}\}$ là hữu hạn.
-    Mỗi lần ghé là một khối tìm kiếm liên tục; việc quay lại một vùng đã từng
-    tìm kiếm được coi là một lần ghé mới (hỗ trợ revisit).
+    \item \textbf{Thời lượng tìm kiếm (Dwell Time):} Dwell time $d_{k\ell} \in \mathcal{D}$ là số tick liên tiếp UAV $k$ thực hiện tìm kiếm tại lần ghé $\ell$. Tập thời lượng cho phép $\mathcal{D} = \{1, 2, \ldots, d_{\max}\}$ là hữu hạn. Mỗi lần ghé là một khối tìm kiếm liên tục; việc quay lại một vùng đã từng tìm kiếm được coi là một lần ghé mới (hỗ trợ revisit).
     
-    \item \textbf{Kiểm tra khả thi quay về an toàn:} Năng lượng dự phòng $R_k$
-    là mức pin bảo hiểm bắt buộc phải duy trì cho đến khi kết thúc nhiệm vụ.
-    Tại mọi thời điểm $t$ khi UAV $k$ đang ở vị trí nút $v$ (bắt đầu tìm kiếm,
-    chờ hoặc hoàn thành một chặng), kiểm tra an toàn đòi hỏi:
-    \[
+    \item \textbf{Kiểm tra khả thi quay về an toàn:} Năng lượng dự phòng $R_k$ là mức pin bảo hiểm bắt buộc phải duy trì cho đến khi kết thúc nhiệm vụ. Tại mọi thời điểm $t$ khi UAV $k$ đang ở vị trí nút $v$, kiểm tra an toàn đòi hỏi:
+    \begin{equation}
     B_k(t) \geq \bar{e}_{v, o}^k + R_k,\qquad t + \bar{\tau}_{v, o}^k \leq T_{\max},
-    \]
-    trong đó $\bar{e}_{v, o}^k$ và $\bar{\tau}_{v, o}^k$ là chi phí năng lượng
-    và thời gian của cùng một đường quay về khả thi ngắn nhất (shortest feasible
-    return path) từ vị trí $v$ về depot $o$ trên đồ thị địa hình GIS, đã bao
-    gồm phần làm tròn.
+    \end{equation}
+    trong đó $\bar{e}_{v, o}^k$ và $\bar{\tau}_{v, o}^k$ là chi phí năng lượng và thời gian của cùng một đường quay về khả thi ngắn nhất từ vị trí $v$ về depot $o$ trên đồ thị địa hình GIS.
     
-    \item \textbf{Kiểm tra chặng bay dở dang và quy tắc quay về khi có phát hiện:}
-    Để bảo đảm an toàn khi có sự kiện dừng đột xuất giữa chặng bay:
+    \item \textbf{Kiểm tra chặng bay dở dang và quy tắc quay về:}
     \begin{itemize}
-        \item \emph{Điều kiện trước khi xuất phát chặng bay:} Trước khi cho phép
-        UAV $k$ rời nút $u$ để bay sang nút $v$ tại thời điểm $t$, hệ thống
-        kiểm tra tường minh khả năng hoàn thành chặng và quay về an toàn:
-        \[
+        \item \emph{Trước khi xuất phát chặng bay $(u,v)$:} Kiểm tra tường minh khả năng hoàn thành chặng và quay về an toàn:
+        \begin{equation}
         B_k(t) \geq \bar{e}_{uv}^k + \bar{e}_{vo}^k + R_k,\qquad t + \bar{\tau}_{uv}^k + \bar{\tau}_{vo}^k \leq T_{\max}.
-        \]
-        \item \emph{Quy tắc quay về khi UAV khác phát hiện mục tiêu:} Khi có một
-        UAV phát hiện mục tiêu tại thời điểm $t$, nhiệm vụ tìm kiếm kết thúc
-        thành công. Các UAV đang tìm kiếm hoặc chờ tại đỉnh $v$ lập tức chuyển
-        hướng bay về depot $o$ theo đường quay về khả thi đã chọn. Đối với UAV
-        đang di chuyển giữa chặng bay $(u, v)$ tại thời điểm phát hiện: để bảo
-        đảm an toàn động học và hành lang bay trên lưới độ cao GIS, UAV tiếp
-        tục bay đến đầu mút $v$ của chặng bay hiện tại, sau đó mới kích hoạt
-        đường quay về khả thi từ $v$ về depot $o$. Nhờ điều kiện kiểm tra trước
-        khi bay chặng $(u, v)$ nêu trên, năng lượng và thời gian còn lại luôn
-        bảo đảm khả thi cho cả chặng bay dở dang và hành trình về depot.
+        \end{equation}
+        \item \emph{Quy tắc quay về khi có phát hiện:} Khi có một UAV phát hiện mục tiêu tại thời điểm $t$, nhiệm vụ tìm kiếm kết thúc. Các UAV đang ở trạm lập tức chuyển hướng bay về depot $o$. Đối với UAV đang di chuyển giữa chặng bay $(u, v)$, UAV tiếp tục bay đến đầu mút $v$ rồi mới kích hoạt đường quay về khả thi từ $v$ về depot $o$ nhằm đảm bảo an toàn động học và hành lang bay GIS.
     \end{itemize}
 \end{enumerate}
 
-\subsection*{Bất định mô hình phát hiện và tập giả thuyết}
+\subsection{Bất định mô hình phát hiện và tập giả thuyết}
 
 Hệ thống phân biệt rõ ba đối tượng mô hình:
 \begin{itemize}
-    \item Mô hình danh định $\widehat q$: Mô hình cảm biến cơ sở ước lượng
-    trước nhiệm vụ.
-    \item Mô hình thực tế $q^\star$: Mô hình vật lý thực của môi trường và
-    cảm biến (chỉ simulator biết).
-    \item Tập giả thuyết $\mathcal{S} = \{q^s, w_s\}_{s=1}^S$: Tập các kịch
-    bản sai lệch mà planner sử dụng để đánh giá rủi ro, với trọng số ban đầu
-    $w_s \geq 0$, $\sum_{s=1}^S w_s = 1$. Giả thuyết $s$ được giữ cố định
-    xuyên suốt toàn bộ mission.
+    \item Mô hình danh định $\widehat q$: Mô hình cảm biến cơ sở ước lượng trước nhiệm vụ.
+    \item Mô hình thực tế $q^\star$: Mô hình vật lý thực của môi trường và cảm biến (chỉ simulator biết).
+    \item Tập giả thuyết $\mathcal{S} = \{q^s, w_s\}_{s=1}^S$: Tập các kịch bản sai lệch mà planner sử dụng để đánh giá rủi ro, với trọng số ban đầu $w_s \geq 0$, $\sum_{s=1}^S w_s = 1$. Giả thuyết $s$ được giữ cố định xuyên suốt toàn bộ mission.
 \end{itemize}
 
-Xác suất phát hiện ô $i$ trong một tick của UAV $k$ theo giả thuyết $s$ tuân
-theo hàm exponential exposure:
-\[
+Xác suất phát hiện ô $i$ trong một tick của UAV $k$ theo giả thuyết $s$ tuân theo hàm exponential exposure:
+\begin{equation}
 q^s_{ki}(a_{kt}) = 1 - \exp\left\{ -\lambda_i^s F_{ki}(a_{kt})\delta t \right\},
-\]
-trong đó detection rate $\lambda_i^s$ được mô hình hóa theo nhóm lớp phủ thực
-địa $g(i)$:
-\[
+\end{equation}
+trong đó detection rate $\lambda_i^s$ được mô hình hóa theo nhóm lớp phủ thực địa $g(i)$:
+\begin{equation}
 \log \lambda_i^s = \log \widehat \lambda_i + \eta_{g(i)}^s,
-\]
-với $\eta_{g(i)}^s$ là sai lệch có cấu trúc không gian theo loại thảm thực vật
-và địa hình.
+\end{equation}
+với $\eta_{g(i)}^s$ là sai lệch có cấu trúc không gian theo loại thảm thực vật và địa hình.
 
-\subsection*{Cập nhật Joint Belief và Đánh giá Lịch hành động}
+\subsection{Cập nhật Joint Belief và Đánh giá Lịch hành động}
 
-\textbf{Giả định mô hình hóa cần thiết.} Các công thức cập nhật belief
-dưới đây dựa trên hai giả định:
+Các công thức cập nhật belief dựa trên hai giả định mô hình hóa:
 \begin{enumerate}[label=(A\arabic*)]
-    \item \textbf{Độc lập có điều kiện theo không gian và thời gian:} Cho
-    trước vị trí mục tiêu $L_t$, giả thuyết cảm biến $s$ và hành động phối
-    hợp $a_t$ tại tick $t$, các quan sát của tất cả $m$ UAV tại tick $t$
-    độc lập với nhau, đồng thời độc lập có điều kiện với toàn bộ lịch sử
-    quan sát và hành động trước đó:
-    \[
+    \item \textbf{Độc lập có điều kiện theo không gian và thời gian:} Cho trước vị trí mục tiêu $L_t$, giả thuyết cảm biến $s$ và hành động phối hợp $a_t$ tại tick $t$, các quan sát của tất cả $m$ UAV tại tick $t$ độc lập với nhau, đồng thời độc lập có điều kiện với toàn bộ lịch sử trước đó:
+    \begin{equation}
     P(Y_t \mid Y_{0:t-1}, a_{0:t}, L_{0:t}, s) = P(Y_t \mid a_t, L_t, s) = \prod_{k\in K} P(Y_{kt} \mid a_{kt}, L_t, s).
-    \]
-    Nhờ đó, likelihood toàn bộ $m$ UAV không phát hiện mục tiêu tại tick $t$
-    theo giả thuyết $s$ có dạng tích:
-    \[
+    \end{equation}
+    Likelihood toàn bộ $m$ UAV không phát hiện mục tiêu tại tick $t$ theo giả thuyết $s$ có dạng tích:
+    \begin{equation}
     \ell_t^s(i,a_t) = \prod_{k\in K} \left[ 1 - q^s_{ki}(a_{kt}) \right].
-    \]
-    \textit{Ý nghĩa:} Giả định này không phủ nhận tính chất persistent uncertainty;
-    sự phụ thuộc xuyên suốt toàn bộ nhiệm vụ giữa các lần quan sát qua thời gian
-    được tạo ra chính xác thông qua biến ẩn chung $s \in \mathcal{S}$. Giả
-    định này xác lập tính chất Markovian có điều kiện theo $(L_t, s)$, cho phép
-    áp dụng quy tắc cập nhật Bayes lặp và công thức truy hồi lùi backward recursion.
-    \item \textbf{Độc lập ban đầu giữa vị trí và giả thuyết sensor:}
-    Phân bố ban đầu $\beta_0^-(i,s) = b_0(i)w_s$ giả định vị trí mục tiêu
-    và đặc tính sensor không tương quan trước khi có quan sát. Giả định này
-    cần phù hợp với bối cảnh hiệu chỉnh cảm biến trước khi bay.
+    \end{equation}
+    \item \textbf{Độc lập ban đầu giữa vị trí và giả thuyết sensor:} Phân bố ban đầu $\beta_0^-(i,s) = b_0(i)w_s$.
 \end{enumerate}
 
-Đặt $\beta_t^-(i,s)$ và $\beta_t^+(i,s)$ là phân bố xác suất đồng thời (joint belief)
-về vị trí mục tiêu $i$ và giả thuyết cảm biến $s$ trước và sau quan sát tại tick $t$.
-
-Sau một tick toàn âm tính, quy tắc cập nhật Bayes đồng thời là:
-\[
+Đặt $\beta_t^-(i,s)$ và $\beta_t^+(i,s)$ là phân bố xác suất đồng thời (joint belief) về vị trí mục tiêu $i$ và giả thuyết $s$ trước và sau quan sát tại tick $t$. Sau một tick toàn âm tính, quy tắc cập nhật Bayes đồng thời là:
+\begin{equation}
 Z_t = \sum_{j\in G}\sum_{r\in\mathcal{S}} \beta_t^-(j,r)\ell_t^r(j,a_t),\qquad
 \beta_t^+(i,s) = \frac{\beta_t^-(i,s)\ell_t^s(i,a_t)}{Z_t},
-\]
-\[
+\end{equation}
+\begin{equation}
 \beta_{t+1}^-(j,s) = \sum_{i\in G}\beta_t^+(i,s)M(i,j).
-\]
+\end{equation}
 
-Theo Proposition~1, để đánh giá lịch hành động $a = (a_0, \ldots, a_{H-1})$,
-ta sử dụng khối lượng xác suất chưa chuẩn hóa $u_t^-(i,s)$ và $u_t^+(i,s)$
-(forward unnormalized mass):
-\[
+Theo Proposition~\ref{prop:equiv}, để đánh giá lịch hành động $a = (a_0, \ldots, a_{H-1})$, ta sử dụng khối lượng xác suất chưa chuẩn hóa (\emph{forward unnormalized mass}) $u_t^-(i,s)$ và $u_t^+(i,s)$:
+\begin{equation}
 u_0^-(i,s) = b_0(i)w_s,\qquad
 u_t^+(i,s) = u_t^-(i,s)\ell_t^s(i,a_t),
-\]
-\[
+\end{equation}
+\begin{equation}
 u_{t+1}^-(j,s) = \sum_{i\in G} u_t^+(i,s)M(i,j).
-\]
+\end{equation}
 Hàm mục tiêu xác suất phát hiện tích lũy trên tập giả thuyết $J_{\mathcal{S}}(a)$ là:
-\[
+\begin{equation}
 J_{\mathcal{S}}(a) = 1 - \sum_{i\in G}\sum_{s\in\mathcal{S}} u_{H-1}^+(i,s).
-\]
+\end{equation}
 
-\subsection*{Ràng buộc định tuyến và năng lượng}
+\subsection{Ràng buộc định tuyến, Dwell, Wait và An toàn Pin}
 
-Với mỗi UAV $k$ có $r_k \geq 1$ lần ghé, lịch trình được xác định bởi
-chuỗi ghé thăm $\rho_k = (v_{k1}, \ldots, v_{kr_k})$, thời điểm bắt đầu
-tìm kiếm $s_{k\ell} \in \delta t\,\mathbb{Z}_{\ge0}$, thời lượng dwell
-$d_{k\ell} \in \mathcal{D}$, và các biến thời gian chờ $w_{k\ell} \in \delta t\,\mathbb{Z}_{\ge0}$.
+Với mỗi UAV $k$ có $r_k \geq 1$ lần ghé, lịch trình được xác định bởi chuỗi ghé thăm $\rho_k = (v_{k1}, \ldots, v_{kr_k})$, thời điểm bắt đầu tìm kiếm $s_{k\ell} \in \delta t\,\mathbb{Z}_{\ge0}$, thời lượng dwell $d_{k\ell} \in \mathcal{D}$, và các biến thời gian chờ $w_{k\ell} \in \delta t\,\mathbb{Z}_{\ge0}$.
 
-\textbf{Quy ước tường minh về vị trí và thời gian chờ:}
+Quy ước vị trí và thời gian chờ:
 \begin{itemize}
-    \item $w_{k1}$ biểu diễn \textbf{thời gian trì hoãn xuất phát tại depot}
-    trước chặng bay đầu tiên. Trong khoảng thời gian $[0, w_{k1}]$, UAV $k$
-    ở tại depot $o$ trong trạng thái chờ tiêu thụ công suất $P_k^{\mathrm{idle}}$.
-    \item Với các lần ghé tiếp theo $\ell = 2, \ldots, r_k$, $w_{k\ell}$ biểu
-    diễn \textbf{thời gian chờ tại vùng đích $v_{k\ell}$ trước khi bắt đầu tìm
-    kiếm} (on-station arrival wait). Trong khoảng $[s_{k\ell} - w_{k\ell}, s_{k\ell}]$,
-    UAV $k$ đã đến vùng $v_{k\ell}$ và bay lơ lửng chờ tại đó với công suất
-    $P_k^{\mathrm{idle}}$.
+    \item $w_{k1}$ là \textbf{thời gian trì hoãn xuất phát tại depot} trước chặng bay đầu tiên. Trong $[0, w_{k1}]$, UAV $k$ ở tại depot $o$ trong trạng thái chờ tiêu thụ công suất $P_k^{\mathrm{idle}}$.
+    \item Với $\ell = 2, \ldots, r_k$, $w_{k\ell}$ là \textbf{thời gian chờ tại vùng đích $v_{k\ell}$ trước khi bắt đầu tìm kiếm}. Trong $[s_{k\ell} - w_{k\ell}, s_{k\ell}]$, UAV $k$ bay lơ lửng chờ tại $v_{k\ell}$ với công suất $P_k^{\mathrm{idle}}$.
 \end{itemize}
 
-Hệ thống ràng buộc sử dụng \textbf{đẳng thức} cho nối tiếp hành động, loại
-trừ mọi khoảng trống thời gian không xác định:
+Hệ thống ràng buộc sử dụng \textbf{đẳng thức} cho nối tiếp hành động:
 \begin{align}
 s_{k1} &= w_{k1} + \bar\tau_{o, v_{k1}}^k, \label{eq:cons1}\\
 s_{k,\ell+1} &= s_{k\ell} + d_{k\ell}\delta t + \bar\tau_{v_{k\ell}, v_{k,\ell+1}}^k + w_{k,\ell+1}, \quad \forall \ell = 1,\ldots,r_k-1, \label{eq:cons2}\\
 s_{kr_k} + d_{kr_k}\delta t + \bar\tau_{v_{kr_k}, o}^k &\leq T_{\max}, \label{eq:cons3}\\
 \sum_{\ell=0}^{r_k} \bar{e}_{v_{k\ell}, v_{k,\ell+1}}^k + P_k^{\mathrm{search}}\sum_{\ell=1}^{r_k} d_{k\ell}\delta t + P_k^{\mathrm{idle}}\sum_{\ell=1}^{r_k} w_{k\ell} &\leq B_k - R_k, \label{eq:cons4}
 \end{align}
-trong đó $v_{k0} = v_{k, r_k+1} = o$ là depot.
-Đẳng thức~(\ref{eq:cons1})--(\ref{eq:cons2}) bảo đảm mọi khoảng thời gian
-đều được gán tường minh cho một hành động (bay, tìm kiếm hoặc chờ) và tính
-chi phí năng lượng tương ứng. UAV không nhận nhiệm vụ ($r_k = 0$) ở lại depot
-và không chịu các ràng buộc trên.
+trong đó $v_{k0} = v_{k, r_k+1} = o$ là depot. Đẳng thức~(\ref{eq:cons1})--(\ref{eq:cons2}) bảo đảm mọi khoảng thời gian đều được gán tường minh cho một hành động và tính chi phí năng lượng tương ứng.
 
 % ============================================================
-\section*{Phương pháp giải thuật toán}
+\section{Phương pháp giải thuật toán}
 % ============================================================
 
-\subsection*{Thuật toán tối ưu hóa cục bộ phối hợp Route--Effort}
+\subsection{Thuật toán tìm kiếm cục bộ phối hợp Route--Effort}
 
-Không gian nghiệm của bài toán là tích Descartes giữa cấu trúc rời rạc của
-lộ trình (routing, phân công UAV) và các biến thời lượng (dwell, wait).
-Thuật toán đề xuất cải thiện lịch hành động phối hợp bằng tìm kiếm cục bộ
-kết hợp cấu trúc láng giềng mở rộng (hỗ trợ thay thế và tái cân bằng) cùng
-bộ đánh giá nhanh hai chiều (Fast Evaluator).
+Không gian nghiệm của bài toán là tích Descartes giữa cấu trúc rời rạc của lộ trình (routing, phân công UAV) và các biến thời lượng (dwell, wait). Thuật toán đề xuất cải thiện lịch hành động phối hợp bằng tìm kiếm cục bộ kết hợp cấu trúc láng giềng mở rộng (hỗ trợ thay thế và tái cân bằng) cùng bộ đánh giá nhanh hai chiều (Fast Evaluator).
 
 \begin{algorithm}[H]
 \caption{Joint Route--Effort Local Search with Fast Evaluator}
 \label{alg:joint}
 \begin{algorithmic}[1]
-\REQUIRE Lịch ban đầu khả thi $a^{(0)}$; tập giả thuyết $\mathcal{S}$; số lượt
-đánh giá tối đa $N_{\max}$; giới hạn thời gian $T_{\mathrm{wall}}$
+\REQUIRE Lịch ban đầu khả thi $a^{(0)}$; tập giả thuyết $\mathcal{S}$; số lượt đánh giá tối đa $N_{\max}$; giới hạn thời gian $T_{\mathrm{wall}}$
 \ENSURE Lịch khả thi tốt nhất tìm được $a^*$ và giá trị $J_{\mathcal{S}}(a^*)$
-\STATE $a^* \leftarrow a^{(0)}$; Tính và lưu $u_t^-, u_t^+$ cho $t \in [0, H-1]$, lưu $V_t$ cho $t \in [0, H-1]$ và đặt điều kiện biên $V_H(i,s) = 1$
+\STATE $a^* \leftarrow a^{(0)}$; Tính và lưu cache $u_t^-, u_t^+$ cho $t \in [0, H-1]$, lưu $V_t$ cho $t \in [0, H-1]$ và đặt $V_H(i,s) = 1$
 \STATE $J^* \leftarrow 1 - \sum_{i,s} u_{H-1}^+(i,s)$; $n_{\mathrm{eval}} \leftarrow 1$
 \REPEAT
     \STATE $\Delta J_{\max} \leftarrow 0$; $\tilde{a}^* \leftarrow \text{null}$
@@ -597,7 +422,7 @@ bộ đánh giá nhanh hai chiều (Fast Evaluator).
             \IF{$n_{\mathrm{eval}} \ge N_{\max}$ hoặc wall-clock $\ge T_{\mathrm{wall}}$}
                 \STATE \textbf{goto} line~\ref{line:accept}
             \ENDIF
-            \STATE Kiểm tra tính khả thi: (\ref{eq:cons1})--(\ref{eq:cons4}), điều kiện trước chặng bay và quay về an toàn
+            \STATE Kiểm tra tính khả thi: (\ref{eq:cons1})--(\ref{eq:cons4}), điều kiện trước chặng bay và an toàn quay về
             \IF{không khả thi}
                 \STATE \textbf{continue}
             \ENDIF
@@ -621,180 +446,171 @@ bộ đánh giá nhanh hai chiều (Fast Evaluator).
 \end{algorithmic}
 \end{algorithm}
 
-\textbf{Tính chất hội tụ và tối ưu cục bộ:} Do bài toán là \textbf{tối đa
-hóa}, nếu một vòng duyệt hoàn chỉnh qua toàn bộ láng giềng $\mathcal{N}(a^*)$
-không tìm thấy bất kỳ move cải thiện nào ($\Delta J_{\max} \leq 0$ khi duyệt
-đủ mà không bị ngắt quãng), lịch $a^*$ đạt \textbf{tối ưu cục bộ (cực đại
-cục bộ)} theo cấu trúc láng giềng đã định nghĩa. Ngược lại, khi thuật toán
-dừng sớm do hết ngân sách tính toán ($n_{\mathrm{eval}} \ge N_{\max}$ hoặc
-wall-clock $\ge T_{\mathrm{wall}}$), \textbf{không đưa ra bảo đảm tối ưu
-cục bộ} này; thuật toán chỉ bảo đảm trả về nghiệm khả thi tốt nhất đã được
-đánh giá.
+\subsection{Cấu trúc không gian 8 toán tử láng giềng $\mathcal{N}(a)$}
 
-\subsection*{Cấu trúc không gian láng giềng $\mathcal{N}(a)$}
-
-Để không bị giới hạn số lần ghé cố định bởi lịch khởi tạo và tránh bẫy
-kẹt nghiệm khi ngân sách năng lượng/thời gian đã bão hòa, ứng viên được sinh
-tuần tự (lazy generation) qua 8 toán tử biến đổi:
-\begin{enumerate}
-    \item \textbf{Reorder Visits (Swap / 2-opt):} Hoán đổi vị trí hai lần
-    ghé (Swap) hoặc đảo ngược thứ tự một đoạn lộ trình con (2-opt) trong
-    lộ trình của một UAV.
-    \item \textbf{Insert Visit (Chèn một lần ghé mới):} Chèn thêm một lần
-    ghé vào lộ trình $\rho_k$ (tăng $r_k$). \emph{Lưu ý quan trọng:} Lần ghé
-    mới này có thể là một vùng chưa có trong lịch hoặc \textbf{quay lại một
-    vùng đã từng tìm kiếm (revisit)}, khai thác triệt để khả năng tái thăm dò
-    của formulation.
-    \item \textbf{Delete Visit (Xóa một lần ghé):} Loại bỏ một lần ghé khỏi
-    lộ trình $\rho_k$ (giảm $r_k$).
-    \item \textbf{Replace Visit (Thay thế một lần ghé):} Thay thế vùng tìm
-    kiếm $v_{k\ell}$ bằng một vùng khác $v' \in G \setminus \{v_{k\ell}\}$,
-    đồng thời tính lại thời gian bay, cập nhật mốc $s_{k\ell}$ và kiểm tra
-    tính khả thi. Toán tử này đóng vai trò quyết định khi lịch đã dùng hết
-    ngân sách (budget-saturated): cho phép thay thế một vùng kém hiệu quả
-    bằng một vùng tiềm năng hơn trong một bước duy nhất, vượt qua rào cản
-    khi mà Delete riêng lẻ bị từ chối do giảm objective còn Insert riêng lẻ
-    bị loại do vượt trần năng lượng/thời gian.
-    \item \textbf{Reassign Visit (Relocate):} Chuyển một lần ghé từ UAV $k_1$
-    sang UAV $k_2$ (kèm cập nhật lại dwell và thời gian bay tương ứng).
-    \item \textbf{Change Dwell (Thay đổi dwell đơn lẻ):} Tăng hoặc giảm
-    $d_{k\ell}$ trong tập rời rạc $\mathcal{D}$.
-    \item \textbf{Dwell Rebalance / Transfer (Cân bằng dwell giữa hai lần ghé):}
-    Chuyển một bước dwell từ lần ghé $\ell_1$ sang lần ghé $\ell_2$ (giảm
-    $d_{k\ell_1}$ và tăng $d_{k\ell_2}$) của cùng UAV hoặc giữa hai UAV khác
-    nhau. Toán tử này giữ nguyên tổng số tick tìm kiếm của hai lần ghé, cho
-    phép tái phân bổ thời lượng quan sát vào vùng giàu tiềm năng hơn; tuy nhiên,
-    thuật toán vẫn phải kiểm tra lại tính khả thi về thời hạn $T_{\max}$ và ngân
-    sách pin $B_k - R_k$ của từng UAV liên quan (đặc biệt khi chuyển giữa hai
-    UAV khác nhau, UAV nhận thêm dwell có thể vượt quá giới hạn năng lượng cho
-    phép).
-    \item \textbf{Adjust Wait (Điều chỉnh thời gian chờ):} Tăng hoặc giảm
-    thời gian chờ chủ động $w_{k\ell}$ (bao gồm cả trì hoãn xuất phát $w_{k1}$
-    tại depot và chờ tại trạm $w_{k\ell}, \ell \ge 2$) để tối ưu thời điểm
-    quan sát đối với mục tiêu di chuyển.
+Để không bị giới hạn số lần ghé cố định bởi lịch khởi tạo và tránh bẫy kẹt nghiệm khi ngân sách năng lượng/thời gian đã bão hòa, ứng viên được sinh tuần tự (lazy generation) qua 8 toán tử biến đổi:
+\begin{enumerate}[label=\textbf{\arabic*.}]
+    \item \textbf{Reorder Visits (Swap / 2-opt):} Hoán đổi vị trí hai lần ghé (Swap) hoặc đảo ngược thứ tự một đoạn lộ trình con (2-opt) trong lộ trình của một UAV.
+    \item \textbf{Insert Visit (Chèn một lần ghé mới):} Chèn thêm một lần ghé vào lộ trình $\rho_k$ (tăng $r_k$). Lần ghé mới này có thể là một vùng chưa có trong lịch hoặc \textbf{quay lại một vùng đã từng tìm kiếm (revisit)}.
+    \item \textbf{Delete Visit (Xóa một lần ghé):} Loại bỏ một lần ghé khỏi lộ trình $\rho_k$ (giảm $r_k$).
+    \item \textbf{Replace Visit (Thay thế một lần ghé):} Thay thế vùng tìm kiếm $v_{k\ell}$ bằng một vùng khác $v' \in G \setminus \{v_{k\ell}\}$, cập nhật lại thời gian bay và mốc $s_{k\ell}$. Toán tử này quyết định khi lịch đã bão hòa ngân sách (budget-saturated): cho phép thay thế một vùng kém hiệu quả bằng một vùng tiềm năng hơn trong một bước duy nhất.
+    \item \textbf{Reassign Visit (Relocate):} Chuyển một lần ghé từ UAV $k_1$ sang UAV $k_2$.
+    \item \textbf{Change Dwell (Thay đổi dwell đơn lẻ):} Tăng hoặc giảm $d_{k\ell}$ trong tập rời rạc $\mathcal{D}$.
+    \item \textbf{Dwell Rebalance / Transfer (Cân bằng dwell giữa hai lần ghé):} Chuyển một bước dwell từ lần ghé $\ell_1$ sang lần ghé $\ell_2$ (giảm $d_{k\ell_1}$ và tăng $d_{k\ell_2}$) của cùng UAV hoặc giữa hai UAV khác nhau.
+    \item \textbf{Adjust Wait (Điều chỉnh thời gian chờ):} Tăng hoặc giảm thời gian chờ chủ động $w_{k\ell}$ (bao gồm cả trì hoãn xuất phát $w_{k1}$ và chờ tại trạm $w_{k\ell}, \ell \ge 2$) để đón đầu mục tiêu di chuyển.
 \end{enumerate}
-Mọi ứng viên đều được kiểm tra tính khả thi trước khi chuyển sang bước đánh
-giá. Cơ chế sinh tuần tự cho phép kiểm soát chặt chẽ ngân sách tính toán.
 
-\subsection*{Evaluator nhanh: Khai thác Backward Continuation và Ba cấp độ đối chứng}
+\subsection{Bộ đánh giá nhanh hai chiều Forward--Backward Fast Evaluator}
 
-Nghiên cứu tập trung phát triển evaluator cho các thay đổi lịch và đánh giá
-ảnh hưởng của nó đến chất lượng nghiệm dưới ngân sách tính toán cố định.
-
-\textbf{Định nghĩa Backward Continuation $V_t(i,s)$:} Là xác suất có điều
-kiện không phát hiện thấy mục tiêu từ tick $t$ đến cuối nhiệm vụ $H-1$, biết
-rằng tại tick $t$ mục tiêu ở ô $i$ và giả thuyết cảm biến là $s$:
-\[
+\begin{definition}[Backward Continuation $V_t(i,s)$]
+Là xác suất có điều kiện không phát hiện thấy mục tiêu từ tick $t$ đến cuối nhiệm vụ $H-1$, biết rằng tại tick $t$ mục tiêu ở ô $i$ và giả thuyết cảm biến là $s$:
+\begin{equation}
 V_t(i,s) = P(\text{không phát hiện trong } [t, H-1] \mid L_t = i, s).
-\]
+\end{equation}
 Điều kiện biên tại thời điểm kết thúc $H$:
-\[
+\begin{equation}
 V_H(i,s) = 1, \qquad \forall i \in G, s \in \mathcal{S}.
-\]
+\end{equation}
 Công thức truy hồi lùi từ $t = H-1$ về $0$:
-\[
+\begin{equation}
 V_t(i,s) = \ell_t^s(i, a_t) \sum_{j\in G} M(i,j) V_{t+1}(j,s).
-\]
+\end{equation}
+\end{definition}
 
-\textbf{Đánh giá nhanh ứng viên thay đổi trong đoạn $[t_a, t_b]$:}
-Khi ứng viên $\tilde a$ chỉ thay đổi các hành động trong khoảng $[t_a, t_b]$
-và giữ nguyên các hành động ở các tick khác:
+Khi ứng viên $\tilde a$ chỉ thay đổi các hành động trong khoảng $[t_a, t_b]$ và giữ nguyên các hành động ở các tick khác:
 \begin{enumerate}
     \item Khởi tạo mass tại biên trước:
-    \[
+    \begin{equation}
     \tilde u_{t_a}^-(i,s) = \begin{cases} b_0(i)w_s, & \text{nếu } t_a = 0, \\ u_{t_a}^-(i,s), & \text{nếu } t_a > 0. \end{cases}
-    \]
+    \end{equation}
     \item Lan truyền forward mass chỉ trong đoạn $[t_a, t_b]$ với hành động mới $\tilde a_t$:
-    \[
+    \begin{equation}
     \tilde u_t^+(i,s) = \tilde u_t^-(i,s)\ell_t^s(i, \tilde a_t),\qquad
     \tilde u_{t+1}^-(j,s) = \sum_{i\in G}\tilde u_t^+(i,s)M(i,j).
-    \]
+    \end{equation}
     \item Tính trực tiếp xác suất thất bại toàn nhiệm vụ bằng cách ghép nối với backward continuation $V_{t_b+1}$:
     \begin{equation}
     P_{\mathrm{fail}}(\tilde a) = \sum_{j\in G}\sum_{s\in\mathcal{S}} \tilde u_{t_b+1}^-(j,s) V_{t_b+1}(j,s).
     \label{eq:fast_eval}
     \end{equation}
-    \textbf{Tái sử dụng tiền tố và điều kiện backward continuation:}
-    $V_{t_b+1}$ tái sử dụng được khi các hành động từ tick $t_b+1$ trở đi
-    không thay đổi so với lịch hiện tại. Nếu thay đổi làm dịch chuyển mốc
-    thời gian phía sau, backward continuation của đoạn sau không thể tái sử
-    dụng và cần đặt $t_b = H-1$. Tuy nhiên, thuật toán \textbf{vẫn luôn tái
-    sử dụng được tiền tố forward unnormalized mass $u_{t_a}^-$} trước $t_a$.
-    Mức tăng tốc phụ thuộc vào độ dài đoạn phải tính lại $[t_a, t_b]$ so với
-    chi phí lan truyền toàn bộ horizon từ $t=0$.
-    \item Mức độ cải thiện hàm mục tiêu:
-    \[
-    \Delta J(\tilde a) = \left[ 1 - P_{\mathrm{fail}}(\tilde a) \right] - J^*.
-    \]
+    \item Mức độ cải thiện hàm mục tiêu: $\Delta J(\tilde a) = \left[ 1 - P_{\mathrm{fail}}(\tilde a) \right] - J^*$.
 \end{enumerate}
 
 \textbf{Ba cấp độ Evaluator để bóc tách giá trị tăng tốc:}
-Để đánh giá khách quan đóng góp tăng tốc và bóc tách giá trị riêng của backward
-continuation, nghiên cứu thiết lập ba cấp độ evaluator đối chứng:
 \begin{enumerate}
-    \item \textbf{Full Evaluator:} Lan truyền lại toàn bộ forward unnormalized
-    mass từ đầu nhiệm vụ ($t=0 \to H-1$), chi phí tính toán là
-    $O(|\mathcal{S}| \cdot \operatorname{nnz}(M) \cdot H)$.
-    \item \textbf{Prefix-only Evaluator (Đối chứng mạnh về caching tiền tố):}
-    Tái sử dụng tiền tố forward mass $u_{t_a}^-$ trước điểm thay đổi đầu tiên
-    $t_a$, nhưng lan truyền tiếp forward mass từ $t_a$ cho đến hết horizon
-    $H-1$ mà không dùng backward continuation, chi phí
-    $O(|\mathcal{S}| \cdot \operatorname{nnz}(M) \cdot (H - t_a))$.
-    \item \textbf{Forward--Backward Fast Evaluator (Đề xuất):} Tái sử dụng
-    tiền tố $u_{t_a}^-$, chỉ lan truyền forward mass trong đoạn bị biến đổi
-    $[t_a, t_b]$, rồi ghép trực tiếp với backward continuation $V_{t_b+1}$,
-    chi phí $O(|\mathcal{S}| \cdot \operatorname{nnz}(M) \cdot (t_b - t_a + 1))$.
-\end{enumerate}
-So sánh giữa Fast Evaluator và Prefix-only Evaluator cho phép bóc tách chính
-xác giá trị gia tăng thực chất của backward continuation $V_{t_b+1}$, tránh
-nhầm lẫn giữa lợi ích của việc lưu cache tiền tố với lợi ích ghép nối hậu tố.
-
-\textbf{Phân tích thực nghiệm độ dài đoạn ảnh hưởng $L_{\mathrm{affected}}$:}
-Nghiên cứu cam kết báo cáo phân bố thực nghiệm của độ dài đoạn ảnh hưởng
-$L_{\mathrm{affected}} = t_b - t_a + 1$ theo từng loại toán tử láng giềng. Khi
-một toán tử làm thay đổi thời lượng dẫn đến dịch chuyển mốc thời gian của toàn
-bộ các lần ghé phía sau (thường gặp ở Insert, Delete, Replace hoặc thay đổi
-dwell), ta buộc phải đặt $t_b = H-1$ và Fast Evaluator thoái hóa về Prefix-only
-Evaluator. Do đó, lợi thế tăng tốc thực tế của backward cache phụ thuộc trực
-tiếp vào tỷ lệ các move giữ nguyên được hậu tố ($t_b < H-1$, chẳng hạn như
-Reorder/Swap trong vùng, Dwell Rebalance không làm đổi lịch bay, hoặc Adjust
-Wait nội bộ).
-
-\textbf{Cam kết kiểm chứng evaluator:}
-\begin{enumerate}
-    \item Fast Evaluator và Full Evaluator cho kết quả tương đương đại số
-    dưới các giả định đã nêu. Khi triển khai số thực, kiểm tra bằng sai số
-    tuyệt đối và tương đối trên bộ test cases.
-    \item Đo thời gian đánh giá ứng viên trên bài vừa và lớn across cả 3 cấp độ.
-    \item Với cùng ngân sách thời gian, thuật toán tìm được nghiệm tốt hơn
-    hay không so với Prefix-only và Full Evaluator.
-    \item Báo cáo phân bố $L_{\mathrm{affected}}$ cho từng toán tử để xác
-    định tỷ lệ move khai thác được backward continuation.
+    \item \textbf{Full Evaluator:} Lan truyền lại toàn bộ forward mass từ $t=0 \to H-1$, chi phí $O(|\mathcal{S}| \cdot \operatorname{nnz}(M) \cdot H)$.
+    \item \textbf{Prefix-only Evaluator:} Tái sử dụng tiền tố $u_{t_a}^-$, lan truyền tiếp từ $t_a \to H-1$ không dùng backward cache, chi phí $O(|\mathcal{S}| \cdot \operatorname{nnz}(M) \cdot (H - t_a))$.
+    \item \textbf{Forward--Backward Fast Evaluator (Đề xuất):} Tái sử dụng tiền tố $u_{t_a}^-$, chỉ lan truyền trong $[t_a, t_b]$, rồi ghép với $V_{t_b+1}$, chi phí $O(|\mathcal{S}| \cdot \operatorname{nnz}(M) \cdot (t_b - t_a + 1))$.
 \end{enumerate}
 
 % ============================================================
-\section*{Câu hỏi nghiên cứu và Đối chứng thuật toán}
+\section{Bảng ma trận 5 Câu hỏi nghiên cứu (RQ1--RQ5)}
 % ============================================================
 
-\subsection*{Hai câu hỏi nghiên cứu chính}
+Để định hình rõ ràng các câu hỏi khoa học và phương pháp kiểm chứng, Bảng~\ref{tab:rq_matrix} tổng hợp ma trận 5 câu hỏi nghiên cứu (RQ1--RQ5), các giả thuyết tương ứng và tiêu chí kiểm chứng thống kê.
 
-\textbf{RQ1 --- Hiệu quả tối ưu hóa và chất lượng thuật toán:}
-Cơ chế đánh giá nhanh Forward--Backward và giải thuật tìm kiếm cục bộ đề xuất
-cải thiện tốc độ hội tụ và chất lượng nghiệm như thế nào so với bộ đánh giá
-Prefix-only, bộ đánh giá đầy đủ và các thuật toán tối ưu hóa tổ hợp chuẩn
-trên cùng hàm mục tiêu ensemble?
+\begin{table}[H]
+\centering
+\caption{Ma trận 5 câu hỏi nghiên cứu (RQ1--RQ5) và tiêu chí kiểm chứng.}
+\label{tab:rq_matrix}
+\scriptsize
+\begin{tabular}{@{}p{1.4cm}p{3.2cm}p{3.8cm}p{3.2cm}p{3.0cm}@{}}
+\toprule
+\textbf{RQ} & \textbf{Vấn đề nghiên cứu} & \textbf{Giả thuyết khoa học} & \textbf{Đại lượng đo lường} & \textbf{Tiêu chí kiểm chứng} \\
+\midrule
+\textbf{RQ1} &
+Tăng tốc Fast Evaluator &
+Ghép nối hai chiều $[t_a, t_b]$ giảm thời gian đánh giá so với Prefix và Full mà không mất độ chính xác đại số. &
+Thời gian đánh giá $(\mu\text{s/eval})$, Tỷ lệ tăng tốc $(\times)$, Sai số tuyệt đối $|J_{\mathrm{fast}} - J_{\mathrm{full}}|$. &
+Sai số $< 10^{-10}$; thời gian đánh giá trên các move cục bộ nhanh hơn Prefix và Full rõ rệt. \\
+\midrule
+\textbf{RQ2} &
+Khởi tạo đa điểm (Multi-start) &
+Khởi tạo 2-start (Ensemble + Nominal) cải thiện chất lượng nghiệm so với Single-start dưới cùng ngân sách đánh giá. &
+Hàm mục tiêu $J_{\mathcal{S}}$, Paired difference $\Delta J$, Bootstrap 95\% CI theo scenario. &
+$\Delta J > 0$ có ý nghĩa thống kê dưới matched evaluation budget. \\
+\midrule
+\textbf{RQ3} &
+Độ bền vững của Ensemble &
+Lập kế hoạch đa giả thuyết $\mathcal{S}$ tăng $DSR$ và giảm $RMST$ khi có bất định, và xác định ranh giới sai đặc tả. &
+$DSR$, $RMST$, Paired $\Delta DSR$, Calibration Gap trên 3 chế độ ground truth. &
+$DSR_{\mathrm{Ens}} > DSR_{\mathrm{Nom}}$ khi có bất định lớn; xác định rõ miền suy giảm ngoài $\mathcal{S}$. \\
+\midrule
+\textbf{RQ4} &
+Đóng góp của Toán tử \& Thứ tự duyệt &
+Replace, Rebalance và thứ tự duyệt toán tử giúp vượt qua bẫy bão hòa ngân sách tốt hơn các tập toán tử cơ sở. &
+$J_{\mathcal{S}}$ qua 4 nhánh ablation $\times$ 3 chiến lược thứ tự (\texttt{fixed}, \texttt{round\_robin}, \texttt{shuffled}). &
+Ablation full-arm vượt trội các arm rút gọn; so sánh ghép cặp thống kê theo scenario. \\
+\midrule
+\textbf{RQ5} &
+Khả năng mở rộng (Scalability) &
+Thuật toán duy trì đường cong hội tụ chất lượng nghiệm ổn định khi tăng $H$, số UAV $m$ và kích thước lưới GIS. &
+Thời gian chạy wall-clock, số vòng lặp, đường cong Quality-vs-Runtime. &
+Thời gian tăng trưởng đa thức theo kích thước bài toán; nghiệm khả thi 100\%. \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\textbf{RQ2 --- Giá trị ngoài mẫu và khả năng chống chịu sai đặc tả:}
-Trong các điều kiện sai số detection model mang tính hệ thống (về biên độ,
-cấu trúc không gian và tính kéo dài), việc lập kế hoạch phối hợp đa giả thuyết
-cải thiện xác suất phát hiện thực tế ($DSR$, $RMST$) đến mức nào so với quy
-hoạch danh định và quy hoạch tách rời; và ranh giới mà phương pháp suy giảm lợi
-ích khi mô hình bị sai đặc tả ngoài tập giả thuyết là gì?
+% ============================================================
+\section{Chi tiết các câu hỏi nghiên cứu và Tiêu chí kiểm chứng}
+% ============================================================
 
-\subsection*{Hệ thống Baselines và Đối chứng kiểm chứng}
+\subsection{RQ1: Hiệu năng và Độ chính xác của Fast Evaluator}
 
-Để làm rõ đóng góp thuật toán và đóng góp mô hình, hệ thống đối chứng được
-thiết kế phân lớp theo Bảng~\ref{tab:baselines}.
+\begin{hypothesis}[Tương đương đại số và Tăng tốc hai chiều]
+Dưới các giả định (A1)--(A2), công thức đánh giá nhanh~(\ref{eq:fast_eval}) cho kết quả trùng khớp chính xác về mặt đại số với Full Evaluator:
+\begin{equation}
+|J_{\mathrm{Fast}}(\tilde a) - J_{\mathrm{Full}}(\tilde a)| \le \epsilon_{\mathrm{mach}},
+\end{equation}
+đồng thời đạt thời gian thực thi trung bình trên mỗi lượt đánh giá nhỏ hơn rõ rệt so với Prefix-only Evaluator và Full Evaluator trên các phép biến đổi có $t_b < H-1$.
+\end{hypothesis}
+
+\textbf{Phương pháp kiểm chứng:} Đo thời gian thực thi $(\mu\text{s/eval})$ trên cùng tập ứng viên độc lập trên lưới $3 \times 3$, $5 \times 5$ và GIS Tây Nguyên; ghi nhận phân bố độ dài đoạn ảnh hưởng $L_{\mathrm{affected}} = t_b - t_a + 1$ cho từng toán tử láng giềng.
+
+\subsection{RQ2: Đóng góp của Khởi tạo đa điểm (Multi-start Initialization)}
+
+\begin{hypothesis}[Hiệu quả khởi tạo đa điểm dưới cùng ngân sách]
+Chiến lược khởi tạo 2-start (\texttt{Proposed\_2Start}: sinh 1 điểm xuất phát từ tham lam trên Ensemble $\mathcal{S}$ và 1 điểm từ tham lam trên mô hình Nominal $\widehat q$) đạt giá trị hàm mục tiêu $J_{\mathcal{S}}$ cao hơn có ý nghĩa thống kê so với các phiên bản Single-start (\texttt{SingleStart\_FixedLS} và \texttt{SingleStart\_MatchedTotal}) khi được chuẩn hóa cùng tổng ngân sách đánh giá hàm mục tiêu.
+\end{hypothesis}
+
+\textbf{Phương pháp kiểm chứng:} So sánh ghép cặp theo kịch bản (paired comparison per scenario), tính khoảng tin cậy 95\% Bootstrap (5.000 lượt lấy mẫu lại theo scenario) và Student's $t$ trên trung bình scenario.
+
+\subsection{RQ3: Hiệu quả mô hình tập giả thuyết và Khả năng chịu sai đặc tả}
+
+\begin{hypothesis}[Giá trị ngoài mẫu của mô hình Ensemble]
+Lập kế hoạch dựa trên tập giả thuyết $\mathcal{S}$ giúp tăng tỷ lệ phát hiện thực tế $DSR$ và giảm thời gian chờ phát hiện $RMST$ so với mô hình danh định $\widehat q$ khi mô hình thực tế $q^\star$ thuộc tập giả thuyết (\emph{In-ensemble}) hoặc có độ biến động cao. Khi mô hình thực tế bị sai đặc tả nghiêm trọng ngoài tập $\mathcal{S}$ (\emph{Misspecified}), hiệu năng suy giảm nhưng vẫn duy trì trong ngưỡng an toàn so với danh định.
+\end{hypothesis}
+
+\textbf{Phương pháp kiểm chứng:} Thiết lập 3 chế độ ground truth kiểm chứng độc lập:
+\begin{enumerate}
+    \item \emph{In-ensemble regime:} $q^\star \in \mathcal{S}$ được lấy mẫu ngẫu nhiên theo trọng số $w_s$.
+    \item \emph{Nominal-matched regime:} $q^\star = \widehat q$ (mô hình danh định hoàn toàn chính xác).
+    \item \emph{Misspecified regime:} $q^\star$ có detection rate $\lambda^\star$ lệch khỏi dải phân bố của $\mathcal{S}$ hoặc có cấu trúc che phủ thực bì biến dạng.
+\end{enumerate}
+
+\subsection{RQ4: Đóng góp của các Toán tử láng giềng và Thứ tự duyệt}
+
+\begin{hypothesis}[Đóng góp của cấu trúc láng giềng mở rộng]
+Hai toán tử Replace Visit và Dwell Rebalance đóng vai trò then chốt giúp thoát khỏi điểm dừng cục bộ khi ngân sách đã bão hòa. Thứ tự duyệt toán tử theo cơ chế xoay vòng (\texttt{round\_robin}) hoặc ngẫu nhiên (\texttt{shuffled}) mang lại sự đa dạng tìm kiếm so với thứ tự cố định (\texttt{fixed}).
+\end{hypothesis}
+
+\textbf{Phương pháp kiểm chứng:} Thiết kế 4 nhánh cắt bỏ toán tử (Ablation Arms: Full, No-Replace, No-Rebalance, Minimal-Route-Only) kết hợp 3 chiến lược thứ tự duyệt toán tử, thực hiện so sánh ghép cặp paired $t$-test theo từng scenario.
+
+\subsection{RQ5: Khả năng mở rộng quy mô (Scalability)}
+
+\begin{hypothesis}[Độ phức tạp tính toán đa thức]
+Thời gian tính toán trên mỗi vòng lặp tìm kiếm cục bộ tỷ lệ thuận với số lượng ô có xác suất khác không $\operatorname{nnz}(M)$, số giả thuyết $|\mathcal{S}|$ và độ dài horizon $H$. Hệ thống duy trì khả năng tìm kiếm nghiệm khả thi trong thời gian thực thi cho phép đối với quy mô lên đến 500 ô và đội bay 6 UAV.
+\end{hypothesis}
+
+\textbf{Phương pháp kiểm chứng:} Đo thời gian chạy wall-clock, bộ nhớ tiêu thụ và đường cong chất lượng nghiệm theo thời gian khi tăng dần kích thước lưới, horizon $H \in \{30, 60, 90, 120\}$ và số lượng UAV $m \in \{1, 2, 3, 4, 6\}$.
+
+% ============================================================
+\section{Thiết kế thực nghiệm và Phương pháp kiểm chứng}
+% ============================================================
+
+\subsection{Hệ thống Baselines và Đối chứng kiểm chứng}
+
+Để làm rõ đóng góp thuật toán và đóng góp mô hình, hệ thống đối chứng được thiết kế phân lớp theo Bảng~\ref{tab:baselines}.
 
 \begin{table}[H]
 \centering
@@ -803,25 +619,25 @@ thiết kế phân lớp theo Bảng~\ref{tab:baselines}.
 \small
 \begin{tabular}{@{}p{6.0cm}p{7.5cm}@{}}
 \toprule
-\textbf{Phương pháp đối chứng} & \textbf{Câu hỏi kiểm chứng (Verification Goal)} \\
+\textbf{Phương pháp đối chứng} & \textbf{Mục tiêu kiểm chứng (Verification Goal)} \\
 \midrule
 \multicolumn{2}{@{}l}{\textbf{Nhóm 1: Đóng góp thuật toán (Algorithmic Ablation)}} \\
 Proposed Search + Prefix-only Evaluator &
-Bóc tách giá trị tăng tốc riêng của backward continuation so với chỉ cache tiền tố? \\
+Bóc tách giá trị tăng tốc riêng của backward continuation so với chỉ cache tiền tố. \\
 Proposed Search + Full Evaluator &
-Mức giảm chi phí đánh giá tổng thể và cải thiện nghiệm trong cùng runtime? \\
+Mức giảm chi phí đánh giá tổng thể và cải thiện nghiệm trong cùng runtime. \\
 Proposed Search bỏ Replace / Dwell Rebalance &
-Định lượng đóng góp của hai toán tử mới trong việc vượt qua bẫy bão hòa ngân sách? \\
+Định lượng đóng góp của hai toán tử mới trong việc vượt qua bẫy bão hòa ngân sách. \\
 Greedy / Myopic Lookahead Heuristic &
-So sánh với chiến lược tham lam tức thời phân bổ UAV vào ô cực đại xác suất phát hiện? \\
+So sánh với chiến lược tham lam tức thời phân bổ UAV vào ô cực đại xác suất phát hiện. \\
 GA Baseline cho UAV SAR &
-So sánh với metaheuristics tiến hóa chuẩn (mã hóa chromosome route+dwell, đột biến xác suất cố định, repair feasibility; phiên bản đầy đủ dự kiến mở rộng thích nghi theo \cite{ge2024})? \\
+So sánh với metaheuristics tiến hóa chuẩn (mã hóa chromosome route+dwell, repair feasibility). \\
 Exact Solver / Brute-force (bài toán nhỏ) &
-Optimality gap $\Delta_{\mathrm{opt}} = J^\star - J_{\mathrm{alg}}$ của giải thuật? \\
+Đo lường khoảng cách nghiệm tối ưu $\Delta_{\mathrm{opt}} = J^\star - J_{\mathrm{alg}}$ của giải thuật. \\
 \midrule
 \multicolumn{2}{@{}l}{\textbf{Nhóm 2: Đóng góp mô hình và phối hợp (Formulation Ablation)}} \\
 Nominal Planning ($S=1$, cùng solver) &
-Giá trị gia tăng của việc mô hình hóa tập giả thuyết ensemble? \\
+Giá trị gia tăng của việc mô hình hóa tập giả thuyết ensemble $\mathcal{S}$. \\
 Scenario-based Routing, Fixed Dwell &
 Điều chỉnh dwell time có thực sự cần thiết khi đã tối ưu lộ trình? \\
 Fixed Route, Dwell Optimization &
@@ -829,168 +645,107 @@ Fixed Route, Dwell Optimization &
 Two-stage (Route trước, Dwell sau) &
 Vì sao cần tối ưu phối hợp đồng thời thay vì tách rời hai bước? \\
 Oracle Solver (biết trước $q^\star$) &
-Khoảng cách tổn thất (information loss) do không biết mô hình thực? \\
+Khoảng cách tổn thất thông tin (information loss) do không biết mô hình thực tế. \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\textbf{Nguyên tắc công bằng tính toán:} So sánh hiệu quả giữa các
-phương pháp hướng tới hai điều kiện chuẩn hóa: (1)~\emph{Cùng trần số lượng
-ứng viên/lượt đánh giá hàm mục tiêu} (matched evaluation budget, bù trừ ngân
-sách khởi tạo greedy giữa single-start và multi-start), và (2)~\emph{Cùng giới
-hạn thời gian chạy wall-clock}. Trong giai đoạn mã nguồn hiện tại, hệ thống đã
-hiện thực đầy đủ điều kiện chuẩn hóa trần evaluation và trần thời gian an toàn cho
-pha tìm kiếm cục bộ; quy trình so sánh đẳng thời gian tuyệt đối và tinh chỉnh siêu
-tham số (hyperparameter tuning) cho các metaheuristics nâng cao (như Adaptive GA
-theo \cite{ge2024}) được xác định là bước hoàn thiện trong kế hoạch thực nghiệm mở
-rộng tiếp theo.
-
-% ============================================================
-\section*{Ba cam kết đóng góp khoa học}
-% ============================================================
-
-\textbf{Đóng góp 1 --- Mô hình toán học và Phân tích lý thuyết:}
-Xây dựng formulation phối hợp đồng thời 4 thành phần (route, dwell, assignment, wait)
-dưới điều kiện persistent detection-model uncertainty với quy ước vị trí rõ
-ràng; thiết lập các tính chất giải tích nền tảng (Proposition~1 về tương
-đương trên nhánh toàn âm tính và cơ chế Jensen đối với sai lệch xác suất
-tích lũy).
-
-\textbf{Đóng góp 2 --- Thuật toán và Công cụ tính toán:}
-Phát triển giải thuật tìm kiếm cục bộ với không gian biến đổi linh hoạt (tích
-hợp Replace Visit, Revisit và Dwell Rebalance nhằm tránh bẫy kẹt ngân sách)
-kết hợp kỹ thuật đánh giá nhanh hai chiều Forward Mass -- Backward Continuation
-(Fast Evaluator) có khả năng tái sử dụng tiền tố/hậu tố mass để giảm chi phí
-tính toán và tương đương đại số với Full Evaluator.
-
-\textbf{Đóng góp 3 --- Bằng chứng thực nghiệm toàn diện:}
-Xác lập bộ kết quả thực nghiệm 5 lớp kiểm chứng độc lập, ước lượng và phân
-tích các miền điều kiện trong phạm vi thí nghiệm mà tại đó mô hình ensemble
-vượt trội, điều kiện ensemble không mang lại lợi ích rõ rệt (khi nominal đã
-chuẩn xác), và giới hạn chịu đựng khi mô hình thực tế bị sai đặc tả ngoài tập
-giả thuyết.
-
-% ============================================================
-\section*{Thiết kế thực nghiệm và Protocol đánh giá}
-% ============================================================
-
-\subsection*{Năm lớp kiểm chứng thực nghiệm}
+\subsection{Năm tầng thực nghiệm (5-Tier Experimental Protocol)}
 
 \begin{table}[H]
 \centering
-\caption{Năm lớp thực nghiệm phục vụ kiểm chứng đa chiều.}
+\caption{Năm tầng thực nghiệm phục vụ kiểm chứng đa chiều.}
 \label{tab:tiers}
 \small
 \begin{tabular}{@{}p{2.8cm}p{4.7cm}p{6.0cm}@{}}
 \toprule
-\textbf{Lớp thực nghiệm} & \textbf{Quy mô và Cấu hình} & \textbf{Mục tiêu bằng chứng (Evidence)} \\
+\textbf{Tầng thực nghiệm} & \textbf{Quy mô và Cấu hình} & \textbf{Mục tiêu bằng chứng (Evidence)} \\
 \midrule
-1. Phân tích cơ chế &
+Tier 1. Phân tích cơ chế &
 Lưới nhỏ ($3 \times 3$), 1--2 UAV &
-Minh họa trực quan sự thay đổi quyết định lộ trình và dwell khi thay đổi bất định. \\
-2. Độ chính xác thuật toán &
+Minh họa trực quan sự thay đổi quyết định lộ trình và dwell khi thay đổi mức độ bất định. \\
+Tier 2. Độ chính xác thuật toán &
 Quy mô nhỏ có nghiệm tối ưu $J^\star$ &
 Đo lường tính chính xác của Fast Evaluator và độ lệch nghiệm $\Delta_{\mathrm{opt}} = J^\star - J_{\mathrm{alg}}$. \\
-3. Hiệu năng chính &
+Tier 3. Hiệu năng chính &
 Benchmark SAREnv và GIS Tây Nguyên &
 Đánh giá tỷ lệ tìm thấy $DSR$, thời gian tìm $RMST$, và năng lượng tiêu thụ thực tế. \\
-4. Kiểm tra sai đặc tả &
-$q^\star$ ngoài tập $\mathcal{S}$, sai lệch thảm phủ, bão hòa quan sát &
+Tier 4. Kiểm tra sai đặc tả &
+$q^\star$ ngoài tập $\mathcal{S}$, sai lệch thảm phủ &
 Xác định giới hạn suy giảm hiệu năng khi giả định của planner không khớp thực tế. \\
-5. Khả năng mở rộng &
-Tăng số ô ($|G| \le 500$), số UAV ($m \le 6$), horizon $H$ &
+Tier 5. Khả năng mở rộng &
+Tăng số ô ($|G| \le 500$), số UAV ($m \le 6$), $H$ &
 Đánh giá đường cong chất lượng nghiệm theo thời gian tính toán (Quality-vs-Runtime). \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection*{Ba tình huống cần xây ở lớp cơ chế}
+\subsection{Metrics đánh giá thống kê}
 
-\begin{enumerate}
-    \item Ensemble có lợi rõ rệt so với nominal.
-    \item Nominal đúng và ensemble không mang lại lợi ích gia tăng.
-    \item Bất định lớn nhưng \textbf{không làm thay đổi} hành động tối ưu.
-\end{enumerate}
-Tình huống (3) rất quan trọng: bất định lớn không tự động đồng nghĩa cần
-một quyết định khác. Quy tắc chọn case được xác định trước khi chạy thử.
+Với $N$ lượt mô phỏng độc lập, đặt $D_r \in \{0, 1\}$ là kết quả phát hiện và $T_r$ là thời điểm phát hiện ($T_r = \infty$ khi không phát hiện):
+\begin{itemize}
+    \item \textbf{Detection Success Rate (DSR):}
+    \begin{equation}
+    \mathrm{DSR} = \frac{1}{N}\sum_{r=1}^N \mathbf{1}\{D_r = 1, T_r \leq T_{\max}\}.
+    \end{equation}
+    \item \textbf{Restricted Mean Survival Time (RMST):}
+    \begin{equation}
+    \mathrm{RMST} = \frac{1}{N}\sum_{r=1}^N \min(T_r, T_{\max}).
+    \end{equation}
+    \item \textbf{Khoảng tin cậy Bootstrap theo Scenario:} Ước lượng khoảng tin cậy 95\% bằng phương pháp Bootstrap với 5.000 lượt lấy mẫu lại có hoàn lại theo đơn vị scenario để bảo toàn cấu trúc tương quan cụm nội tại.
+\end{itemize}
 
-\subsection*{Nguồn dữ liệu và Phân chia tập đánh giá}
+% ============================================================
+\section{Dữ liệu thực nghiệm và Môi trường mô phỏng GIS Tây Nguyên}
+% ============================================================
 
 \begin{table}[H]
 \centering
-\caption{Nguồn dữ liệu và vai trò hỗ trợ kiểm chứng.}
+\caption{Nguồn dữ liệu và vai trò trong môi trường mô phỏng.}
 \label{tab:data}
 \small
 \begin{tabular}{@{}p{4.2cm}p{9.3cm}@{}}
 \toprule
 \textbf{Nguồn dữ liệu} & \textbf{Vai trò và Mục đích sử dụng} \\
 \midrule
-Dữ liệu GIS (DEM GLO-30, WorldCover, OSM) &
-Xây dựng đồ thị độ cao, ma trận khoảng cách/năng lượng và bản đồ thảm phủ thực tế. \\
+Dữ liệu GIS (DEM GLO-30, WorldCover, OSM) \cite{copdem, worldcover, osm} &
+Xây dựng đồ thị độ cao, ma trận khoảng cách/năng lượng và bản đồ thảm phủ thực tế khu vực Tây Nguyên. \\
 Benchmark SAREnv \cite{sarenv2025} &
-Cung cấp môi trường và phân bố/vị trí mục tiêu tổng hợp; quỹ đạo chuyển
-động được sinh bằng mô hình $M$ đã quy định. \\
+Cung cấp môi trường và phân bố vị trí mục tiêu tổng hợp; quỹ đạo chuyển động được sinh bằng mô hình Markov $M$. \\
 Dữ liệu quan sát WiSARD \cite{broyles2022} \& Dumenčić et al. \cite{dumencic2025} &
-Tham chiếu hiệu chuẩn detection rate danh định và biên độ sai lệch, nếu có
-đủ thông tin về exposure, sự hiện diện mục tiêu và các lần bỏ sót. Ảnh chỉ
-gán nhãn người nhìn thấy không đủ suy ra xác suất phát hiện người bị che khuất. \\
+Tham chiếu hiệu chuẩn detection rate danh định và biên độ sai lệch cảm biến trên các dạng thảm thực vật khác nhau. \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\textbf{Protocol đánh giá:}
-\begin{itemize}
-    \item Phân chia độc lập tập Calibration, Validation và Test theo khu vực
-    địa lý và đợt bay, tuyệt đối không trùng lặp.
-    \item Tập giả thuyết $\mathcal{S}$, trọng số $w_s$ và tham số thuật toán
-    được cố định hoàn toàn trước khi chạy trên tập Test.
-    \item Sử dụng kỹ thuật Common Random Numbers (CRN) với cơ chế sinh số
-    ngẫu nhiên được lập chỉ mục (indexed RNG stream) gắn chặt theo bộ 4 chỉ
-    mục xác định: $(\text{mission instance}, \text{thời điểm tick } t, \text{UAV } k, \text{loại sự kiện cảm biến/chuyển động})$,
-    thay vì phụ thuộc vào thứ tự gọi hàm RNG của từng arm. Thiết kế này giúp
-    duy trì ghép cặp nhất quán theo quy tắc đã định nghĩa giữa các thuật toán
-    đối chứng, đồng thời bảo đảm hai UAV khác nhau $k_1 \neq k_2$ quan sát cùng
-    tick $t$ không vô tình dùng chung biến ngẫu nhiên, tuân thủ đúng giả định
-    độc lập có điều kiện theo không gian (A1).
-    \item Trong thí nghiệm cô lập detection error, initial belief $b_0$ và
-    motion model $M$ khớp với quá trình sinh mục tiêu trong simulator; sai
-    lệch của chúng chỉ được kiểm tra bổ sung.
-    \item Phân biệt kiểm tra ngoài mẫu cùng phân phối (out-of-sample) với
-    kiểm tra dịch chuyển phân phối (distribution-shift / misspecification).
-\end{itemize}
-
-\subsection*{Metrics đánh giá thống kê}
-
-Với $N$ lượt mô phỏng độc lập, đặt $D_r \in \{0, 1\}$ là kết quả phát hiện
-và $T_r$ là thời điểm phát hiện ($T_r = \infty$ khi không phát hiện):
-\begin{itemize}
-    \item \textbf{Detection Success Rate (DSR):}
-    \[
-    \mathrm{DSR} = \frac{1}{N}\sum_{r=1}^N \mathbf{1}\{D_r = 1, T_r \leq T_{\max}\}.
-    \]
-    Thất bại ($D_r = 0$) không được tính là sự kiện tại thời hạn cuối.
-    \item \textbf{Restricted Mean Survival Time (RMST):} Thời gian chờ phát
-    hiện trung bình giới hạn:
-    \[
-    \mathrm{RMST} = \frac{1}{N}\sum_{r=1}^N \min(T_r, T_{\max}).
-    \]
-    RMST là thời gian chờ phát hiện giới hạn, không phải thời gian sống của
-    người mất tích.
-    \item \textbf{Các chỉ số bổ trợ:} $\Delta \mathrm{DSR}$ kèm khoảng tin
-    cậy, mức tiêu thụ năng lượng thực tế, chênh lệch ghép cặp theo mission,
-    độ lệch hiệu chuẩn (Calibration Gap giữa $J_{\mathcal{S}}$ dự báo và
-    tần suất phát hiện thực tế), chất lượng theo thời gian chạy
-    (quality-vs-runtime), và số lần vi phạm ràng buộc.
-\end{itemize}
-
-Thành công dự báo theo ensemble và thành công quan sát trong simulator
-được trình bày riêng. Cỡ mẫu $N$ được xác định sau pilot từ độ biến thiên
-ghép cặp và mức chênh lệch mong muốn. Bootstrap theo incident/region khi có
-cấu trúc cụm. Chốt main contrasts trước test và xử lý multiple comparisons
-khi cần.
+\textbf{Protocol sinh số ngẫu nhiên chuẩn hóa (CRN):} Sử dụng kỹ thuật Common Random Numbers (CRN) với cơ chế sinh số ngẫu nhiên được lập chỉ mục (\emph{indexed RNG stream}) gắn chặt theo bộ 4 chỉ mục xác định:
+\[
+(\text{mission instance}, \text{thời điểm tick } t, \text{UAV } k, \text{loại sự kiện cảm biến/chuyển động}),
+\]
+bảo đảm sự công bằng tuyệt đối giữa các thuật toán đối chứng và tuân thủ đúng giả định độc lập không gian (A1).
 
 % ============================================================
-\section*{Lộ trình nghiên cứu và Mốc chuyển tiếp}
+\section{Giới hạn phạm vi nghiên cứu và Quy tắc điều chỉnh}
+% ============================================================
+
+\subsection{Giới hạn phạm vi nghiên cứu}
+
+\begin{itemize}
+    \item Nghiên cứu tập trung vào bài toán lập kế hoạch ngoài tuyến (offline planning) và đánh giá trên môi trường mô phỏng số thực dựa trên dữ liệu GIS thực tế.
+    \item Chưa xét false positive và nhận dạng hình ảnh trực tuyến trên bo mạch phần cứng thực tế.
+    \item Kết luận khoa học được giới hạn trong phạm vi các mô hình và kịch bản thực nghiệm đã công bố.
+\end{itemize}
+
+\subsection{Quy tắc điều chỉnh hướng nghiên cứu (Contingency Rules)}
+
+\begin{enumerate}[label=\textbf{\arabic*.}]
+    \item Nếu Fast Evaluator không mang lại ưu thế tốc độ đáng kể so với Prefix-only Evaluator trong cùng ngân sách thời gian, trọng tâm đóng góp thuật toán sẽ chuyển dịch sang phân tích đặc tính cấu trúc của không gian nghiệm Route--Effort và cơ chế láng giềng bão hòa ngân sách.
+    \item Nếu mô hình nominal được hiệu chỉnh tốt cho kết quả tương đương ensemble trên tập test chuẩn, bài báo sẽ tập trung định vị sâu vào phân tích các miền điều kiện (mức độ bất định, hình học khu vực, deadline và entropy ban đầu) mà tại đó việc xét nhiều giả thuyết đem lại lợi ích gia tăng hoặc suy giảm.
+    \item Nếu mô hình thực tế bị sai đặc tả nghiêm trọng ngoài tập giả thuyết, nghiên cứu sẽ xác định rõ ranh giới suy giảm và ghi nhận hạn chế khoa học.
+\end{enumerate}
+
+% ============================================================
+\section{Lộ trình thực hiện đề tài và Mốc chuyển tiếp}
 % ============================================================
 
 \begin{table}[H]
@@ -1003,17 +758,17 @@ khi cần.
 \textbf{Mốc nghiên cứu} & \textbf{Sản phẩm kỹ thuật bắt buộc} & \textbf{Điều kiện chuyển tiếp (Gate Condition)} \\
 \midrule
 M1. Khép kín lý thuyết &
-Formulation toán học, Proof sketch Proposition~1, Bảng related-work hoàn chỉnh &
+Formulation toán học, Proof sketch Proposition~\ref{prop:equiv}, Bảng related-work hoàn chỉnh &
 Mô hình toán học nhất quán về thứ nguyên, không còn mâu thuẫn ký hiệu; các ô trong bảng literature đã được xác minh. \\
 M2. Hiện thực hóa thuật toán &
 Mã nguồn Local Search, Fast Evaluator, Kiểm chứng đơn vị (Unit Tests) &
 Fast Evaluator cho kết quả trùng khớp với Full Evaluator trong sai số tuyệt đối/tương đối cho trước trên test cases. \\
 M3. Pilot thực nghiệm &
 Chạy thử nghiệm trên bài toán nhỏ ($3 \times 3$) và bài toán có nghiệm $J^\star$ &
-Hoàn thành đối chiếu nghiệm tham chiếu, báo cáo phân bố gap và failure cases; xác định cấu hình, cỡ mẫu và ngân sách tính toán cho thí nghiệm chính. \\
+Hoàn thành đối chiếu nghiệm tham chiếu, báo cáo phân bố gap và failure cases; xác định cấu hình và ngân sách tính toán. \\
 M4. Đánh giá diện rộng &
 Pipeline kiểm thử trên SAREnv và GIS Tây Nguyên &
-Hoàn thành cỡ mẫu và protocol đã chốt từ pilot; báo effect size, khoảng tin cậy và kết quả dù có hay không có ý nghĩa thống kê. \\
+Hoàn thành cỡ mẫu và protocol đã chốt từ pilot; báo effect size, khoảng tin cậy Bootstrap 95\%. \\
 M5. Kiểm tra sai đặc tả &
 Kết quả trên các kịch bản $q^\star$ ngoài phân phối &
 Xác định rõ ràng ranh giới suy giảm hiệu năng của phương pháp. \\
@@ -1024,85 +779,96 @@ Mọi tuyên bố (claims) đều có bảng biểu hoặc đồ thị thực ng
 \end{tabular}
 \end{table}
 
-\subsection*{Quy tắc điều chỉnh hướng nghiên cứu}
+% ============================================================
+\section{Ba cam kết đóng góp khoa học}
+% ============================================================
 
-\begin{enumerate}
-    \item Nếu Fast Evaluator không mang lại ưu thế tốc độ đáng kể so với
-    Prefix-only Evaluator trong cùng ngân sách thời gian, trọng tâm đóng góp
-    thuật toán sẽ chuyển dịch sang phân tích đặc tính cấu trúc của không gian
-    nghiệm route--dwell và cơ chế láng giềng bão hòa ngân sách.
-    \item Nếu mô hình nominal được hiệu chỉnh tốt cho kết quả tương đương
-    ensemble trên tập test chuẩn, bài báo sẽ tập trung định vị sâu vào phân
-    tích các miền điều kiện (tương tác giữa mức độ bất định, hình học khu vực,
-    thời hạn deadline và entropy phân bố ban đầu) mà tại đó việc xét nhiều giả
-    thuyết đem lại lợi ích gia tăng hoặc suy giảm.
-    \item Nếu mô hình thực tế bị sai đặc tả nghiêm trọng ngoài tập giả thuyết,
-    nghiên cứu sẽ xác định phạm vi suy giảm và ghi nhận hạn chế. Cơ chế thích
-    ứng trực tuyến (online hypothesis update) là hướng nghiên cứu riêng, cần
-    phân tích khả năng nhận dạng vì quan sát âm tính khó phân biệt giữa sensor
-    yếu và mục tiêu ở nơi khác.
-    \item Nếu literature đã có formulation tương đương, chuyển trọng tâm sang
-    thuật toán hoặc kết quả thực nghiệm mới.
+\begin{enumerate}[label=\textbf{Đóng góp \arabic*:}]
+    \item \textbf{Mô hình toán học và Phân tích lý thuyết:} Xây dựng formulation phối hợp đồng thời 4 thành phần (route, dwell, assignment, wait) dưới điều kiện persistent detection-model uncertainty với quy ước vị trí rõ ràng; thiết lập các tính chất giải tích nền tảng (Proposition~\ref{prop:equiv} về tương đương trên nhánh toàn âm tính và cơ chế Jensen đối với sai lệch xác suất tích lũy).
+    \item \textbf{Thuật toán và Công cụ tính toán:} Phát triển giải thuật tìm kiếm cục bộ với không gian biến đổi linh hoạt (tích hợp Replace Visit, Revisit và Dwell Rebalance nhằm tránh bẫy kẹt ngân sách) kết hợp kỹ thuật đánh giá nhanh hai chiều Forward Mass -- Backward Continuation (Fast Evaluator) có khả năng tái sử dụng tiền tố/hậu tố mass để giảm chi phí tính toán và tương đương đại số với Full Evaluator.
+    \item \textbf{Bằng chứng thực nghiệm toàn diện:} Xác lập bộ kết quả thực nghiệm 5 lớp kiểm chứng độc lập, ước lượng và phân tích các miền điều kiện mà tại đó mô hình ensemble vượt trội, điều kiện ensemble không mang lại lợi ích rõ rệt (khi nominal đã chuẩn xác), và giới hạn chịu đựng khi mô hình thực tế bị sai đặc tả ngoài tập giả thuyết.
 \end{enumerate}
 
-Nếu kết quả chỉ dựa trên GIS thực và detection model giả định, phạm vi kết
-luận là phương pháp trên mô phỏng. Kiểm chứng sensor hoặc bay thực địa là
-bằng chứng bổ sung cần thiết trước khi tuyên bố hiệu quả cứu hộ ngoài thực
-tế.
+% ============================================================
+\section{Kết luận}
+% ============================================================
+
+Đề tài giải quyết toàn diện bài toán định tuyến và phân bổ thời lượng tìm kiếm cho đội hình đa UAV trong cứu nạn cứu hộ vùng hoang dã dưới độ bất định mô hình phát hiện kéo dài. Bằng cách kết hợp phân tích lý thuyết chặt chẽ, thuật toán đánh giá nhanh hai chiều sáng tạo và quy trình thực nghiệm 5 tầng nghiêm ngặt trên dữ liệu GIS thực tế, nghiên cứu hướng tới cung cấp một giải pháp thuật toán hiệu quả, bền vững và có thể kiểm chứng độc lập cho các hệ thống robot cứu hộ tự hành trong tương lai.
 
 % ============================================================
 \section*{Tài liệu tham khảo}
+\addcontentsline{toc}{section}{Tài liệu tham khảo}
 % ============================================================
+
 \begin{thebibliography}{99}
-\bibitem{hashimoto2022}
-Hashimoto, A., Heintzman, L., Koester, R., Abaid, N.:
-An agent-based model reveals lost person behavior based on data from
-wilderness search and rescue.
-\emph{Scientific Reports} \textbf{12}, 5873 (2022).
-doi:10.1038/s41598-022-09502-4.
+\bibitem{brown1980}
+Brown, S.S.:
+Optimal Search for a Moving Target in Discrete Time and Space.
+\emph{Operations Research} \textbf{28}(6), 1275--1289 (1980).
+doi:10.1287/opre.28.6.1275.
 
-\bibitem{lin2010}
-Lin, L., Goodrich, M.A.:
-A Bayesian approach to modeling lost person behaviors based on terrain
-features in wilderness search and rescue.
-\emph{Computational and Mathematical Organization Theory}
-\textbf{16}(3), 300--323 (2010).
-doi:10.1007/s10588-010-9066-2.
-
-\bibitem{ge2024}
-Ge, Z., Jiang, J., Coombes, M.:
-Multi-UAV Search and Rescue in Wilderness Using Smart Agent-Based
-Probability Models.
-\emph{arXiv preprint} arXiv:2411.10148 (2024).
-doi:10.48550/arXiv.2411.10148.
+\bibitem{bertuccelli2005}
+Bertuccelli, L.F., How, J.P.:
+Robust UAV Search for Environments with Imprecise Probability Maps.
+In: \emph{44th IEEE Conference on Decision and Control and European Control Conference} (2005).
+doi:10.1109/CDC.2005.1583068.
 
 \bibitem{hansen2007}
 Hansen, S.R., McLain, T.W., Goodrich, M.A.:
 Probabilistic Searching Using a Small Unmanned Aerial Vehicle.
 In: \emph{AIAA Infotech@Aerospace 2007 Conference and Exhibit}, p. 2740 (2007).
 doi:10.2514/6.2007-2740.
-\url{https://scholarsarchive.byu.edu/facpub/1509/}.
+
+\bibitem{berger2021}
+Berger, J., Barkaoui, M., Lo, N.:
+Near-optimal search-and-rescue path planning for a moving target.
+\emph{Journal of the Operational Research Society} \textbf{72}(3), 688--700 (2021).
+doi:10.1080/01605682.2019.1685362.
+
+\bibitem{ge2024}
+Ge, Z., Jiang, J., Coombes, M.:
+Multi-UAV Search and Rescue in Wilderness Using Smart Agent-Based Probability Models.
+\emph{arXiv preprint} arXiv:2411.10148 (2024).
+doi:10.48550/arXiv.2411.10148.
+
+\bibitem{niu2026}
+Niu, D., Yi, P., Hong, Y.:
+Distributed Event-Driven Bayesian Search for Multi-UAV Systems with Spatially Correlated Targets.
+\emph{Sensors} \textbf{26}(16), 5189 (2026).
+doi:10.3390/s26165189.
+
+\bibitem{hashimoto2022}
+Hashimoto, A., Heintzman, L., Koester, R., Abaid, N.:
+An agent-based model reveals lost person behavior based on data from wilderness search and rescue.
+\emph{Scientific Reports} \textbf{12}, 5873 (2022).
+doi:10.1038/s41598-022-09502-4.
+
+\bibitem{lin2010}
+Lin, L., Goodrich, M.A.:
+A Bayesian approach to modeling lost person behaviors based on terrain features in wilderness search and rescue.
+\emph{Computational and Mathematical Organization Theory} \textbf{16}(3), 300--323 (2010).
+doi:10.1007/s10588-010-9066-2.
 
 \bibitem{broyles2022}
 Broyles, D., Hayner, C.R., Leung, K.:
-WiSARD: A Labeled Visual and Thermal Image Dataset for Wilderness Search
-and Rescue.
-In: \emph{2022 IEEE/RSJ International Conference on Intelligent Robots
-and Systems (IROS)}, pp. 9467--9474 (2022).
+WiSARD: A Labeled Visual and Thermal Image Dataset for Wilderness Search and Rescue.
+In: \emph{2022 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)}, pp. 9467--9474 (2022).
 doi:10.1109/IROS47612.2022.9981298.
 
 \bibitem{dumencic2025}
 Dumenčić, S., Lanča, L., Jakac, K., Ivić, S.:
-Experimental Validation of UAV Search and Detection System in Real
-Wilderness Environment.
+Experimental Validation of UAV Search and Detection System in Real Wilderness Environment.
 \emph{Drones} \textbf{9}(7), 473 (2025).
 doi:10.3390/drones9070473.
 
+\bibitem{sarenv2025}
+Grøntved, K.A.R., Jarabo-Peñas, A., Reid, S., Rolland, E.G.A., Watson, M., Richards, A., Bullock, S., Christensen, A.L.:
+SAREnv: An Open-Source Dataset and Benchmark Tool for Informed Wilderness Search and Rescue Using UAVs.
+\emph{Drones} \textbf{9}(9), 628 (2025).
+doi:10.3390/drones9090628.
+
 \bibitem{worldcover}
-Zanaga, D., Van De Kerchove, R., Daems, D., De Keersmaecker, W.,
-Brockmann, C., Kirches, G., Wevers, J., Cartus, O., Santoro, M.,
-Fritz, S., Lesiv, M., Herold, M., Tsendbazar, N.E., Xu, P.,
-Ramoino, F., Arino, O.:
+Zanaga, D., et al.:
 ESA WorldCover 10 m 2021 v200 [Data set] (2022).
 doi:10.5281/zenodo.7254221.
 
@@ -1112,45 +878,11 @@ OpenStreetMap geographic database.
 OpenStreetMap Foundation (2023).
 \url{https://www.openstreetmap.org}.
 
-\bibitem{brown1980}
-Brown, S.S.:
-Optimal Search for a Moving Target in Discrete Time and Space.
-\emph{Operations Research} \textbf{28}(6), 1275--1289 (1980).
-doi:10.1287/opre.28.6.1275.
-
-\bibitem{berger2021}
-Berger, J., Barkaoui, M., Lo, N.:
-Near-optimal search-and-rescue path planning for a moving target.
-\emph{Journal of the Operational Research Society}
-\textbf{72}(3), 688--700 (2021; published online 2020).
-doi:10.1080/01605682.2019.1685362.
-
-\bibitem{bertuccelli2005}
-Bertuccelli, L.F., How, J.P.:
-Robust UAV Search for Environments with Imprecise Probability Maps.
-In: \emph{44th IEEE Conference on Decision and Control and European
-Control Conference} (2005).
-doi:10.1109/CDC.2005.1583068.
-
-\bibitem{sarenv2025}
-Grøntved, K.A.R., Jarabo-Peñas, A., Reid, S., Rolland, E.G.A.,
-Watson, M., Richards, A., Bullock, S., Christensen, A.L.:
-SAREnv: An Open-Source Dataset and Benchmark Tool for Informed
-Wilderness Search and Rescue Using UAVs.
-\emph{Drones} \textbf{9}(9), 628 (2025).
-doi:10.3390/drones9090628.
-
-\bibitem{niu2026}
-Niu, D., Yi, P., Hong, Y.:
-Distributed Event-Driven Bayesian Search for Multi-UAV Systems
-with Spatially Correlated Targets.
-\emph{Sensors} \textbf{26}(16), 5189 (2026).
-doi:10.3390/s26165189.
-
 \bibitem{copdem}
 Copernicus:
 Copernicus DEM GLO-30 [Data set].
 \url{https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM}.
 
 \end{thebibliography}
+
 \end{document}
